@@ -119,7 +119,7 @@ export function CreateLink() {
         />
         {errors.longUrl && <Error message={errors.longUrl} />}
         <div className="flex items-center gap-2">
-          <Card className="p-2">TrimLink</Card> /
+          <Card className="p-2">trimlink.netlify.app</Card> /
           <Input
             id="customUrl"
             placeholder="Custom Link (optional)"
