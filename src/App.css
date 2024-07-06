@@ -1,0 +1,18 @@
+body {
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* Internet Explorer/Edge */
+    user-select: none;         /* Non-prefixed version, currently supported by Chrome, Opera, and Edge */
+  }
+  /* Add this CSS to your stylesheet */
+.custom-datetime-input::-webkit-calendar-picker-indicator {
+  filter: invert(1) sepia(1) saturate(5) hue-rotate(175deg);
+  padding-left: 150px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* For Firefox */
+.custom-datetime-input::-moz-calendar-picker-indicator {
+  filter: invert(1) sepia(1) saturate(5) hue-rotate(175deg);
+}
