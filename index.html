@@ -1,23 +1,78 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-2JEFJCSVW0"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <meta
+      name="description"
+      content="Shorten your long URLs with our URL shortener service. Create custom short links and track their performance."
+    />
+    <meta
+      name="keywords"
+      content="URL shortener, short links, link management, URL redirection, QR code generator"
+    />
+    <meta name="author" content="Your Name" />
+    <!-- Open Graph meta tags -->
+    <meta property="og:title" content="URL Shortener - Shorten Your Links" />
+    <meta
+      property="og:description"
+      content="Shorten your long URLs with our URL shortener service. Create custom short links and track their performance."
+    />
+    <meta property="og:url" content="https://trimlink.netlify.app/" />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:image"
+      content="https://trimlink.netlify.app/images/thumbnail.png"
+    />
 
-  gtag('config', 'G-2JEFJCSVW0');
-</script>
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="URL Shortener - Shorten Your Links" />
+    <meta
+      name="twitter:description"
+      content="Shorten your long URLs with our URL shortener service. Create custom short links and track their performance."
+    />
+    <meta
+      name="twitter:image"
+      content="https://trimlink.netlify.app/images/thumbnail.png"
+    />
+
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="https://res.cloudinary.com/dj0eulqd8/image/upload/v1719838363/17198382942675tr4l2er_w26wki.jpg"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TrimLink - Shorten Your Links</title>
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-2JEFJCSVW0"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-2JEFJCSVW0");
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "https://trimlink.netlify.app/",
+        "name": "URL Shortener",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://trimlink.netlify.app/?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
-
 </html>
