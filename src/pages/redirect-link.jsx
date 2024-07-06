@@ -22,15 +22,12 @@ const RedirectLink = () => {
 
   useEffect(() => {
     if (!loading && data) {
-      // Check if the URL has expired
       const currentDate = new Date();
       const expirationDate = new Date(data.expiration_date);
 
       if (data.expiration_date && expirationDate < currentDate) {
-        // If expired, show an error message or redirect to an error page
         navigate("/link-expired")
       } else {
-        // If not expired, store the click and redirect
         fnStats();
         window.location.href = data.original_url;
       }

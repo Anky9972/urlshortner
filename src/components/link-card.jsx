@@ -86,7 +86,7 @@ const LinkCard = ({ url = [], fetchUrls }) => {
           {url?.title}
         </span>
         <span className="text-2xl text-blue-400 font-bold hover:underline cursor-pointer">
-          http://localhost:5173/
+        https://trimlink.netlify.app/
           {url?.custom_url ? url?.custom_url : url.short_url}
         </span>
         <span className="flex items-center gap-1 hover:underline cursor-pointer">
@@ -104,7 +104,7 @@ const LinkCard = ({ url = [], fetchUrls }) => {
           variant="ghost"
           onClick={() =>
             navigator.clipboard.writeText(
-              `http://localhost:5173/${url?.short_url}`
+              `https://trimlink.netlify.app/${url?.short_url}`
             )
           }
         >
@@ -162,7 +162,7 @@ const LinkCard = ({ url = [], fetchUrls }) => {
       </Modal>
 
       {/* Share Buttons */}
-      <ShareButtons shortUrl={`http://localhost:5173/${url?.short_url}`} />
+      <ShareButtons shortUrl={`https://trimlink.netlify.app/${url?.short_url}`} />
     </div>
   );
 };

@@ -76,11 +76,11 @@ const Link = () => {
             {url?.title}
           </span>
           <a
-            href={`http://localhost:5173/${link}`}
+            href={`https://trimlink.netlify.app/${link}`}
             target="_blank"
             className="text-3xl sm:text-4xl text-blue-400 font-bold hover:underline cursor-pointer"
           >
-            http://localhost:5173/{link}
+            https://trimlink.netlify.app/{link}
           </a>
           <a
             href={url?.original_url}
@@ -97,7 +97,7 @@ const Link = () => {
             <Button
               variant="ghost"
               onClick={() =>
-                navigator.clipboard.writeText(`http://localhost:5173/${link}`)
+                navigator.clipboard.writeText(`https://trimlink.netlify.app/${link}`)
               }
             >
               <Copy />
