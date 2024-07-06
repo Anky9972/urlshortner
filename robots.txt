@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://trimlink.netlify.app/sitemap.xml
