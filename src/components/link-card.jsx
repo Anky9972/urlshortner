@@ -100,6 +100,7 @@ const LinkCard = ({ url = [], fetchUrls }) => {
         </span>
       </Link>
       <div className="flex gap-2">
+      <ShareButtons shortUrl={`https://trimlink.netlify.app/${url?.short_url}`} />
         <Button
           variant="ghost"
           onClick={() =>
@@ -123,6 +124,8 @@ const LinkCard = ({ url = [], fetchUrls }) => {
         <Button variant="ghost" onClick={handleEdit}>
           <Edit />
         </Button>
+          {/* Share Buttons */}
+      
       </div>
       {/* Edit Modal */}
       <Modal isOpen={showEditModal}>
@@ -161,8 +164,7 @@ const LinkCard = ({ url = [], fetchUrls }) => {
         </div>
       </Modal>
 
-      {/* Share Buttons */}
-      <ShareButtons shortUrl={`https://trimlink.netlify.app/${url?.short_url}`} />
+    
     </div>
   );
 };

@@ -128,6 +128,7 @@ export function CreateLink() {
           />
         </div>
         <div>
+          <span className="text-slate-400">Expire Date (optional):</span>
         <Input
           type="datetime-local"
           id="expirationDate"
