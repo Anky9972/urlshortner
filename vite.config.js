@@ -18,7 +18,6 @@ export default defineConfig({
           'router': ['react-router-dom'],
           'ui': ['@/components/ui'],
           'utils': ['@/lib/utils'],
-          'analytics': ['@/utils/analytics'],
         },
         // Optimize chunk naming and caching
         chunkFileNames: 'assets/js/[name]-[hash].js',
