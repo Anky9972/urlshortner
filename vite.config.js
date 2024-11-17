@@ -16,8 +16,8 @@ export default defineConfig({
         manualChunks: {
           'vendor': ['react', 'react-dom'],
           'router': ['react-router-dom'],
-          'ui': ['@/components/ui'],
-          'utils': ['@/lib/utils'],
+          'ui': ['src/components/ui/index'],
+          'utils': ['src/lib/utils'],
         },
         // Optimize chunk naming and caching
         chunkFileNames: 'assets/js/[name]-[hash].js',
