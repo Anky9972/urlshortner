@@ -16,6 +16,8 @@ import { ErrorBoundary, RouteError } from './components/error-boundary'
 import SharedLinkTree from './components/linktree/shared-linktree'
 import NotFoundPage from './pages/not-found'
 import LinkTreeGallery from './components/linktree/linktree-gallery'
+import { HelmetProvider } from 'react-helmet-async'
+import useGoogleAnalytics from './hooks/use-googleanalytics'
 
 const router = createBrowserRouter([
   {
@@ -100,12 +102,15 @@ const router = createBrowserRouter([
 ])
 
 function App() {
+  useGoogleAnalytics();
   return (
+    <HelmetProvider>
     <ErrorBoundary>
       <UrlProvider>
         <RouterProvider router={router} />
       </UrlProvider>
     </ErrorBoundary>
+    </HelmetProvider>
   )
 }
 

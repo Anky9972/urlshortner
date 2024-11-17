@@ -1,0 +1,28 @@
+User-agent: *
+
+# Allow access to main pages
+Allow: /$
+Allow: /about
+Allow: /contact
+Allow: /privacy-policy
+Allow: /terms-of-service
+
+# Prevent crawling of user-specific pages and sensitive areas
+Disallow: /dashboard
+Disallow: /auth
+
+# Prevent crawling of shortened URLs to avoid duplicate content
+Disallow: /l/
+Disallow: /links/
+
+# Prevent crawling of temporary files and development assets
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /temp/
+Disallow: /assets/temp/
+
+# Sitemap location (if you have one)
+Sitemap: https://trimlink.netlify.app/sitemap.xml
+
+# Crawl delay to prevent server overload
+Crawl-delay: 10

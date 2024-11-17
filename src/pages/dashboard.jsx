@@ -12,6 +12,7 @@ import useFetch from "@/hooks/use-fetch";
 import { UrlState } from "@/context";
 import { getUrls } from "@/db/apiUrls";
 import { getClicksForUrls } from "@/db/apiClicks";
+import { SEOMetadata } from "@/components/seo-metadata";
 
 const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,6 +39,16 @@ const Dashboard = () => {
   const isLoading = loading || loadingClicks;
 
   return (
+    <>
+    <SEOMetadata 
+      title="Dashboard - Manage Your Links | TrimLink"
+      description="Access your shortened URLs, QR codes, and link analytics all in one place. Monitor performance and manage your digital presence effectively."
+      canonical="https://trimlink.netlify.app/dashboard"
+      keywords="link management dashboard, URL analytics, link tracking, short URL management, QR code management, link statistics"
+      // ogImage="https://trimlink.netlify.app/dashboard-preview.jpg"
+      author="TrimLink"
+      language="en"
+  />
     <div className="min-h-screen p-6 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-6xl mx-auto space-y-8">
         {isLoading && (
@@ -111,7 +122,7 @@ const Dashboard = () => {
             </div>
           )}
 
-          <div className="grid gap-4">
+          <div>
             {(filteredUrls || []).map((url, i) => (
               <div
                 key={i}
@@ -141,6 +152,8 @@ const Dashboard = () => {
         }
       `}</style>
     </div>
+    </>
+
   );
 };
 

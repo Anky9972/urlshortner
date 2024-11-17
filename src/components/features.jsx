@@ -1,7 +1,7 @@
 import {
   Card,
 } from "@/components/ui/card";
-import { Link2, BarChart2, QrCode, Layout, Clock, Wand2 } from "lucide-react";
+import { Link2, BarChart2, QrCode, Layout, Clock, Wand2, Network } from "lucide-react";
 
 const Features = () => {
   const features = [
@@ -34,11 +34,16 @@ const Features = () => {
       feature: "Link Expiration",
       description: "Set expiration dates for your short URLs for temporary promotions.",
       icon: Clock
+    },
+    {
+      feature:"Link Tree",
+      description:"Create a link tree to showcase all your important links in one place.",
+      icon: Network
     }
   ];
 
   return (
-    <div className=" p-8">
+    <div>
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((f, i) => {

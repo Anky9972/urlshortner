@@ -16,6 +16,7 @@ import {
 } from "react-icons/fa";
 import { defaultThemes } from "../../utils/theme";
 import SaveStatus from "./save-status";
+import { IoClose } from "react-icons/io5";
 const socialIcons = {
   instagram: FaInstagram,
   twitter: FaTwitter,
@@ -37,7 +38,10 @@ const Sidebar = ({
   isSaving,
   linkTreeId,
   setLinkTreeId,
+  sidebarOpen,
+  setSidebarOpen,
 }) => {
+  // const [sidebarOpen, setSidebarOpen] = useState(false);
   const addLink = () => {
     const newLink = {
       id: Date.now().toString(),
@@ -53,16 +57,19 @@ const Sidebar = ({
       initial={{ x: "-100%" }}
       animate={{ x: 0 }}
       transition={{ duration: 0.5, type: "spring", stiffness: 120 }}
-      className="w-80 bg- h-screen shadow-xl relative rounded-lg border"
+      className={`lg:w-80 fixed ${sidebarOpen?"visible":"hidden"} z-10 bg-gray-900 top h-screen shadow-xl lg:relative lg:rounded-lg border`}
     >
-      <div className="p-6">
+      <span className="p-1 lg:hidden border absolute right-2 top-2 rounded-md" onClick={()=>setSidebarOpen(!sidebarOpen)}>
+        <IoClose/>
+      </span>
+      <div className="p-6 h-full mt-5 lg:mt-0">
         {/* Tabs */}
-        <div className="flex space-x-2 mb-6">
+        <div className="flex justify-center w-full gap-10 lg:gap-2 mb-6">
           {["links", "appearance", "settings"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-md ${
+              className={`px-4 py-2 rounded-md lg:text-sm ${
                 activeTab === tab ? "bg-gray-900 text-white border" : "bg-gray-950 text-gray-500"
               }`}
             >
@@ -76,7 +83,7 @@ const Sidebar = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="space-y-6"
+            className="space-y-6 h-full"
           >
             {activeTab === "links" && (
               <div className="space-y-4">
@@ -295,6 +302,8 @@ Sidebar.propTypes = {
   isSaving: PropTypes.bool.isRequired,
   linkTreeId: PropTypes.string,
   setLinkTreeId: PropTypes.func.isRequired,
+  sidebarOpen: PropTypes.bool.isRequired,
+  setSidebarOpen: PropTypes.func.isRequired,
 };
 
 export default Sidebar;

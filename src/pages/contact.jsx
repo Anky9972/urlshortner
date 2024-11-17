@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { FaEnvelope, FaMapMarkerAlt, FaPhoneAlt } from "react-icons/fa";
 import { BeatLoader } from "react-spinners";
+import { SEOMetadata } from '@/components/seo-metadata';
 
 const ContactPage = () => {
   const [messageSent, setMessageSent] = useState(false);
@@ -103,6 +104,16 @@ const ContactPage = () => {
   };
 
   return (
+    <>
+    <SEOMetadata
+      title="Contact Us | TrimLink"
+      description="Get in touch with our support team for help with URL shortening, QR codes, or any other inquiries. We're here to assist you."
+      canonical="https://trimlink.netlify.app/contact"
+      keywords="contact TrimLink, customer support, help desk, contact form, technical support, URL shortener support"
+      // ogImage="https://trimlink.netlify.app/contact-preview.jpg"
+      author="TrimLink"
+      language="en"
+  />
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
       {messageSent ? (
         <motion.div 
@@ -255,6 +266,7 @@ const ContactPage = () => {
         </motion.div>
       )}
     </div>
+    </>
   );
 };
 

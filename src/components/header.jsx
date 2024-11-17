@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { LinkIcon, LogOut, Menu, X } from "lucide-react";
+import { LinkIcon, LogOut, Menu, Network, X } from "lucide-react";
 import { UrlState } from "@/context";
 import useFetch from "@/hooks/use-fetch";
 import { logout } from "@/db/apiAuth";
@@ -242,7 +242,7 @@ const UserMenu = ({ user, fnLogout, fetchUser, navigate }) => (
             to="/link-tree-gallery"
             className="flex items-center text-gray-300 hover:text-white transition-colors"
           >
-            <LinkIcon className="mr-2 h-4 w-4" />
+            <Network className="mr-2 h-4 w-4" />
             <span>My LinkTree&apos;s</span>
           </Link>
         </DropdownMenuItem>

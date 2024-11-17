@@ -10,6 +10,7 @@ import { deleteUrl, getUrl } from "@/db/apiUrls";
 import useFetch from "@/hooks/use-fetch";
 import DeviceStats from "@/components/device-stats";
 import Location from "@/components/location-stats";
+import { SEOMetadata } from "@/components/seo-metadata";
 
 const Link = () => {
   const [copied, setCopied] = useState(false);
@@ -75,6 +76,16 @@ const Link = () => {
   };
 
   return (
+    <>
+    <SEOMetadata 
+      title="Link Analytics & Tracking | TrimLink"
+      description="Get detailed insights into your link performance. Track clicks, geographic data, referral sources, and user engagement in real-time."
+      canonical="https://trimlink.netlify.app/dashboard"
+      keywords="link analytics, URL tracking, click analytics, traffic statistics, link performance, engagement metrics"
+      // ogImage="https://trimlink.netlify.app/analytics-preview.jpg"
+      author="TrimLink"
+      language="en"
+  />
     <div className="min-h-screen p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {(loading || loadingStats) && (
         <div className="fixed top-0 left-0 right-0 z-50">
@@ -224,6 +235,8 @@ const Link = () => {
         }
       `}</style>
     </div>
+    </>
+
   );
 };
 

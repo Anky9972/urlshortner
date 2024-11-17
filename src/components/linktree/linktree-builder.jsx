@@ -3,6 +3,8 @@ import supabase from "../../db/supabase";
 import Sidebar from "./sidebar";
 import Preview from "./preview";
 import { useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
+import { SEOMetadata } from "../seo-metadata";
 
 const LinkTreeBuilder = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -12,6 +14,7 @@ const LinkTreeBuilder = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [linkTreeId, setLinkTreeId] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState({
@@ -204,8 +207,21 @@ const LinkTreeBuilder = () => {
   }
 
   return (
+    <>
+    <SEOMetadata 
+        title="Create Your Link Tree | TrimLink"
+        description="Build a personalized link tree to showcase all your important links in one place. Perfect for social media bio links and personal branding."
+        canonical="https://trimlink.netlify.app/link-tree"
+        keywords="link in bio, link tree, bio link page, social media links, personal landing page, multiple links"
+        // ogImage="https://trimlink.netlify.app/linktree-preview.jpg"
+        author="TrimLink"
+        language="en"
+  />
     <div className="min-h-screen w-full">
-      <main className="w-full flex gap-5 p-2 h-full">
+      <main className="w-full flex gap-5 lg:p-2 h-full relative">
+        <span className="absolute lg:hidden">
+            <Plus size={24} className="fixed top-20 right-4 bg-gray-900  rounded-md cursor-pointer" onClick={() => setSidebarOpen(!sidebarOpen)} />
+        </span>
         <Sidebar
           profile={profile}
           setProfile={setProfile}
@@ -220,6 +236,8 @@ const LinkTreeBuilder = () => {
           linkTreeId={linkTreeId}
           setLinkTreeId={setLinkTreeId}
           userId={userId}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
         />
         <Preview 
           profile={profile} 
@@ -227,6 +245,7 @@ const LinkTreeBuilder = () => {
         />
       </main>
     </div>
+    </>
   );
 };
 

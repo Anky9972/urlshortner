@@ -72,7 +72,7 @@ const LinkCard = ({ url, fetchUrls }) => {
 
   return (
     <div
-      className="group relative overflow-hidden transition-all duration-300"
+      className="group relative overflow-hidden rounded-xl transition-all duration-30 mb-5 w-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -94,7 +94,7 @@ const LinkCard = ({ url, fetchUrls }) => {
           </h3>
           
           <div className="flex items-center gap-2 text-2xl text-blue-400 font-bold overflow-hidden">
-            <span className="truncate hover:text-blue-300 transition-colors">
+            <span className="truncate hover:text-blue-300 transition-colors text-wrap">
               https://trimlink.netlify.app/{url?.custom_url || url.short_url}
             </span>
             <ExternalLink className="w-5 h-5 flex-shrink-0" />
@@ -102,7 +102,7 @@ const LinkCard = ({ url, fetchUrls }) => {
           
           <div className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
             <LinkIcon className="w-4 h-4 flex-shrink-0" />
-            <p className="truncate">{url?.original_url}</p>
+            <p className="truncate text-wrap text-xs">{url?.original_url}</p>
           </div>
           
           <span className="text-sm text-gray-400 mt-auto">
@@ -110,12 +110,11 @@ const LinkCard = ({ url, fetchUrls }) => {
           </span>
         </Link>
 
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2 mb-2">
+        <div >
+          <div className="flex lg:flex-col gap-2">
+          <div>
             <ShareButtons shortUrl={`https://trimlink.netlify.app/${url?.short_url}`} />
           </div>
-          
-          <div className="flex flex-col gap-2">
             <Button
               variant="ghost"
               onClick={handleCopy}
@@ -231,7 +230,10 @@ const LinkCard = ({ url, fetchUrls }) => {
 
 LinkCard.propTypes = {
   url: PropTypes.shape({
-    id: PropTypes.string.isRequired,
+    id: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ]).isRequired,
     title: PropTypes.string,
     original_url: PropTypes.string,
     custom_url: PropTypes.string,
