@@ -94,7 +94,7 @@ export function CreateLink() {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="destructive">Create New Link</Button>
+        <Button>Create New Link</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
         <DialogHeader>

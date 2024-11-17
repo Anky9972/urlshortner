@@ -78,9 +78,9 @@ const Link = () => {
           <a
             href={`https://trimlink.netlify.app/${link}`}
             target="_blank"
-            className="text-3xl sm:text-4xl text-blue-400 font-bold hover:underline cursor-pointer"
+            className="text-3xl sm:text-4xl text-blue-400 font-bold hover:underline cursor-pointer w-full overflow-x-auto no-scrollbar"
           >
-            https://trimlink.netlify.app/{link}
+            https://trimlink.netlify.app/{link}https://trimlink.netlify.app/{link}
           </a>
           <a
             href={url?.original_url}
@@ -88,7 +88,9 @@ const Link = () => {
             className="flex items-center gap-1 hover:underline cursor-pointer"
           >
             <LinkIcon className="p-1" />
+            <p className="w-full overflow-x-scroll lg:overflow-auto">
             {url?.original_url}
+            </p>
           </a>
           <span className="flex items-end font-extralight text-sm">
             {new Date(url?.created_at).toLocaleString()}

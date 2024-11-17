@@ -19,7 +19,7 @@ export default function App({stats}) {
 
   return (
     <div style={{width: "100%", height: 300}}>
-      <ResponsiveContainer>
+      <ResponsiveContainer className=" overflow-auto">
         <PieChart width={700} height={400}>
           <Pie
             data={result}
@@ -34,6 +34,7 @@ export default function App({stats}) {
                 key={`cell-${index}`}
                 fill={COLORS[index % COLORS.length]}
               />
+              
             ))}
           </Pie>
         </PieChart>
