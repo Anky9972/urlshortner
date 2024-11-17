@@ -1,0 +1,10 @@
+{
+    "name": "TrimLink",
+    "short_name": "TrimLink",
+    "description": "A powerful and user-friendly URL shortener.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#1a73e8"
+  }
+  
