@@ -15,6 +15,7 @@ import LinkTreeBuilder from './components/linktree/linktree-builder'
 import { ErrorBoundary, RouteError } from './components/error-boundary'
 import SharedLinkTree from './components/linktree/shared-linktree'
 import NotFoundPage from './pages/not-found'
+import LinkTreeGallery from './components/linktree/linktree-gallery'
 
 const router = createBrowserRouter([
   {
@@ -87,6 +88,11 @@ const router = createBrowserRouter([
         path: '/not-found',
         element: (
             <NotFoundPage />
+        ),
+      },{
+        path: '/link-tree-gallery',
+        element: (
+            <LinkTreeGallery />
         ),
       },
     ],

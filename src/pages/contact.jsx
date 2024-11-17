@@ -1,16 +1,15 @@
-import ConfettiComponent from "@/components/confetti";
-import MessageSent from "@/components/message-sent";
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-// import { useToast } from "@/components/ui/use-toast";
-import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { FaEnvelope, FaMapMarkerAlt, FaPhoneAlt } from "react-icons/fa";
 import { BeatLoader } from "react-spinners";
 
 const ContactPage = () => {
-  const [messagesent, setMessageSent] = useState(false);
-  // const { toast } = useToast();
+  const [messageSent, setMessageSent] = useState(false);
+  const [sendLoading, setSendLoading] = useState(false);
   const [details, setDetails] = useState({
     name: "",
     email: "",
@@ -18,7 +17,6 @@ const ContactPage = () => {
     message: "",
   });
 
-  const [sendLoading,setSendLoading] = useState(false);
   const handleSubmit = async (e) => {
     setSendLoading(true);
     e.preventDefault();
@@ -53,12 +51,10 @@ const ContactPage = () => {
       if (json.status) {
         setSendLoading(false);
         setMessageSent(true);
-        
       }
-      console.log(json);
     } catch (error) {
       console.error(error);
-      toast.error(error.message);
+      setSendLoading(false);
     }
   };
 
@@ -66,138 +62,199 @@ const ContactPage = () => {
     setDetails({ ...details, [e.target.name]: e.target.value });
   };
 
+  const contactInfo = [
+    { icon: <FaPhoneAlt className="w-5 h-5" />, text: "+1 212 965 9700" },
+    { icon: <FaEnvelope className="w-5 h-5" />, text: "Morinfa@creatif.com" },
+    { 
+      icon: <FaMapMarkerAlt className="w-5 h-5" />, 
+      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+    }
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1
+    }
+  };
+
+  const successVariants = {
+    hidden: { scale: 0.8, opacity: 0 },
+    visible: { 
+      scale: 1,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 200,
+        damping: 10
+      }
+    }
+  };
+
   return (
-    <>
-    {
-        messagesent ? 
-        (
-            <>
-            <ConfettiComponent/>
-            <MessageSent/>
-            </>
-        )
-        :
-        (
-            <div className="flex justify-center items-center min-h-screen ">
-            <div className="lg:w-11/12 md:p-8 rounded-lg shadow-lg">
-              <div className="flex flex-col md:flex-row gap-2 mt-12 lg:mt-0 lg:gap-40 lg:px-10">
-                <div className="md:w-1/2 p-4 flex flex-col gap-10">
-                  <h1 className="text-3xl font-bold text-[#E9DFCE] mb-4 leading-snug">
-                    LET'S TALK ABOUT
-                  </h1>
-                  <div className="mb-6 flex flex-col gap-5">
-                    <p className="text-[#E9DFCE] mb-2 border p-3 rounded-lg flex justify-start items-center gap-2">
-                      <FaPhoneAlt /> +1 212 965 9700
-                    </p>
-                    <p className="text-[#E9DFCE] mb-2 border p-3 rounded-lg flex justify-start items-center gap-2">
-                      <FaEnvelope /> Morinfa@creatif.com
-                    </p>
-                    <p className="text-[#E9DFCE] border p-3 rounded-lg flex justify-start items-start gap-2">
-                      <FaMapMarkerAlt />{" "}
-                      <span>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      </span>
-                    </p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+      {messageSent ? (
+        <motion.div 
+          className="flex flex-col items-center justify-center space-y-6 text-center"
+          variants={successVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center">
+            <svg 
+              className="w-12 h-12 text-white" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M5 13l4 4L19 7" 
+              />
+            </svg>
+          </div>
+          <h2 className="text-3xl font-bold text-white">Message Sent Successfully!</h2>
+          <p className="text-gray-300">We&apos;ll get back to you soon.</p>
+          <Button 
+            onClick={() => setMessageSent(false)}
+            className="mt-6"
+          >
+            Send Another Message
+          </Button>
+        </motion.div>
+      ) : (
+        <motion.div 
+          className="max-w-7xl mx-auto"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <Card className="bg-gray-800/50 backdrop-blur-lg border-gray-700">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <motion.div 
+                  className="space-y-8"
+                  variants={itemVariants}
+                >
+                  <div>
+                    <h1 className="text-4xl font-bold text-white mb-2">Let&apos;s Talk</h1>
+                    <p className="text-gray-400">We&apos;d love to hear from you</p>
                   </div>
-                  <div className="flex space-x-4 mt-4">
-                    <a href="#" className="text-[#E9DFCE]">
-                      <i className="fab fa-linkedin fa-2x"></i>
-                    </a>
-                    <a href="#" className="text-[#E9DFCE]">
-                      <i className="fab fa-youtube fa-2x"></i>
-                    </a>
-                    <a href="#" className="text-[#E9DFCE]">
-                      <i className="fab fa-instagram fa-2x"></i>
-                    </a>
-                    <a href="#" className="text-[#E9DFCE]">
-                      <i className="fab fa-facebook fa-2x"></i>
-                    </a>
-                    <a href="#" className="text-[#E9DFCE]">
-                      <i className="fab fa-dribbble fa-2x"></i>
-                    </a>
-                    <a href="#" className="text-[#E9DFCE]">
-                      <i className="fab fa-twitter fa-2x"></i>
-                    </a>
-                    <a href="#" className="text-[#E9DFCE]">
-                      <i className="fab fa-skype fa-2x"></i>
-                    </a>
+                  
+                  <div className="space-y-4">
+                    {contactInfo.map((info, index) => (
+                      <motion.div
+                        key={index}
+                        className="flex items-center space-x-4 text-gray-300 bg-gray-700/50 p-4 rounded-lg hover:bg-gray-700/70 transition-colors"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        {info.icon}
+                        <span>{info.text}</span>
+                      </motion.div>
+                    ))}
                   </div>
-                </div>
-                <div className="md:w-1/2 p-4">
-                  <form className="space-y-4" onSubmit={handleSubmit}>
-                    <div>
-                      <label htmlFor="name" className="block">
-                        Name <span className="text-red-600">*</span>
-                      </label>
-                      <Input
-                        id="name"
-                        name="name"
-                        type="text"
-                        className="block w-full mt-1 p-3 shadow-sm"
-                        value={details.name}
-                        onChange={handleChange}
-                        required
-                      />
+
+                  <div className="pt-6 border-t border-gray-700">
+                    <div className="flex space-x-4">
+                      {['linkedin', 'youtube', 'instagram', 'facebook', 'twitter'].map((social) => (
+                        <motion.a
+                          key={social}
+                          href={`#${social}`}
+                          className="text-gray-400 hover:text-white transition-colors"
+                          whileHover={{ scale: 1.2 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <i className={`fab fa-${social} text-xl`}></i>
+                        </motion.a>
+                      ))}
                     </div>
-                    <div>
-                      <label htmlFor="email" className="block">
-                        Email <span className="text-red-600">*</span>
-                      </label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        className="block w-full mt-1 p-3  shadow-sm"
-                        value={details.email}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="phone" className="block">
-                        Phone Number <span className="text-red-600">*</span>
-                      </label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        className="block w-full mt-1 p-3  shadow-sm"
-                        value={details.phone}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="message" className="block">
-                        Message <span className="text-red-600">*</span>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  variants={itemVariants}
+                  className="bg-gray-700/30 p-6 rounded-lg"
+                >
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {[
+                      { label: 'Name', name: 'name', type: 'text' },
+                      { label: 'Email', name: 'email', type: 'email' },
+                      { label: 'Phone', name: 'phone', type: 'tel' },
+                    ].map((field) => (
+                      <motion.div
+                        key={field.name}
+                        whileHover={{ scale: 1.01 }}
+                        className="space-y-1"
+                      >
+                        <label className="block text-sm font-medium text-gray-300">
+                          {field.label}
+                        </label>
+                        <Input
+                          type={field.type}
+                          name={field.name}
+                          value={details[field.name]}
+                          onChange={handleChange}
+                          className="w-full bg-gray-700/50 border-gray-600 text-white"
+                          required
+                        />
+                      </motion.div>
+                    ))}
+                    
+                    <motion.div
+                      whileHover={{ scale: 1.01 }}
+                      className="space-y-1"
+                    >
+                      <label className="block text-sm font-medium text-gray-300">
+                        Message
                       </label>
                       <Textarea
-                        id="message"
                         name="message"
-                        rows="4"
-                        className="block w-full mt-1 p-2  shadow-sm"
                         value={details.message}
                         onChange={handleChange}
+                        className="w-full bg-gray-700/50 border-gray-600 text-white"
+                        rows={4}
                         required
-                      ></Textarea>
-                    </div>
-                    <div>
+                      />
+                    </motion.div>
+
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
                       <Button
                         type="submit"
-                        className="block w-full py-3 px-4 mt-5  font-semibold rounded-md shadow-md "
+                        className="w-full py-3"
+                        disabled={sendLoading}
                       >
-                        {sendLoading ? (<BeatLoader color="#020817"/>):'Submit'}
+                        {sendLoading ? (
+                          <BeatLoader size={8} color="#ffffff" />
+                        ) : (
+                          'Send Message'
+                        )}
                       </Button>
-                    </div>
+                    </motion.div>
                   </form>
-                </div>
+                </motion.div>
               </div>
-            </div>
-          </div>
-        )
-    }
-    </>
-    
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+    </div>
   );
 };
 

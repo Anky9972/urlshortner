@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import QRCode from 'qrcode.react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
