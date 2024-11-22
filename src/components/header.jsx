@@ -26,7 +26,7 @@ const Header = () => {
 
   const navLinks = [
     { path: "/", label: "Home" },
-    { path: "/link-tree", label: "LinkTree" },
+    { path: "/link-tree?create", label: "LinkTree" },
     { path: "/qr-code-generator", label: "QR Generator" },
   ];
 

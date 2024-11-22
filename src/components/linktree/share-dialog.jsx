@@ -20,8 +20,8 @@ const ShareDialog = ({linkTreeId}) => {
     return (
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant="outline" className="gap-2">
-            <Share2 size={16} />
+          <Button variant="outline" className="gap-2 text-gray-400 hover:text-white text-xs font-bold" size="sm" >
+            <Share2 className='w-3' />
             Share
           </Button>
         </DialogTrigger>
@@ -76,7 +76,7 @@ const ShareDialog = ({linkTreeId}) => {
 }
   ShareDialog.propTypes = {
     linkTreeId: PropTypes.string.isRequired,
-    setLinkTreeId: PropTypes.func.isRequired,
+    // setLinkTreeId: PropTypes.func.isRequired,
   };
 
   export default ShareDialog;

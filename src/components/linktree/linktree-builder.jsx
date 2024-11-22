@@ -5,6 +5,7 @@ import Preview from "./preview";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { SEOMetadata } from "../seo-metadata";
+import { v4 as uuidv4 } from 'uuid';
 
 const LinkTreeBuilder = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -15,6 +16,10 @@ const LinkTreeBuilder = () => {
   const [linkTreeId, setLinkTreeId] = useState(null);
   const [userId, setUserId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [title, setTitle] = useState("Your Link Tree");
+  const [is_active, setIsactive] = useState(true);
+  const [views, setViews] = useState(0);
+  const [linkTree, setLinkTree] = useState([]);
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState({
@@ -34,7 +39,7 @@ const LinkTreeBuilder = () => {
       title: "Portfolio Website",
       url: "https://example.com",
       icon: "website",
-      isActive: true,
+      // isActive: true,
     },
   ]);
 
@@ -70,8 +75,9 @@ const LinkTreeBuilder = () => {
 
         if (linkTree) {
           setLinkTreeId(linkTree.id);
-          setProfile(linkTree.profile || profile);
-          setLinks(linkTree.links || links);
+          // setProfile(linkTree.profile || profile);
+          // setLinks(linkTree.links || links);
+          setLinkTree(linkTree);
         }
       } catch (error) {
         console.error("Error loading user or LinkTree:", error);
@@ -90,6 +96,9 @@ const LinkTreeBuilder = () => {
         setUserId(null);
         setLinkTreeId(null);
         // Reset to default states
+        setTitle("Your Link Tree");
+        setIsactive(true);
+        setViews(0);
         setProfile({
           name: "Your Name",
           bio: "Your Bio ✨",
@@ -106,7 +115,7 @@ const LinkTreeBuilder = () => {
             title: "Portfolio Website",
             url: "https://example.com",
             icon: "website",
-            isActive: true,
+            clicks: 0,
           },
         ]);
       } else if (event === 'SIGNED_IN') {
@@ -132,60 +141,138 @@ const LinkTreeBuilder = () => {
     }
   }, [saveSuccess, saveError]);
 
-  const saveLinkTree = async () => {
-    setIsSaving(true);
-    setSaveError(null);
-    setSaveSuccess(false);
+  // const updateLinkTree = async () => {
+  //   setIsSaving(true);
+  //   setSaveError(null);
+  //   setSaveSuccess(false);
 
-    if (!userId) {
-      setSaveError('Please sign in to save your LinkTree');
-      setIsSaving(false);
-      return;
-    }
+  //   if (!userId) {
+  //     setSaveError('Please sign in to save your LinkTree');
+  //     setIsSaving(false);
+  //     return;
+  //   }
 
-    const linkTreeData = {
-      profile,
-      links,
-      user_id: userId,
-      updated_at: new Date().toISOString()
-    };
+  //   const linkTreeData = {
+  //     profile,
+  //     links,
+  //     user_id: userId,
+  //     created_at: new Date().toISOString(),
+  //     updated_at: new Date().toISOString(),
+  //     title
+  //   };
 
-    try {
-      let response;
+  //   try {
+  //     let response;
 
-      if (linkTreeId) {
-        response = await supabase
-          .from("linktrees")
-          .update(linkTreeData)
-          .eq("id", linkTreeId)
-          .eq("user_id", userId)
-          .select()
-          .single();
-      } else {
-        response = await supabase
-          .from("linktrees")
-          .insert(linkTreeData)
-          .select()
-          .single();
-      }
+  //     if (linkTreeId) {
+  //       response = await supabase
+  //         .from("linktrees")
+  //         .update(linkTreeData)
+  //         .eq("id", linkTreeId)
+  //         .eq("user_id", userId)
+  //         .select()
+  //         .single();
+  //     } else {
+  //       response = await supabase
+  //         .from("linktrees")
+  //         .insert(linkTreeData)
+  //         .select()
+  //         .single();
+  //     }
 
-      if (response.error) {
-        throw response.error;
-      }
+  //     if (response.error) {
+  //       throw response.error;
+  //     }
 
-      if (response.data) {
-        setLinkTreeId(response.data.id);
-        setSaveSuccess(true);
-      } else {
-        throw new Error("No data returned from save operation");
-      }
-    } catch (error) {
-      console.error("Save error:", error);
-      setSaveError(error.message || "Failed to save changes");
-    } finally {
-      setIsSaving(false);
-    }
+  //     if (response.data) {
+  //       setLinkTreeId(response.data.id);
+  //       setSaveSuccess(true);
+  //     } else {
+  //       throw new Error("No data returned from save operation");
+  //     }
+  //   } catch (error) {
+  //     console.error("Save error:", error);
+  //     setSaveError(error.message || "Failed to save changes");
+  //   } finally {
+  //     setIsSaving(false);
+  //   }
+  // };
+
+  
+const saveLinkTree = async () => {
+  setIsSaving(true);
+  setSaveError(null);
+  setSaveSuccess(false);
+
+  if (!userId) {
+    setSaveError('Please sign in to save your LinkTree');
+    setIsSaving(false);
+    return;
+  }
+
+  // Generate UUIDs for links
+  const linksWithUuid = links.map(link => ({
+    ...link,
+    id: link.id === "1" ? uuidv4() : (link.id || uuidv4()), // Generate UUID if id is "1" or not present
+  }));
+
+  const linkTreeData = {
+    profile,
+    links: linksWithUuid,
+    user_id: userId,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    title,
+    is_active,
+    views
   };
+
+  try {
+    // Always insert a new row, regardless of existing linkTreeId
+    const response = await supabase
+      .from("linktrees")
+      .insert(linkTreeData)
+      .select()
+      .single();
+
+    if (response.error) {
+      throw response.error;
+    }
+
+    if (response.data) {
+      // Optionally update the linkTreeId with the new row's ID
+      setLinkTreeId(response.data.id);
+      setSaveSuccess(true);
+    } else {
+      throw new Error("No data returned from save operation");
+    }
+  } catch (error) {
+    console.error("Save error:", error);
+    setSaveError(error.message || "Failed to save changes");
+  } finally {
+    setIsSaving(false);
+    setProfile({
+      name: "Your Name",
+      bio: "Your Bio ✨",
+      theme: "default",
+      customColors: {
+        background: "#1a1a1a",
+        text: "#ffffff",
+        button: "#ffffff20",
+      },
+    });
+    setLinks([
+      {
+        id: uuidv4(), // Use uuidv4() to generate a new UUID
+        title: "Portfolio Website",
+        url: "https://example.com",
+        icon: "website",
+        clicks: 0,
+      },
+    ]);
+  }
+};
+
 
   if (isLoading) {
     return (
@@ -238,10 +325,15 @@ const LinkTreeBuilder = () => {
           userId={userId}
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
+          title={title}
+          setTitle={setTitle}
         />
         <Preview 
           profile={profile} 
           links={links} 
+          linkTree={linkTree}
+          setProfile={setProfile}
+          setLinks={setLinks}
         />
       </main>
     </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -62,7 +62,6 @@ const Login = () => {
         newErrors[err.path] = err.message;
       });
       setErrors(newErrors);
-    } finally {
     }
   };
 

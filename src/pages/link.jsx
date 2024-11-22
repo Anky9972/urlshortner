@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Copy, Download, LinkIcon, Trash, ExternalLink, Check, ChevronUp } from "lucide-react";
+import { Copy, Download, Trash, ExternalLink, Check, ChevronUp } from "lucide-react";
 import { BarLoader, BeatLoader } from "react-spinners";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,7 +86,7 @@ const Link = () => {
       author="TrimLink"
       language="en"
   />
-    <div className="min-h-screen p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen p-4 lg:p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {(loading || loadingStats) && (
         <div className="fixed top-0 left-0 right-0 z-50">
           <BarLoader width={"100%"} color="#36d7b7" />
@@ -94,7 +94,7 @@ const Link = () => {
       )}
 
       <div className="max-w-7xl mx-auto flex flex-col gap-8 sm:flex-row justify-between">
-        <div className="flex flex-col items-start gap-8 sm:w-2/5 animate-fade-in">
+        <div className="flex flex-col items-start gap-5 lg:gap-8 sm:w-2/5 animate-fade-in">
           <h1 className="text-5xl sm:text-6xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             {url?.title}
           </h1>
@@ -110,15 +110,17 @@ const Link = () => {
             </a>
           </div>
 
+          <div className="bg-gray-800/50 p-2 backdrop-blur-sm rounded-lg border border-gray-700/50">
           <a
             href={url?.original_url}
             target="_blank"
-            className=" p-2 bg-gray-800/50 group flex items-center gap-2 text-gray-300 hover:text-white transition-colors backdrop-blur-sm rounded-lg border border-gray-700/50"
+            className=" group text-gray-300 hover:text-white transition-colors lg:flex lg:gap-2 lg:items-center "
           >
-            <LinkIcon className="w-8 h-8" />
-            <span className="truncate text-wrap">{url?.original_url}</span>
+            {/* <LinkIcon className="w-8 h-8" /> */}
+            <span className="truncate text-balance">{url?.original_url}</span>
             <ExternalLink className="w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity" />
           </a>
+          </div>
 
           <span className="text-sm text-gray-400">
             Created: {new Date(url?.created_at).toLocaleString()}

@@ -123,8 +123,5 @@ NotFoundPage.propTypes = {
   isNotFound: PropTypes.bool
 };
 
-NotFoundPage.defaultProps = {
-  isNotFound: true
-};
 
 export default NotFoundPage;

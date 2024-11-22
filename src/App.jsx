@@ -17,6 +17,10 @@ import SharedLinkTree from './components/linktree/shared-linktree'
 import NotFoundPage from './pages/not-found'
 import LinkTreeGallery from './components/linktree/linktree-gallery'
 import { HelmetProvider } from 'react-helmet-async'
+import ViewLinkTree from './components/linktree/view-linktree'
+import TreeEdit from './components/linktree/tree-edit'
+import RoomDashboard from './components/room/room-dashboard'
+import RoomDetail from './components/room/room-detail'
 
 const router = createBrowserRouter([
   {
@@ -96,6 +100,42 @@ const router = createBrowserRouter([
             <LinkTreeGallery />
         ),
       },
+      {
+        path: '/view/:id',
+        element: (
+          <ErrorBoundary>
+            <ViewLinkTree />
+          </ErrorBoundary>
+        ),
+      },
+      {
+        path:'/edit/:id',
+        element:(
+          <ErrorBoundary>
+            <TreeEdit />
+          </ErrorBoundary>
+        )
+      },
+      {
+        path:'/rooms',
+        element:(
+          <ErrorBoundary>
+            <RequireAuth>
+              <RoomDashboard />
+            </RequireAuth>
+          </ErrorBoundary>
+        )
+      },
+      {
+        path:'/room/:slug',
+        element:(
+          <ErrorBoundary>
+            <RequireAuth>
+              <RoomDetail />
+            </RequireAuth>
+          </ErrorBoundary>
+        )
+      }
     ],
   },
 ])

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link2Icon, Share2 } from "lucide-react";
+import { Link2Icon, MousePointerClick } from "lucide-react";
 import PropTypes from "prop-types";
 const socialIcons = {
   instagram: FaInstagram,
@@ -18,7 +18,9 @@ import {
 } from "react-icons/fa";
 import { defaultThemes } from "@/utils/theme";
 import { UrlState } from "@/context";
-const Preview = ({ profile, links }) => {
+// import { Button } from "../ui/button";
+import { trackAndUpdateTreeLinkClick } from "../analytics";
+const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
   const { user } = UrlState();
   const theme = defaultThemes[profile.theme];
   if (!profile || !links) {
@@ -28,9 +30,36 @@ const Preview = ({ profile, links }) => {
       </div>
     );
   }
+  const handleClick = () => {
+    setProfile({
+      name: "Your Name",
+      bio: "Your Bio ✨",
+      theme: "default",
+      customColors: {
+        background: "#1a1a1a",
+        text: "#ffffff",
+        button: "#ffffff20",
+      },
+    });
+    setLinks([
+      {
+        id: "1",
+        title: "Portfolio Website",
+        url: "https://example.com",
+        icon: "website",
+        isActive: true,
+      },
+    ]);
+  };
+
+  const handleClickCount = async(url, linkId) => {
+    await trackAndUpdateTreeLinkClick(url,treeId, linkId);
+   }
+  //  console.log("treeId", treeId);
 
   return (
     <div className={`min-h-screen w-full rounded-lg ${theme.background}`}>
+      <button className="absolute right-5 top-5 " onClick={handleClick}>Add To Gallery</button>
       <div className="max-w-md mx-auto px-4 py-16">
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
@@ -44,9 +73,12 @@ const Preview = ({ profile, links }) => {
               className="w-full h-full object-cover"
             />
           </div>
-          <h1 className={`text-2xl font-bold ${theme.textColor} mb-2`}>
+          <h1 className={`text-xl font-bold ${theme.textColor} mb-2`}>
             {profile.name}
           </h1>
+          {/* <h1 className={`text-3xl font-bold ${theme.textColor} mt-2`}>
+            {profile.treetitle}
+          </h1> */}
           <p className="text-gray-400">{profile.bio}</p>
         </motion.div>
 
@@ -80,15 +112,20 @@ const Preview = ({ profile, links }) => {
                     transition-all duration-200 backdrop-blur-sm`}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => handleClickCount(link.url, link.id)}
               >
                 <span className="flex items-center gap-3">
                   <Icon size={18} />
                   {link.title}
                 </span>
-                <Share2
+                <span className="border rounded-full px-2 py-1 text-xs font-bold flex gap-1">
+                  <MousePointerClick size={16}/>
+                  {link.clicks||0} clicks
+                </span>
+                {/* <Share2
                   size={18}
                   className="opacity-0 group-hover:opacity-100"
-                />
+                /> */}
               </motion.a>
             );
           })}
@@ -111,5 +148,9 @@ Preview.propTypes = {
       icon: PropTypes.string,
     })
   ).isRequired,
+  setProfile: PropTypes.func,
+  setLinks: PropTypes.func,
+  handleClickCount: PropTypes.func,
+  treeId: PropTypes.string,
 };
 export default Preview;

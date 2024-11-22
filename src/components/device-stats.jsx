@@ -108,7 +108,7 @@ const DeviceStatsChart = ({ stats }) => {
   return (
     <Card className="w-full bg-gray-800/50 border-gray-700/50">
       <CardHeader>
-        <CardTitle>Device Distribution</CardTitle>
+        <CardTitle className="hidden lg:flex">Device Distribution</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-80 w-full">

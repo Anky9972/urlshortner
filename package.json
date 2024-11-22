@@ -12,6 +12,7 @@
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-avatar": "^1.1.0",
+    "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-dropdown-menu": "^2.1.1",
     "@radix-ui/react-menubar": "^1.1.1",
@@ -23,6 +24,7 @@
     "ast-types": "^0.14.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "framer-motion": "^11.11.17",
     "lucide-react": "^0.396.0",
     "qrcode.react": "^3.1.0",
@@ -39,9 +41,11 @@
     "react-use": "^17.5.0",
     "recharts": "^2.12.7",
     "shadcn-ui": "^0.8.0",
+    "sonner": "^1.7.0",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
     "ua-parser-js": "^1.0.38",
+    "uuid": "^11.0.3",
     "yup": "^1.4.0"
   },
   "devDependencies": {

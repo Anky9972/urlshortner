@@ -200,7 +200,7 @@ const LocationStats = ({ stats = [] }) => {
     <Card className="w-full bg-gray-800/50 border-gray-700/50">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
-          <span>Location Distribution</span>
+          <span className='hidden lg:flex'>Location Distribution</span>
           <Tabs defaultValue="line" className="w-[400px]">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger 

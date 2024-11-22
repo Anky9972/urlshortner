@@ -1,6 +1,5 @@
-import React from "react";
 import { trackLinkClick } from "./analytics";
-import { FaFacebook, FaShare, FaTelegram, FaTwitter, FaWhatsapp } from "react-icons/fa";
+import { FaFacebook, FaTelegram, FaTwitter, FaWhatsapp } from "react-icons/fa";
 import {
   Menubar,
   MenubarContent,
@@ -10,6 +9,7 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { IoShareSocial } from "react-icons/io5";
+import PropTypes from "prop-types";
 const ShareButtons = ({ shortUrl }) => {
   const isValidUrl = (url) => {
     try {
@@ -100,6 +100,9 @@ const ShareButtons = ({ shortUrl }) => {
       </Menubar>
     </div>
   );
+};
+ShareButtons.propTypes = {
+  shortUrl: PropTypes.string.isRequired,
 };
 
 export default ShareButtons;

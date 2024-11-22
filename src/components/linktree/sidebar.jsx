@@ -17,6 +17,8 @@ import {
 import { defaultThemes } from "../../utils/theme";
 import SaveStatus from "./save-status";
 import { IoClose } from "react-icons/io5";
+import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 const socialIcons = {
   instagram: FaInstagram,
   twitter: FaTwitter,
@@ -40,6 +42,8 @@ const Sidebar = ({
   setLinkTreeId,
   sidebarOpen,
   setSidebarOpen,
+  title,
+  setTitle
 }) => {
   // const [sidebarOpen, setSidebarOpen] = useState(false);
   const addLink = () => {
@@ -51,20 +55,32 @@ const Sidebar = ({
     };
     setLinks([...links, newLink]);
   };
+  const location = useLocation();
+  const [createMode, setCreateMode] = useState(false);
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);  // Use location.search to get the query string
+    const createParam = queryParams.get("create");  // Extract the 'create' parameter
+
+    if (createParam !== null) {
+      setCreateMode(true);
+    } else {
+      setCreateMode(false);
+    }
+  }, [location.search]);
+  // console.log("create param:", createMode);
 
   return (
     <motion.div
-      initial={{ x: "-100%" }}
-      animate={{ x: 0 }}
-      transition={{ duration: 0.5, type: "spring", stiffness: 120 }}
-      className={`lg:w-80 fixed ${sidebarOpen?"visible":"hidden"} z-10 bg-gray-900 top h-screen shadow-xl lg:relative lg:rounded-lg border`}
+      
+      className={`lg:w-80 fixed lg:relative left-0 right-0 ${sidebarOpen?"visible":"hidden"} z-10 bg-gray-900 top h-screen shadow-xl lg:relative lg:rounded-lg border`}
     >
       <span className="p-1 lg:hidden border absolute right-2 top-2 rounded-md" onClick={()=>setSidebarOpen(!sidebarOpen)}>
         <IoClose/>
       </span>
       <div className="p-6 h-full mt-5 lg:mt-0">
         {/* Tabs */}
-        <div className="flex justify-center w-full gap-10 lg:gap-2 mb-6">
+        <div className="flex justify-center w-full gap-6 lg:gap-2 mb-6">
           {["links", "appearance", "settings"].map((tab) => (
             <button
               key={tab}
@@ -252,6 +268,16 @@ const Sidebar = ({
                     }
                     className="w-full px-3 py-2 text-gray-300 text-xs rounded-lg border bg-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
+                </div><div>
+                  <label className="block text-sm font-bold text-gray-300 mb-2">
+                    LinkTree Title
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full px-3 py-2 text-gray-300 text-xs rounded-lg border bg-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-300 mb-2">
@@ -278,6 +304,7 @@ const Sidebar = ({
         isSaving={isSaving}
         linkTreeId={linkTreeId}
         setLinkTreeId={setLinkTreeId}
+        isCreate={createMode}
       />
     </motion.div>
   );
@@ -304,6 +331,8 @@ Sidebar.propTypes = {
   setLinkTreeId: PropTypes.func.isRequired,
   sidebarOpen: PropTypes.bool.isRequired,
   setSidebarOpen: PropTypes.func.isRequired,
+  title: PropTypes.string.isRequired,
+  setTitle: PropTypes.func.isRequired
 };
 
 export default Sidebar;
