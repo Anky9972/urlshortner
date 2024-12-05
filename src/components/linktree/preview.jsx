@@ -30,27 +30,27 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
       </div>
     );
   }
-  const handleClick = () => {
-    setProfile({
-      name: "Your Name",
-      bio: "Your Bio ✨",
-      theme: "default",
-      customColors: {
-        background: "#1a1a1a",
-        text: "#ffffff",
-        button: "#ffffff20",
-      },
-    });
-    setLinks([
-      {
-        id: "1",
-        title: "Portfolio Website",
-        url: "https://example.com",
-        icon: "website",
-        isActive: true,
-      },
-    ]);
-  };
+  // const handleClick = () => {
+  //   setProfile({
+  //     name: "Your Name",
+  //     bio: "Your Bio ✨",
+  //     theme: "default",
+  //     customColors: {
+  //       background: "#1a1a1a",
+  //       text: "#ffffff",
+  //       button: "#ffffff20",
+  //     },
+  //   });
+  //   setLinks([
+  //     {
+  //       id: "1",
+  //       title: "Portfolio Website",
+  //       url: "https://example.com",
+  //       icon: "website",
+  //       isActive: true,
+  //     },
+  //   ]);
+  // };
 
   const handleClickCount = async(url, linkId) => {
     await trackAndUpdateTreeLinkClick(url,treeId, linkId);
@@ -59,7 +59,7 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
 
   return (
     <div className={`min-h-screen w-full rounded-lg ${theme.background}`}>
-      <button className="absolute right-5 top-5 " onClick={handleClick}>Add To Gallery</button>
+      {/* <button className="absolute right-5 top-5 " onClick={handleClick}>Add To Gallery</button> */}
       <div className="max-w-md mx-auto px-4 py-16">
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}

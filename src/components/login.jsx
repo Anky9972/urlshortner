@@ -84,7 +84,7 @@ const Login = () => {
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit">
+          <Button type="submit" className="w-full">
             {loading ? <BeatLoader size={8} color="#020817" /> : "Login"}
           </Button>
         </CardFooter>

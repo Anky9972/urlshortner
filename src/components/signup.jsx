@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
     Card,
     CardContent,
@@ -66,6 +66,12 @@ const Signup = () => {
             });
             setErrors(newErrors);
         } finally {
+            setFormData({
+                name:"",
+                email: "",
+                password: "",
+                profile_pic:null
+            });
         }
     }
 
@@ -90,12 +96,13 @@ const Signup = () => {
                     {errors.password && <Error message={errors.password} />}
                 </div>
                 <div className='space-y-1'>
-                    <Input name="profile_pic" type="file" accept="image/*" onChange={handleInputChange} />
+                    <label className='text-xs font-bold'>Profile Picture:</label>
+                    <Input name="profile_pic" type="file" accept="image/*" onChange={handleInputChange}/>
                     {errors.profile_pic && <Error message={errors.profile_pic} />}
                 </div>
             </CardContent>
             <CardFooter>
-                <Button onClick={handleSignup}>
+                <Button onClick={handleSignup} className="w-full">
                     {loading ? <BeatLoader size={8} color="#020817" /> : "Create Account"}
                 </Button>
             </CardFooter>

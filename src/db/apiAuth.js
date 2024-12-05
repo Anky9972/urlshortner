@@ -38,6 +38,21 @@ export async function signup({name, email, password, profile_pic}) {
     });
   
     if (error) throw new Error(error.message);
+        // 3. Insert into profiles table
+        const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: data.user.id,         // Use the auth user's ID as the profile ID
+          email: email,
+          full_name: name,
+          profile_pic_url: `${supabaseUrl}/storage/v1/object/public/profile_pic/${fileName}`,
+        });
+  
+      if (profileError) {
+        // If profile creation fails, you might want to clean up the auth user
+        // and uploaded image, but that depends on your requirements
+        throw new Error(profileError.message);
+      }
   
     return data;
   }

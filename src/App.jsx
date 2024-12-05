@@ -21,6 +21,9 @@ import ViewLinkTree from './components/linktree/view-linktree'
 import TreeEdit from './components/linktree/tree-edit'
 import RoomDashboard from './components/room/room-dashboard'
 import RoomDetail from './components/room/room-detail'
+import NotificationManager from './components/notification/notification'
+import RoomInvitation from './components/room/accept-invitation'
+import InvitedRooms from './components/room/invite-rooms'
 
 const router = createBrowserRouter([
   {
@@ -134,6 +137,28 @@ const router = createBrowserRouter([
               <RoomDetail />
             </RequireAuth>
           </ErrorBoundary>
+        )
+      },
+      {
+        path:'/notifications',
+        element:(
+          <NotificationManager/>
+        )
+      },
+      {
+        path:'/invitation/:roomId',
+        element:(
+          <ErrorBoundary>
+            <RequireAuth>
+              <RoomInvitation/>
+            </RequireAuth>
+          </ErrorBoundary>
+        )
+      },
+      {
+        path:'/joined-rooms',
+        element:(
+          <InvitedRooms/>
         )
       }
     ],

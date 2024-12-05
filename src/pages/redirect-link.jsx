@@ -1,5 +1,6 @@
 import { storeClicks } from "@/db/apiClicks";
 import { getLongUrl } from "@/db/apiUrls";
+import { handleUrlRedirect } from "@/db/freeUrls";
 import useFetch from "@/hooks/use-fetch";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -22,21 +23,31 @@ const RedirectLink = () => {
 
   useEffect(() => {
     if (!loading && data) {
-      // Check if the URL has expired
       const currentDate = new Date();
       const expirationDate = new Date(data.expiration_date);
 
       if (data.expiration_date && expirationDate < currentDate) {
-        // If expired, show an error message or redirect to an error page
         navigate("/link-expired")
       } else {
-        // If not expired, store the click and redirect
         fnStats();
         window.location.href = data.original_url;
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading]);
+  }, [data, loading, navigate, fnStats]);
+  
+  useEffect(() => {
+    const performRedirect = async () => {
+      const originalUrl = await handleUrlRedirect(id);
+      
+      if (originalUrl) {
+        window.location.href = originalUrl;
+      } else {
+        navigate('/not-found');
+      }
+    };
+
+    performRedirect();
+  }, [id, navigate]);
 
   if (loading || loadingStats) {
     return (

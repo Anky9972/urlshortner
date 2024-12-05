@@ -199,7 +199,7 @@ const RoomDetail = () => {
               </button>
               <button
                 onClick={() => setShowAddLinkModal(true)}
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-lg"
               >
                 <Plus size={18} />
                 Add Link
@@ -222,7 +222,7 @@ const RoomDetail = () => {
           <h2 className="text-lg font-semibold mb-6">Links</h2>
           
           {links.length === 0 ? (
-            <div className="text-center py-8 text-blue-500 cursor-pointer" onClick={() => setShowAddLinkModal(true)} >
+            <div className="text-center text-xs py-8 text-blue-500 cursor-pointer" onClick={() => setShowAddLinkModal(true)} >
               No links added yet. Click to get started.
             </div>
           ) : (
@@ -389,7 +389,7 @@ const RoomDetail = () => {
                 </button>
                 <button
                   onClick={showAddLinkModal ? handleAddLink : handleEditLink}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-4 py-2 bg-white text-black rounded-lg"
                 >
                   {showAddLinkModal ? 'Add Link' : 'Save Changes'}
                 </button>

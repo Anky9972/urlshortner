@@ -1,7 +1,7 @@
 import {
   Card,
 } from "@/components/ui/card";
-import { Link2, BarChart2, QrCode, Layout, Clock, Wand2, Network } from "lucide-react";
+import { Link2, BarChart2, QrCode, Layout, Clock, Wand2, Network, HomeIcon } from "lucide-react";
 
 const Features = () => {
   const features = [
@@ -39,6 +39,11 @@ const Features = () => {
       feature:"Link Tree",
       description:"Create a link tree to showcase all your important links in one place.",
       icon: Network
+    },
+    {
+      feature: "Rooms & Invitations",
+      description: "Create rooms and invite users to collaborate on projects and share links.",
+      icon: HomeIcon
     }
   ];
 

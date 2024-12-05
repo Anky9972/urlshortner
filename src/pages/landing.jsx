@@ -12,10 +12,13 @@ import Features from "@/components/features";
 import { motion } from "framer-motion";
 import { ChevronUp } from "lucide-react";
 import { SEOMetadata } from "@/components/seo-metadata";
+import UrlShortener from "@/components/url-shortner";
+import { UrlState } from "@/context";
 
 const LandingPage = () => {
   const [longUrl, setLongUrl] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const {user} = UrlState();
   const navigate = useNavigate();
 
   const handleShorten = (e) => {
@@ -95,7 +98,9 @@ const LandingPage = () => {
         </motion.div>
 
         {/* URL Shortener Form */}
-        <motion.form
+        {
+          user ? (
+            <motion.form
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -115,6 +120,10 @@ const LandingPage = () => {
             </Button>
           </div>
         </motion.form>
+          ) : (
+            <UrlShortener/>
+          )
+        }
 
         {/* Features Section */}
         <motion.div

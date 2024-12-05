@@ -9,26 +9,44 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { LinkIcon, LogOut, Menu, Network, X } from "lucide-react";
+import { Bell, LinkIcon, LogOut, Menu, Network, X } from "lucide-react";
 import { UrlState } from "@/context";
 import useFetch from "@/hooks/use-fetch";
 import { logout } from "@/db/apiAuth";
 import { BarLoader } from "react-spinners";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { fetchNotifications } from "./notification/notification-methods";
+import MyUrls from "./my-urls";
 
 const Header = () => {
   const navigate = useNavigate();
   const { user, fetchUser } = UrlState();
   const { loading, fn: fnLogout } = useFetch(logout);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [isMyUrlsOpen, setIsMyUrlsOpen] = useState(false);
 
-  const navLinks = [
-    { path: "/", label: "Home" },
-    { path: "/link-tree?create", label: "LinkTree" },
-    { path: "/qr-code-generator", label: "QR Generator" },
-  ];
+  const navLinks = user
+    ? [
+        { path: "/", label: "Home" },
+        { path: "/link-tree?create", label: "LinkTree" },
+        { path: "/qr-code-generator", label: "QR Generator" },
+        { path: "/rooms", label: "Rooms" },
+      ]
+    : [
+        { path: "/", label: "My URLs", onClick: () => setIsMyUrlsOpen(true) },
+        { path: "/link-tree?create", label: "LinkTree" },
+        { path: "/qr-code-generator", label: "QR Generator" },
+        { path: "/rooms", label: "Rooms" },
+      ];
+
+  useEffect(() => {
+    fetchNotifications().then((data) => {
+      if (data) setNotifications(data);
+    });
+  }, []);
 
   return (
     <>
@@ -61,7 +79,11 @@ const Header = () => {
             <div className="hidden md:flex items-center space-x-4">
               <ul className="flex items-center gap-4">
                 {navLinks.map((link) => (
-                  <motion.li key={link.path} whileHover={{ scale: 1.05 }}>
+                  <motion.li
+                    key={link.path}
+                    whileHover={{ scale: 1.05 }}
+                    onClick={link.onClick}
+                  >
                     <NavLink
                       to={link.path}
                       className={({ isActive }) =>
@@ -77,6 +99,17 @@ const Header = () => {
                     </NavLink>
                   </motion.li>
                 ))}
+                {user && (
+                  <li className="flex mr-2 items-center">
+                    <Bell
+                      className="w-5 h-5 text-blue-500 cursor-pointer"
+                      onClick={() => navigate("/notifications")}
+                    />
+                    <span className="mt-2 text-xs">
+                      {notifications.filter((n) => n.status).length}
+                    </span>
+                  </li>
+                )}
               </ul>
 
               <AnimatePresence mode="wait">
@@ -141,7 +174,10 @@ const Header = () => {
                   <NavLink
                     key={link.path}
                     to={link.path}
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      link.onClick && link.onClick();
+                    }}
                     className={({ isActive }) =>
                       `block px-4 py-2 rounded-lg transition-all duration-200
                       ${
@@ -170,6 +206,9 @@ const Header = () => {
           )}
         </AnimatePresence>
       </motion.nav>
+
+      {/* MyUrls Modal */}
+      {isMyUrlsOpen && <MyUrls setIsMyUrlsOpen={setIsMyUrlsOpen} />}
 
       {/* Loading Bar */}
       <AnimatePresence>

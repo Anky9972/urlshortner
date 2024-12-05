@@ -10,7 +10,7 @@ import {
   Network,
 } from "lucide-react";
 import { Button } from "../ui/button";
-import { toast } from "sonner"; // Assuming you're using sonner for toasts
+import { toast } from "sonner";
 import supabase from "@/db/supabase";
 import { useParams, useNavigate } from "react-router-dom";
 
