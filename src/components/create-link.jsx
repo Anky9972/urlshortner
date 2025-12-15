@@ -1,4 +1,4 @@
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,20 +7,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {Input} from "@/components/ui/input";
-import {Card} from "./ui/card";
-import {useNavigate, useSearchParams} from "react-router-dom";
-import {useEffect, useRef, useState} from "react";
+import { Input } from "@/components/ui/input";
+import { Card } from "./ui/card";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import Error from "./error";
 import * as yup from "yup";
 import useFetch from "@/hooks/use-fetch";
-import {createUrl} from "@/db/apiUrls";
-import {BeatLoader} from "react-spinners";
-import {UrlState} from "@/context";
-import {QRCode} from "react-qrcode-logo";
+import { createUrl } from "@/api/urls";
+import { BeatLoader } from "react-spinners";
+import { UrlState } from "@/context";
+import { QRCode } from "react-qrcode-logo";
 
 export function CreateLink() {
-  const {user} = UrlState();
+  const { user } = UrlState();
 
   const navigate = useNavigate();
   const ref = useRef();
@@ -57,7 +57,7 @@ export function CreateLink() {
     error,
     data,
     fn: fnCreateUrl,
-  } = useFetch(createUrl, {...formValues, user_id: user.id});
+  } = useFetch(createUrl, { ...formValues, user_id: user.id });
 
   useEffect(() => {
     if (error === null && data) {
@@ -69,7 +69,7 @@ export function CreateLink() {
   const createNewLink = async () => {
     setErrors([]);
     try {
-      await schema.validate(formValues, {abortEarly: false});
+      await schema.validate(formValues, { abortEarly: false });
 
       const canvas = ref.current.canvasRef.current;
       const blob = await new Promise((resolve) => canvas.toBlob(resolve));
@@ -119,7 +119,7 @@ export function CreateLink() {
         />
         {errors.longUrl && <Error message={errors.longUrl} />}
         <div className="flex items-center gap-2">
-          <Card className="p-2">trimlink.netlify.app</Card> /
+          <Card className="p-2">trimlynk.com</Card> /
           <Input
             id="customUrl"
             placeholder="Custom Link (optional)"
@@ -129,13 +129,13 @@ export function CreateLink() {
         </div>
         <div>
           <span className="text-slate-400">Expire Date (optional):</span>
-        <Input
-          type="datetime-local"
-          id="expirationDate"
-          value={formValues.expirationDate}
-          onChange={handleChange}
-          className="custom-datetime-input"
-        />
+          <Input
+            type="datetime-local"
+            id="expirationDate"
+            value={formValues.expirationDate}
+            onChange={handleChange}
+            className="custom-datetime-input"
+          />
         </div>
         {errors.expirationDate && <Error message={errors.expirationDate} />}
         {error && <Error message={errors.message} />}

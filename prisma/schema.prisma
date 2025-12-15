@@ -1,0 +1,566 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String    // bcrypt hashed password
+  name          String?
+  avatarUrl     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  urls          Url[]
+  linkTrees     LinkTree[]
+  rooms         Room[]
+  roomMembers   RoomMember[]
+  apiKeys       ApiKey[]
+  folders       Folder[]
+  webhooks      Webhook[]
+  retargetingPixels RetargetingPixel[]
+  
+  // New Relations
+  teamsOwned    Team[]
+  teams         TeamMember[]
+  auditLogs     AuditLog[]
+  domains       CustomDomain[]
+}
+
+// ============================================
+// URL SHORTENING - CORE
+// ============================================
+
+model Url {
+  id              String    @id @default(cuid())
+  title           String
+  originalUrl     String
+  shortUrl        String    @unique
+  customUrl       String?   @unique
+  qrCode          String?
+
+  // Advanced Features
+  password        String?           // Encrypted password for protection
+  isActive        Boolean           @default(true)
+  clickLimit      Int?              // Max clicks allowed
+  currentClicks   Int               @default(0)
+  activatesAt     DateTime?         // Link scheduling - start
+  deactivatesAt   DateTime?         // Link scheduling - end
+  isCloaked       Boolean           @default(false)
+
+  // UTM Parameters
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+  utmTerm         String?
+  utmContent      String?
+
+  // Metadata
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  expiresAt       DateTime?
+
+  // Relations
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folderId        String?
+  folder          Folder?           @relation(fields: [folderId], references: [id])
+  
+  // Team Support
+  teamId          String?
+  team            Team?             @relation(fields: [teamId], references: [id])
+  
+  // Custom Domain Support
+  customDomainId  String?
+  customDomain    CustomDomain?     @relation(fields: [customDomainId], references: [id])
+  
+  // Dynamic Rotator
+  isRotator       Boolean           @default(false)
+  rotatorConfig   Json?             // { type: 'sequential' | 'weighted' | 'random', items: [{url: '...', weight: 50}] }
+
+  clicks          Click[]
+  targetingRules  TargetingRule[]
+  tags            TagOnUrl[]
+  pixels          PixelOnUrl[]
+  splitDestinations SplitDestination[]
+  healthChecks    LinkHealthCheck[]
+
+  @@index([userId])
+  @@index([teamId])
+  @@index([shortUrl])
+  @@index([customUrl])
+  @@index([customDomainId])
+}
+
+// ============================================
+// CLICK ANALYTICS
+// ============================================
+
+model Click {
+  id          String   @id @default(cuid())
+  urlId       String
+  url         Url      @relation(fields: [urlId], references: [id], onDelete: Cascade)
+
+  // Location Data
+  city        String?
+  country     String?
+  countryCode String?
+  region      String?
+  latitude    Float?
+  longitude   Float?
+
+  // Device & Browser Data
+  device      String?   // mobile, desktop, tablet
+  browser     String?   // Chrome, Firefox, Safari
+  browserVersion String?
+  os          String?   // Windows, macOS, iOS, Android
+  osVersion   String?
+
+  // Traffic Source
+  referrer    String?
+  referrerDomain String?
+
+  // Privacy-safe tracking
+  ipHash      String?   // Hashed IP for unique visitor detection
+  userAgent   String?
+  
+  isBot       Boolean   @default(false)
+
+  createdAt   DateTime  @default(now())
+
+  @@index([urlId])
+  @@index([createdAt])
+  @@index([country])
+}
+
+// ============================================
+// GEO & DEVICE TARGETING
+// ============================================
+
+model TargetingRule {
+  id          String   @id @default(cuid())
+  urlId       String
+  url         Url      @relation(fields: [urlId], references: [id], onDelete: Cascade)
+
+  type        String   // 'geo', 'device', 'browser', 'os', 'language'
+  condition   String   // 'country:IN', 'device:mobile', 'browser:chrome'
+  operator    String   @default("equals") // 'equals', 'not_equals', 'contains'
+  targetUrl   String   // Where to redirect when rule matches
+  priority    Int      @default(0)
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+
+  @@index([urlId])
+}
+
+// ============================================
+// ORGANIZATION - FOLDERS & TAGS
+// ============================================
+
+model Folder {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  color       String?  // Hex color for UI
+  icon        String?  // Icon name
+
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  teamId      String?
+  team        Team?    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  urls        Url[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@index([teamId])
+}
+
+model Tag {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  color     String?    // Hex color
+  urls      TagOnUrl[]
+
+  createdAt DateTime   @default(now())
+}
+
+model TagOnUrl {
+  urlId     String
+  tagId     String
+  url       Url        @relation(fields: [urlId], references: [id], onDelete: Cascade)
+  tag       Tag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  assignedAt DateTime  @default(now())
+
+  @@id([urlId, tagId])
+}
+
+// ============================================
+// LINK TREE
+// ============================================
+
+model LinkTree {
+  id              String    @id @default(cuid())
+  title           String
+  description     String?
+  slug            String    @unique
+  theme           String?   @default("default")
+  customCss       String?
+  avatarUrl       String?
+  backgroundColor String?
+  textColor       String?
+  buttonStyle     String?   @default("rounded")
+
+  isPublic        Boolean   @default(true)
+  viewCount       Int       @default(0)
+
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  links           LinkTreeItem[]
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([slug])
+}
+
+model LinkTreeItem {
+  id          String    @id @default(cuid())
+  linkTreeId  String
+  linkTree    LinkTree  @relation(fields: [linkTreeId], references: [id], onDelete: Cascade)
+
+  title       String
+  url         String
+  icon        String?
+  thumbnail   String?
+  isActive    Boolean   @default(true)
+  order       Int       @default(0)
+  clicks      Int       @default(0)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([linkTreeId])
+}
+
+// ============================================
+// COLLABORATION ROOMS
+// ============================================
+
+model Room {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  description String?
+  isPublic    Boolean      @default(false)
+
+  ownerId     String
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  members     RoomMember[]
+  sharedUrls  RoomUrl[]
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([ownerId])
+  @@index([slug])
+}
+
+model RoomMember {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role      String   @default("member") // 'admin', 'member', 'viewer'
+  joinedAt  DateTime @default(now())
+
+  @@unique([roomId, userId])
+  @@index([roomId])
+  @@index([userId])
+}
+
+model RoomUrl {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  title     String
+  url       String
+  shortUrl  String?
+  addedBy   String   // User ID who added
+
+  createdAt DateTime @default(now())
+
+  @@index([roomId])
+}
+
+// ============================================
+// API & WEBHOOKS
+// ============================================
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  key         String    @unique
+  name        String
+  description String?
+
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  permissions String[]  @default(["read", "write"]) // Granular permissions
+  rateLimit   Int       @default(1000) // Requests per hour
+
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+  @@index([key])
+}
+
+model Webhook {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  secret      String   // For signature verification
+  events      String[] // ['click', 'link_created', 'link_expired', 'link_deleted']
+  isActive    Boolean  @default(true)
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  lastTriggeredAt DateTime?
+  failureCount    Int       @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // 'room_invite', 'link_expired', 'click_milestone'
+  title       String
+  message     String
+  data        Json?    // Additional data
+  isRead      Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+// ============================================
+// FREE URL SERVICE (no auth required)
+// ============================================
+
+model FreeService {
+  id          String    @id @default(cuid())
+  originalUrl String
+  shortCode   String    @unique
+  clause      String?   @unique
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime?
+  
+  @@index([shortCode])
+  @@index([clause])
+}
+
+// ============================================
+// RETARGETING PIXELS
+// ============================================
+
+model RetargetingPixel {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // 'facebook', 'google', 'tiktok', 'linkedin', 'twitter', 'custom'
+  pixelId     String   // The actual pixel/tag ID
+  isActive    Boolean  @default(true)
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  urls        PixelOnUrl[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model PixelOnUrl {
+  urlId     String
+  pixelId   String
+  url       Url              @relation(fields: [urlId], references: [id], onDelete: Cascade)
+  pixel     RetargetingPixel @relation(fields: [pixelId], references: [id], onDelete: Cascade)
+
+  @@id([urlId, pixelId])
+}
+
+// ============================================
+// A/B SPLIT TESTING
+// ============================================
+
+model SplitDestination {
+  id          String   @id @default(cuid())
+  urlId       String
+  url         Url      @relation(fields: [urlId], references: [id], onDelete: Cascade)
+
+  name        String?  // e.g., "Variant A", "Variant B"
+  targetUrl   String   // The destination URL for this variant
+  weight      Int      @default(50) // Percentage weight (0-100)
+  clicks      Int      @default(0)  // Track clicks per variant
+
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@index([urlId])
+}
+
+// ============================================
+// TEAMS & ORGANIZATION
+// ============================================
+
+model Team {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  avatarUrl   String?
+  
+  ownerId     String
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  members     TeamMember[]
+  urls        Url[]
+  folders     Folder[]
+  domains     CustomDomain[]
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([ownerId])
+  @@index([slug])
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  role      String   @default("member") // 'owner', 'admin', 'member', 'viewer'
+  joinedAt  DateTime @default(now())
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+}
+
+// ============================================
+// CUSTOM DOMAINS
+// ============================================
+
+model CustomDomain {
+  id          String   @id @default(cuid())
+  domain      String   @unique
+  verified    Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  
+  // Verification DNS
+  verificationCode String @default(cuid())
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  teamId      String?
+  team        Team?    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  urls        Url[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([teamId])
+}
+
+// ============================================
+// AUDIT LOGS
+// ============================================
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  teamId      String?  
+  // No strict relation to Team to avoid cycle delete issues, or keep loose
+  
+  action      String   // 'create_link', 'delete_link', 'param_change'
+  entityId    String   // ID of the object modified
+  entityType  String   // 'Url', 'Team', 'User'
+  details     Json?    // { before: ..., after: ... }
+  
+  ipAddress   String?
+  userAgent   String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([teamId])
+  @@index([createdAt])
+}
+
+// ============================================
+// BROKEN LINK MONITORING
+// ============================================
+
+model LinkHealthCheck {
+  id           String   @id @default(cuid())
+  urlId        String
+  url          Url      @relation(fields: [urlId], references: [id], onDelete: Cascade)
+
+  statusCode   Int?
+  isHealthy    Boolean  @default(true)
+  responseTime Int?     // Response time in ms
+  errorMessage String?
+
+  checkedAt    DateTime @default(now())
+
+  @@index([urlId])
+  @@index([checkedAt])
+}
+

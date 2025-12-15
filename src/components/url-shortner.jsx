@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 import {
   AlertCircle,
   Link as LinkIcon,
@@ -7,30 +6,19 @@ import {
   QrCode,
   Clock,
   Star,
-  UserPlus,
+  ArrowRight,
+  Check,
 } from "lucide-react";
 import QRCode from "qrcode.react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 const generateUniqueCode = () => {
-  // const sanitizedClause = clause
-  //   .toLowerCase()
-  //   .replace(/[^a-z0-9]/g, "")
-  //   .slice(0, 10);
-
-  // const randomString = Math.random().toString(36).substring(2, 7);
   const shortCode = Math.random().toString(36).substring(2, 7);
-
-  return {
-    // clause: clause
-    //   ? `${sanitizedClause}-${randomString}`
-    //   : randomString,
-    shortCode: shortCode,
-  };
+  return { shortCode };
 };
 
 const UrlShortener = () => {
@@ -41,6 +29,7 @@ const UrlShortener = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
 
   const handleShorten = async () => {
@@ -48,6 +37,7 @@ const UrlShortener = () => {
     setShortUrl("");
     setLoading(true);
     setShowQR(false);
+    setCopied(false);
 
     if (!originalUrl) {
       setError("Please provide a valid URL");
@@ -57,229 +47,177 @@ const UrlShortener = () => {
 
     try {
       new URL(originalUrl);
-      const { shortCode: generatedShortCode } = generateUniqueCode(clause);
+      const { shortCode: generatedShortCode } = generateUniqueCode();
 
-      const urlEntry = {
-        original_url: originalUrl,
-        short_code: generatedShortCode,
-        clause: clause || null,
-        created_at: new Date().toISOString(),
-        expires_at: new Date(
-          Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 days expiration
-        ).toISOString(),
-      };
+      const response = await fetch(`${API_URL}/api/free-urls`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          originalUrl,
+          shortCode: generatedShortCode,
+          clause: clause || null,
+        }),
+      });
 
-      const { error } = await supabase
-        .from("free_services")
-        .insert(urlEntry)
-        .select();
+      const data = await response.json();
 
-      if (error) {
-        if (error.code === "23505") {
-          setError(
-            "This custom clause or short code is already in use. Please try again."
-          );
+      if (!response.ok) {
+        if (response.status === 409) {
+          setError(data.error || "This custom clause is already in use. Try another one.");
           setLoading(false);
           return;
         }
-        throw error;
+        throw new Error(data.error || 'Failed to shorten URL');
       }
 
-      const clauseUrl = `${window.location.origin}/${clause}`;
+      const clauseUrl = clause ? `${window.location.origin}/${clause}` : null;
       const shortCodeUrl = `${window.location.origin}/${generatedShortCode}`;
 
-      setShortUrl(clauseUrl);
+      setShortUrl(clauseUrl || shortCodeUrl);
       setShortCode(shortCodeUrl);
     } catch (err) {
-      console.error("Full Supabase Error:", err);
-      setError(`Error: ${err.message || "Failed to shorten URL"}`);
+      if (err.message.includes("Invalid URL")) {
+        setError("Invalid URL format");
+      } else {
+        setError(err.message || "Something went wrong. Please try again.");
+      }
+      console.error("Error shortening URL:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCopyUrl = (url) => {
-    navigator.clipboard
-      .writeText(url)
-      .then(() => alert("Copied to clipboard!"))
-      .catch((err) => console.error("Copy failed", err));
-  };
-
-  const handleToggleQR = () => {
-    setShowQR(!showQR);
+  const handleCopy = async (url) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
   };
 
   return (
-    <div className="flex flex-col gap-2 lg:flex-row max-w-4xl mx-auto bg-gray-900 lg:border rounded-xl shadow-lg lg:overflow-hidden backdrop-blur-md">
-      <div className="lg:w-3/5 p-6 space-y-4 border rounded-xl lg:border-none lg:rounded-none">
-        <h2 className="text-2xl font-bold text-center text-gray-100">
-          URL Shortener
-        </h2>
-
-        <div className="space-y-5">
-          <input
-            type="url"
-            value={originalUrl}
-            onChange={(e) => setOriginalUrl(e.target.value)}
-            placeholder="Enter your long URL"
-            required
-            className="w-full px-3 py-2 bg-gray-900 text-gray-100 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-
-          <input
-            type="text"
-            value={clause}
-            onChange={(e) => setClause(e.target.value)}
-            placeholder="Optional custom short link clause"
-            className="w-full px-3 py-2 border bg-gray-900 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-
-          <button
+    <div className="w-full max-w-2xl mx-auto">
+      {/* Main Input Card */}
+      <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1">
+            <Input
+              type="text"
+              placeholder="Paste your long URL here..."
+              value={originalUrl}
+              onChange={(e) => setOriginalUrl(e.target.value)}
+              className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 h-12"
+            />
+          </div>
+          <Button
             onClick={handleShorten}
-            disabled={loading}
-            className={`w-full text-white py-2 rounded-md transition flex items-center justify-center ${
-              loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600"
-            }`}
+            disabled={loading || !originalUrl}
+            className="bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold h-12 px-6 disabled:opacity-50"
           >
             {loading ? (
-              "Shortening..."
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full animate-spin" />
+                Shortening...
+              </span>
             ) : (
-              <>
-                <LinkIcon className="mr-2" /> Shorten URL
-              </>
+              <span className="flex items-center gap-2">
+                <LinkIcon className="w-4 h-4" />
+                Shorten
+              </span>
             )}
-          </button>
+          </Button>
         </div>
 
+        {/* Custom Clause */}
+        <div className="mt-4 flex items-center gap-2">
+          <span className="text-zinc-500 text-sm">{window.location.origin}/</span>
+          <Input
+            type="text"
+            placeholder="custom-alias (optional)"
+            value={clause}
+            onChange={(e) => setClause(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+            className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 h-9 max-w-[200px] text-sm"
+          />
+        </div>
+
+        {/* Error */}
         {error && (
-          <div className="flex items-center text-red-500 bg-red-50 p-3 rounded-md">
-            <AlertCircle className="mr-2" />
-            <p>{error}</p>
-          </div>
-        )}
-
-        {shortUrl && (
-          <div className="w-full bg-green-50 p-3 rounded-md space-y-2">
-            <div className="w-full flex flex-col space-y-2">
-              {clause !== "" ? (
-                <div className="w-full flex items-center">
-                  <div className="text-green-700 flex w-full items-center">
-                    <h1 className="text-sm">Short URL:</h1>
-                    <a
-                      href={shortUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-2 text-sm text-blue-600 hover:underline"
-                    >
-                      {shortUrl}
-                    </a>
-                  </div>
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={() => handleCopyUrl(shortUrl)}
-                      className="text-green-700 hover:text-green-900"
-                      title="Copy Clause URL"
-                    >
-                      <Copy size={20} />
-                    </button>
-                    <button
-                      onClick={handleToggleQR}
-                      className="text-green-700 hover:text-green-900"
-                      title="Show QR Code"
-                    >
-                      <QrCode size={20} />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="w-full flex flex-col lg:flex-row gap-2 lg:gap-0 items-center">
-                  <div className="text-green-700 flex w-full">
-                    <h1 className="text-sm">Short URL:</h1>
-                    <a
-                      href={shortCode}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-2 text-sm text-blue-600 hover:underline"
-                    >
-                      {shortCode}
-                    </a>
-                  </div>
-                  <div className="flex w-full lg:w-auto justify-end space-x-2">
-                    <button
-                      onClick={() => handleCopyUrl(shortCode)}
-                      className="text-green-700 hover:text-green-900"
-                      title="Copy Short Code URL"
-                    >
-                      <Copy size={20} />
-                    </button>
-                    <button
-                      onClick={handleToggleQR}
-                      className="text-green-700 hover:text-green-900"
-                      title="Show QR Code"
-                    >
-                      <QrCode size={20} />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {showQR && (
-                <div className="flex justify-center mt-2">
-                  <QRCode value={clause !== "" ? shortUrl : shortCode} />
-                </div>
-              )}
-            </div>
+          <div className="mt-4 flex items-center gap-2 text-red-400 text-sm">
+            <AlertCircle className="w-4 h-4" />
+            {error}
           </div>
         )}
       </div>
 
-      <div className="border rounded-xl lg:rounded-none lg:w-1/2 bg-gray-900 p-6 space-y-4 lg:border-l">
-        <div className="mx-auto">
-          <h3 className="text-xl font-bold mb-4">Free Service Details</h3>
-
-          <div className="bg-white backdrop-blur-md p-4 rounded-lg shadow-md space-y-3">
-            <div className="flex space-x-3">
-              <Clock className="text-blue-600" />
-              <div className="flex flex-col items-start">
-                <p className="font-semibold text-gray-700">Link Expiry</p>
-                <p className="text-sm text-gray-500">7 days from creation</p>
-              </div>
+      {/* Success Result */}
+      {shortUrl && (
+        <div className="mt-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex-1 min-w-0">
+              <p className="text-emerald-400 text-sm font-medium mb-1">Your shortened link:</p>
+              <p className="text-white font-mono text-lg truncate">{shortUrl}</p>
             </div>
-
-            <div className="flex space-x-3">
-              <Star className="text-blue-600" />
-              <div className="flex flex-col items-start">
-                <p className="font-semibold text-gray-700">Free Tier Limits</p>
-                <p className="text-sm text-gray-500">10 links/month</p>
-              </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleCopy(shortUrl)}
+                className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowQR(!showQR)}
+                className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+              >
+                <QrCode className="w-4 h-4" />
+              </Button>
             </div>
           </div>
 
-          <div className="mt-6">
-            <h4 className="text-lg font-semibold mb-3">Unlock More Features</h4>
-
-            <div className="space-y-3">
-              <p className="text-sm text-gray-300">
-                Create an account to access:
-              </p>
-              <ul className="text-sm text-gray-400 space-y-1 text-left pl-4 list-disc">
-                <li>Unlimited link creations</li>
-                <li>Permanent link storage</li>
-                <li>Advanced analytics</li>
-                <li>Custom domain support</li>
-              </ul>
-
-              <button
-                className="w-full mt-4 bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition flex items-center justify-center"
-                onClick={() => navigate("/auth")}
-              >
-                <UserPlus className="mr-2" /> Create Account
-              </button>
+          {showQR && (
+            <div className="mt-4 flex justify-center bg-white p-4 rounded-lg w-fit mx-auto">
+              <QRCode value={shortUrl} size={150} />
             </div>
+          )}
+
+          <div className="mt-4 flex items-center gap-4 text-zinc-400 text-sm">
+            <span className="flex items-center gap-1">
+              <Clock className="w-4 h-4" />
+              Expires in 7 days
+            </span>
           </div>
         </div>
+      )}
+
+      {/* Features */}
+      <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { icon: Star, label: "Free forever" },
+          { icon: Clock, label: "7-day links" },
+          { icon: QrCode, label: "QR codes" },
+          { icon: LinkIcon, label: "Custom aliases" },
+        ].map(({ icon: Icon, label }) => (
+          <div key={label} className="flex items-center gap-2 text-zinc-400 text-sm">
+            <Icon className="w-4 h-4 text-cyan-500" />
+            {label}
+          </div>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <div className="mt-6 text-center">
+        <button
+          onClick={() => navigate("/auth")}
+          className="text-cyan-400 hover:text-cyan-300 text-sm font-medium inline-flex items-center gap-1 transition-colors"
+        >
+          Sign up for advanced analytics & permanent links
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );

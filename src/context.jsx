@@ -1,22 +1,59 @@
 /* eslint-disable react/prop-types */
 
-import {createContext, useContext, useEffect} from "react";
-import {getCurrentUser} from "./db/apiAuth";
-import useFetch from "./hooks/use-fetch";
+import { createContext, useContext, useEffect, useState } from "react";
+import { authApi } from "./api/client";
 
 const UrlContext = createContext();
 
-const UrlProvider = ({children}) => {
-  const {data: user, loading, fn: fetchUser} = useFetch(getCurrentUser);
+const UrlProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const isAuthenticated = user?.role === "authenticated";
+  const fetchUser = async () => {
+    try {
+      setLoading(true);
+      const userData = await authApi.getCurrentUser();
+      setUser(userData);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const login = async (email, password) => {
+    const result = await authApi.login({ email, password });
+    setUser(result.user);
+    return result;
+  };
+
+  const register = async (name, email, password) => {
+    const result = await authApi.register({ name, email, password });
+    setUser(result.user);
+    return result;
+  };
+
+  const logout = async () => {
+    await authApi.logout();
+    setUser(null);
+  };
+
+  const isAuthenticated = !!user;
 
   useEffect(() => {
     fetchUser();
   }, []);
 
   return (
-    <UrlContext.Provider value={{user, fetchUser, loading, isAuthenticated}}>
+    <UrlContext.Provider value={{
+      user,
+      fetchUser,
+      loading,
+      isAuthenticated,
+      login,
+      register,
+      logout
+    }}>
       {children}
     </UrlContext.Provider>
   );

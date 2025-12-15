@@ -1,10 +1,10 @@
 import { Helmet } from 'react-helmet-async';
 import PropTypes from 'prop-types';
 
-export const SEOMetadata = ({ 
-  title, 
-  description, 
-  canonical, 
+export const SEOMetadata = ({
+  title,
+  description,
+  canonical,
   ogImage,
   keywords,
   author = "Your Name",
@@ -12,7 +12,7 @@ export const SEOMetadata = ({
 }) => {
   const siteName = "TrimLink - URL Shortener";
   const defaultDescription = "Create short, customized URLs and track their performance with detailed analytics.";
-  
+
   return (
     <Helmet>
       {/* Basic metadata */}
@@ -20,10 +20,10 @@ export const SEOMetadata = ({
       <meta name="description" content={description || defaultDescription} />
       <meta name="keywords" content={keywords} />
       <meta name="author" content={author} />
-      
+
       {/* Canonical URL */}
       <link rel="canonical" href={canonical} />
-      
+
       {/* Open Graph metadata */}
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content={siteName} />
@@ -31,20 +31,20 @@ export const SEOMetadata = ({
       <meta property="og:description" content={description || defaultDescription} />
       <meta property="og:image" content={ogImage} />
       <meta property="og:url" content={canonical} />
-      
+
       {/* Twitter Card metadata */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content={twitterHandle} />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description || defaultDescription} />
       <meta name="twitter:image" content={ogImage} />
-      
+
       {/* Mobile optimization */}
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      
+
       {/* Robots directives */}
       <meta name="robots" content="index, follow" />
-      
+
       {/* Additional SEO optimization */}
       <meta name="format-detection" content="telephone=no" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
@@ -60,10 +60,10 @@ export const SEOSchema = ({ type, data }) => {
       "@type": "WebSite",
       name: "TrimLink",
       description: "Professional URL shortener service with analytics",
-      url: "https://trimlink.netlify.app",
+      url: "https://trimlynk.com",
       potentialAction: {
         "@type": "SearchAction",
-        target: "https://trimlink.netlify.app/search?q={search_term_string}",
+        target: "https://trimlynk.com/search?q={search_term_string}",
         "query-input": "required name=search_term_string"
       }
     },
@@ -71,9 +71,10 @@ export const SEOSchema = ({ type, data }) => {
       "@context": "https://schema.org",
       "@type": "Organization",
       name: "TrimLink",
-      url: "https://trimlink.netlify.app",
-      logo: "https://trimlink.netlify.app/logo.png",
+      url: "https://trimlynk.com",
+      logo: "https://trimlynk.com/images/logo.png",
       sameAs: [
+        "https://trimlink.netlify.app",
         "https://twitter.com/trimlink",
         "https://facebook.com/trimlink",
         "https://linkedin.com/company/trimlink"
@@ -110,15 +111,15 @@ SEOSchema.propTypes = {
 const Dashboard = () => {
   return (
     <>
-      <SEOMetadata 
+      <SEOMetadata
         title="Dashboard"
         description="Manage your shortened URLs and track their performance with detailed analytics."
-        canonical="https://trimlink.netlify.app/dashboard"
+        canonical="https://trimlynk.com/dashboard"
         keywords="url shortener, link management, analytics, dashboard"
-        ogImage="https://trimlink.netlify.app/dashboard-preview.jpg"
+        ogImage="https://trimlynk.com/dashboard-preview.jpg"
       />
       <SEOSchema type="website" />
-      
+
       {/* Rest of your Dashboard component */}
     </>
   );

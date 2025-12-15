@@ -1,6 +1,4 @@
-import {
-  Card,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Link2, BarChart2, QrCode, Layout, Clock, Wand2, Network, HomeIcon } from "lucide-react";
 
 const Features = () => {
@@ -8,107 +6,90 @@ const Features = () => {
     {
       feature: "Instant URL Shortening",
       description: "Convert long URLs into short, easy-to-share links instantly with just a click.",
-      icon: Link2
+      icon: Link2,
+      color: "cyan"
     },
     {
       feature: "Custom Short URLs",
       description: "Create personalized short URLs that are easy to remember and promote.",
-      icon: Wand2
+      icon: Wand2,
+      color: "violet"
     },
     {
       feature: "Link Analytics",
       description: "Track clicks, geographic location, and referrers to optimize your strategy.",
-      icon: BarChart2
+      icon: BarChart2,
+      color: "emerald"
     },
     {
       feature: "QR Code Generation",
       description: "Generate QR codes for your short URLs. Perfect for print media and events.",
-      icon: QrCode
+      icon: QrCode,
+      color: "amber"
     },
     {
       feature: "User-Friendly Dashboard",
       description: "Manage all your shortened URLs in one intuitive dashboard interface.",
-      icon: Layout
+      icon: Layout,
+      color: "cyan"
     },
     {
       feature: "Link Expiration",
       description: "Set expiration dates for your short URLs for temporary promotions.",
-      icon: Clock
+      icon: Clock,
+      color: "rose"
     },
     {
-      feature:"Link Tree",
-      description:"Create a link tree to showcase all your important links in one place.",
-      icon: Network
+      feature: "Link Tree",
+      description: "Create a link tree to showcase all your important links in one place.",
+      icon: Network,
+      color: "violet"
     },
     {
       feature: "Rooms & Invitations",
       description: "Create rooms and invite users to collaborate on projects and share links.",
-      icon: HomeIcon
+      icon: HomeIcon,
+      color: "emerald"
     }
   ];
 
-  return (
-    <div>
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((f, i) => {
-            const Icon = f.icon;
-            return (
-              <div
-                key={i}
-                className="group animate-fade-up"
-                style={{
-                  animationDelay: `${i * 150}ms`,
-                  animationFillMode: 'forwards'
-                }}
-              >
-                <Card className="relative h-full overflow-hidden border-0 bg-gradient-to-br from-gray-900 to-gray-800 transform transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-y-2">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 blur transition-all duration-500" />
-                  
-                  <div className="relative bg-gray-900/95 h-full p-6">
-                    <div className="flex flex-col items-center text-center space-y-4">
-                      <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 transform transition-transform duration-500 hover:rotate-180">
-                        <Icon className="w-8 h-8 text-white" />
-                      </div>
-                      
-                      <h3 className="text-xl font-bold text-white">
-                        {f.feature}
-                      </h3>
-                      
-                      <p className="text-gray-400">
-                        {f.description}
-                      </p>
-                    </div>
-                    
-                    <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
-                    <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500 transform origin-top scale-y-0 group-hover:scale-y-100 transition-transform duration-500 delay-100" />
-                  </div>
-                </Card>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+  const colorClasses = {
+    cyan: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+    violet: "bg-violet-500/10 text-violet-400 border-violet-500/20",
+    emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    amber: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    rose: "bg-rose-500/10 text-rose-400 border-rose-500/20"
+  };
 
-      <style>{`
-        @keyframes fade-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-fade-up {
-          opacity: 0;
-          animation: fade-up 0.5s ease-out;
-        }
-      `}</style>
+  return (
+    <div className="max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {features.map((f, i) => {
+          const Icon = f.icon;
+          return (
+            <div
+              key={i}
+              className="group"
+            >
+              <Card className="h-full bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors p-5">
+                <div className="flex flex-col space-y-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${colorClasses[f.color]}`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+
+                  <h3 className="text-base font-semibold text-white">
+                    {f.feature}
+                  </h3>
+
+                  <p className="text-sm text-zinc-500">
+                    {f.description}
+                  </p>
+                </div>
+              </Card>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

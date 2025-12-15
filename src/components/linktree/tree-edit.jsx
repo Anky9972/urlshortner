@@ -88,7 +88,7 @@ const TreeEdit = () => {
       url: "",
       icon: "default",
       clicks: 0,
-    //   isActive: true,
+      //   isActive: true,
     };
     setTreeData((prev) => ({
       ...prev,
@@ -122,7 +122,7 @@ const TreeEdit = () => {
   const saveData = async () => {
     if (!treeData) return;
     setIsSaving(true);
-  
+
     try {
       // Update entire tree data including profile and links
       const { error } = await supabase
@@ -143,13 +143,13 @@ const TreeEdit = () => {
           views: treeData.views,
         })
         .eq("id", treeId);
-  
+
       if (error) {
         console.error("Tree Update Error:", error);
         toast.error(`Update Failed: ${error.message}`);
         return;
       }
-  
+
       toast.success("Tree updated successfully");
     } catch (error) {
       console.error("Comprehensive Save Error:", error);
@@ -171,7 +171,7 @@ const TreeEdit = () => {
 
   // Render main component
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
       <div className="w-full rounded-2xl overflow-hidden relative">
         {/* Header */}
         <div className="fixed top-16 right-0 left-0 bg-gray-900 px-6 py-3 flex items-center justify-between border-b">

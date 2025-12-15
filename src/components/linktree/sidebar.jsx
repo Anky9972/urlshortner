@@ -72,22 +72,23 @@ const Sidebar = ({
 
   return (
     <motion.div
-      
-      className={`lg:w-80 fixed lg:relative left-0 right-0 ${sidebarOpen?"visible":"hidden"} z-10 bg-gray-900 top h-screen shadow-xl lg:relative lg:rounded-lg border`}
+
+      className={`lg:w-80 fixed lg:relative left-0 right-0 ${sidebarOpen ? "visible" : "hidden"} z-10 bg-zinc-900 top h-screen shadow-xl lg:relative lg:rounded-xl border border-zinc-800`}
     >
-      <span className="p-1 lg:hidden border absolute right-2 top-2 rounded-md" onClick={()=>setSidebarOpen(!sidebarOpen)}>
-        <IoClose/>
+      <span className="p-1.5 lg:hidden border border-zinc-700 absolute right-2 top-2 rounded-lg hover:bg-zinc-800 cursor-pointer text-zinc-400 hover:text-white transition-colors" onClick={() => setSidebarOpen(!sidebarOpen)}>
+        <IoClose />
       </span>
-      <div className="p-6 h-full mt-5 lg:mt-0">
+      <div className="p-5 h-full mt-5 lg:mt-0">
         {/* Tabs */}
-        <div className="flex justify-center w-full gap-6 lg:gap-2 mb-6">
+        <div className="flex justify-center w-full gap-2 mb-6">
           {["links", "appearance", "settings"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-md lg:text-sm ${
-                activeTab === tab ? "bg-gray-900 text-white border" : "bg-gray-950 text-gray-500"
-              }`}
+              className={`px-3 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${activeTab === tab
+                ? "bg-zinc-800 text-white"
+                : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50"
+                }`}
             >
               {tab}
             </button>
@@ -107,28 +108,28 @@ const Sidebar = ({
                   <motion.div
                     key={link.id}
                     layout
-                    className="bg-gray-900 border rounded-xl p-4"
+                    className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <button className="p-1.5 hover:bg-gray-950 border rounded-lg">
-                          <ChevronUp size={16} className="text-gray-600" />
+                      <div className="flex items-center gap-1">
+                        <button className="p-1.5 hover:bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-400 hover:text-white transition-colors">
+                          <ChevronUp size={14} />
                         </button>
-                        <button className="p-1.5 hover:bg-gray-950 border rounded-lg">
-                          <ChevronDown size={16} className="text-gray-600" />
+                        <button className="p-1.5 hover:bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-400 hover:text-white transition-colors">
+                          <ChevronDown size={14} />
                         </button>
                       </div>
                       <button
                         onClick={() =>
                           setLinks(links.filter((l) => l.id !== link.id))
                         }
-                        className="p-1.5 text-red-500 hover:bg-gray-950 border rounded-lg"
+                        className="p-1.5 text-red-400 hover:bg-red-500/10 border border-zinc-600 rounded-lg transition-colors"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       <input
                         type="text"
                         value={link.title}
@@ -137,7 +138,7 @@ const Sidebar = ({
                           newLinks[index].title = e.target.value;
                           setLinks(newLinks);
                         }}
-                        className="w-full px-3 py-2 text-gray-300 text-xs rounded-lg border bg-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 text-white text-sm rounded-lg border border-zinc-700 bg-zinc-800 focus:border-cyan-500/50 focus:outline-none transition-colors"
                         placeholder="Link Title"
                       />
                       <input
@@ -148,7 +149,7 @@ const Sidebar = ({
                           newLinks[index].url = e.target.value;
                           setLinks(newLinks);
                         }}
-                        className="w-full px-3 py-2 text-gray-300 text-xs rounded-lg border bg-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 text-white text-sm rounded-lg border border-zinc-700 bg-zinc-800 focus:border-cyan-500/50 focus:outline-none transition-colors"
                         placeholder="URL"
                       />
 
@@ -159,7 +160,7 @@ const Sidebar = ({
                           newLinks[index].icon = e.target.value;
                           setLinks(newLinks);
                         }}
-                        className="w-full px-3 py-2 text-gray-300 text-xs rounded-lg border bg-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 text-white text-sm rounded-lg border border-zinc-700 bg-zinc-800 focus:border-cyan-500/50 focus:outline-none transition-colors"
                       >
                         {Object.keys(socialIcons).map((icon) => (
                           <option key={icon} value={icon}>
@@ -173,32 +174,31 @@ const Sidebar = ({
 
                 <button
                   onClick={addLink}
-                  className="w-full py-3 border-2 border-dashed border-gray-600 rounded-xl text-gray-300 hover:border-gray-400 hover:text-gray-600 flex items-center justify-center space-x-2"
+                  className="w-full py-3 border-2 border-dashed border-zinc-700 rounded-xl text-zinc-400 hover:border-cyan-500/50 hover:text-cyan-400 flex items-center justify-center gap-2 transition-colors"
                 >
-                  <PlusCircle size={20} />
+                  <PlusCircle size={18} />
                   <span>Add New Link</span>
                 </button>
               </div>
             )}
 
             {activeTab === "appearance" && (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-bold text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">
                     Theme
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2">
                     {Object.keys(defaultThemes).map((theme) => (
                       <button
                         key={theme}
                         onClick={() => setProfile({ ...profile, theme })}
-                        className={`p-4 rounded-xl border ${
-                          profile.theme === theme
-                            ? "border-blue-500 ring-2 ring-blue-500 ring-opacity-50"
-                            : "border hover:border-gray-700"
-                        }`}
+                        className={`p-3 rounded-lg border transition-colors ${profile.theme === theme
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            : "border-zinc-700 hover:border-zinc-600 text-zinc-400"
+                          }`}
                       >
-                        <div className="text-sm font-medium capitalize text-gray-400 ">
+                        <div className="text-sm font-medium capitalize">
                           {theme}
                         </div>
                       </button>
@@ -207,12 +207,12 @@ const Sidebar = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">
                     Custom Colors
                   </label>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm text-gray-400">
+                      <label className="text-xs text-zinc-500">
                         Background
                       </label>
                       <input
@@ -227,11 +227,11 @@ const Sidebar = ({
                             },
                           })
                         }
-                        className="w-full h-10 rounded-lg"
+                        className="w-full h-10 rounded-lg bg-zinc-800 border border-zinc-700 cursor-pointer"
                       />
                     </div>
                     <div>
-                      <label className="text-sm text-gray-400">
+                      <label className="text-xs text-zinc-500">
                         Button Style
                       </label>
                       <input
@@ -246,7 +246,7 @@ const Sidebar = ({
                             },
                           })
                         }
-                        className="w-full h-10 rounded-lg"
+                        className="w-full h-10 rounded-lg bg-zinc-800 border border-zinc-700 cursor-pointer"
                       />
                     </div>
                   </div>
@@ -257,7 +257,7 @@ const Sidebar = ({
             {activeTab === "settings" && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">
                     Profile Name
                   </label>
                   <input
@@ -266,21 +266,22 @@ const Sidebar = ({
                     onChange={(e) =>
                       setProfile({ ...profile, name: e.target.value })
                     }
-                    className="w-full px-3 py-2 text-gray-300 text-xs rounded-lg border bg-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 text-white text-sm rounded-lg border border-zinc-700 bg-zinc-800 focus:border-cyan-500/50 focus:outline-none transition-colors"
                   />
-                </div><div>
-                  <label className="block text-sm font-bold text-gray-300 mb-2">
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">
                     LinkTree Title
                   </label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full px-3 py-2 text-gray-300 text-xs rounded-lg border bg-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 text-white text-sm rounded-lg border border-zinc-700 bg-zinc-800 focus:border-cyan-500/50 focus:outline-none transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">
                     Bio
                   </label>
                   <textarea
@@ -288,7 +289,7 @@ const Sidebar = ({
                     onChange={(e) =>
                       setProfile({ ...profile, bio: e.target.value })
                     }
-                    className="w-full px-3 py-2 text-gray-300 text-xs rounded-lg border bg-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 text-white text-sm rounded-lg border border-zinc-700 bg-zinc-800 focus:border-cyan-500/50 focus:outline-none transition-colors resize-none"
                     rows={3}
                   />
                 </div>

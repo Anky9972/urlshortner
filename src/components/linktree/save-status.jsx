@@ -11,15 +11,15 @@ const SaveStatus = ({
   setLinkTreeId,
   isCreate,
 }) => (
-  <div className="w-full absolute bottom-0 p-6">
+  <div className="w-full absolute bottom-0 p-5 bg-zinc-900 border-t border-zinc-800">
     {/* {isCreate && "Create your LinkTree and share it with the world!"} */}
     {saveError && (
-      <Alert variant="destructive" className="mb-2">
+      <Alert variant="destructive" className="mb-2 bg-red-500/10 border-red-500/20 text-red-400">
         <AlertDescription>{saveError}</AlertDescription>
       </Alert>
     )}
     {saveSuccess && (
-      <Alert className="mb-2 bg-green-50 text-green-700 border-green-200">
+      <Alert className="mb-2 bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
         <AlertDescription>Changes saved successfully!</AlertDescription>
       </Alert>
     )}
@@ -27,7 +27,7 @@ const SaveStatus = ({
       {isCreate ? (
         <button
           onClick={saveLinkTree}
-          className="w-full gap-2 p-2 bg-gray-900 border text-gray-300 flex justify-center items-center rounded-md text-sm"
+          className="w-full gap-2 p-2.5 bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-medium flex justify-center items-center rounded-lg text-sm transition-colors"
           disabled={isSaving}
         >
           <Save size={16} />
@@ -36,7 +36,7 @@ const SaveStatus = ({
       ) : (
         <button
           onClick={saveLinkTree}
-          className="w-full gap-2 p-2 bg-gray-900 border text-gray-300 flex justify-center items-center rounded-md text-sm"
+          className="w-full gap-2 p-2.5 bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-medium flex justify-center items-center rounded-lg text-sm transition-colors"
           disabled={isSaving}
         >
           <Save size={16} />

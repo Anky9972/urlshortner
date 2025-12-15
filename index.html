@@ -3,8 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <!-- Adding base URL -->
-    <!-- <base href="https://trimlink.netlify.app/" /> -->
-    <!-- <base href="/" /> -->
+    <base href="/" />
 
     <!-- Primary Meta Tags -->
     <title>TrimLink - Shorten Your Links</title>
@@ -22,8 +21,8 @@
     <!-- Favicon -->
     <link
       rel="icon"
-      type="image/svg+xml"
-      href="https://res.cloudinary.com/dj0eulqd8/image/upload/v1719838363/17198382942675tr4l2er_w26wki.jpg"
+      type="image/png"
+      href="/images/logo.png"
     />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
@@ -40,7 +39,7 @@
     />
     <meta property="og:url" content="https://trimlink.netlify.app/" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/images/thumbnail.png" />
+    <meta property="og:image" content="/images/logo.png" />
     <meta property="og:site_name" content="TrimLink" />
     <meta property="og:locale" content="en_US" />
 
@@ -51,7 +50,7 @@
       name="twitter:description"
       content="Shorten your long URLs with our URL shortener service. Create custom short links and track their performance."
     />
-    <meta name="twitter:image" content="/images/thumbnail.png" />
+    <meta name="twitter:image" content="/images/logo.png" />
 
     <!-- Preconnect to required origins -->
     <link rel="preconnect" href="https://www.googletagmanager.com" />
@@ -69,9 +68,13 @@
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "TrimLink",
-        "url": "https://trimlink.netlify.app/",
+        "url": [
+          "https://trimlink.netlify.app/",
+          "https://trimlynk.com/"
+        ],
         "description": "Shorten your long URLs with our URL shortener service. Create custom short links and track their performance.",
         "applicationCategory": "UtilityApplication",
+        "image": "https://trimlynk.com/images/logo.png",
         "offers": {
           "@type": "Offer",
           "price": "0",
@@ -79,7 +82,7 @@
         },
         "potentialAction": {
           "@type": "SearchAction",
-          "target": "https://trimlink.netlify.app/?q={search_term_string}",
+          "target": "https://trimlynk.com/?q={search_term_string}",
           "query-input": "required name=search_term_string"
         }
       }

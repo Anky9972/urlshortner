@@ -20,9 +20,11 @@ import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { CardHeader, CardTitle } from "../ui/card";
+import { UrlState } from "@/context";
 
 const RoomDashboard = () => {
   const navigate = useNavigate();
+  const { user } = UrlState();
   const [rooms, setRooms] = useState([]);
   const [showNewRoomModal, setShowNewRoomModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -32,7 +34,6 @@ const RoomDashboard = () => {
   const [isLoadingState, setIsLoadingState] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [filteredRooms, setFilteredRooms] = useState([]);
-  const [userId, setUserId] = useState(null);
   const [roomData, setRoomData] = useState({
     title: "",
     slug: "",
@@ -59,8 +60,12 @@ const RoomDashboard = () => {
   });
 
   useEffect(() => {
-    fetchRooms();
-  }, []);
+    if (user?.id) {
+      fetchRooms();
+    } else {
+      setIsLoading(false);
+    }
+  }, [user?.id]);
   useEffect(() => {
     applyFilters();
   }, [rooms, filterOptions]);
@@ -116,24 +121,21 @@ const RoomDashboard = () => {
   };
 
   const fetchRooms = async () => {
+    if (!user?.id) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session?.user?.id) {
-        throw new Error("No authenticated user");
-      }
-
-      setUserId(session.user.id);
       const { data, error } = await supabase
         .from("rooms")
         .select("*")
-        .eq("user_id", session.user.id)
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setRooms(data);
+      setRooms(data || []);
     } catch (error) {
       console.error("Error fetching rooms:", error);
     } finally {
@@ -240,7 +242,7 @@ const RoomDashboard = () => {
               name: roomData.title,
             },
             links: [],
-            user_id: userId,
+            user_id: user?.id,
           },
         ])
         .select()
@@ -386,421 +388,424 @@ const RoomDashboard = () => {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">Rooms</div>
-            <Button size="sm" onClick={() => setShowNewRoomModal(true)}>
-              Create Room
+    <div className="min-h-screen bg-zinc-950 p-6">
+      <div className="max-w-6xl mx-auto">
+        <Card className="bg-zinc-900 border-zinc-800">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-white">Rooms</div>
+              <Button size="sm" onClick={() => setShowNewRoomModal(true)} className="bg-cyan-500 hover:bg-cyan-400 text-zinc-900">
+                Create Room
+              </Button>
+            </CardTitle>
+          </CardHeader>
+        </Card>
+        <div className="flex items-center gap-5">
+
+          <div className="flex items-center mt-5 mb-5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilterModal(true)}
+              className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+            >
+              <Filter size={16} className="mr-2" /> Filters
             </Button>
-          </CardTitle>
-        </CardHeader>
-      </Card>
-      <div className="flex items-center gap-5">
+          </div>
+          <div className="flex items-center mt-5 mb-5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/joined-rooms")}
+              className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+            >
+              <HousePlus size={16} className="mr-2" /> Joined Rooms
+            </Button>
+          </div>
+        </div>
 
-      <div className="flex items-center mt-5 mb-5">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowFilterModal(true)}
-        >
-          <Filter size={16} className="mr-2" /> Filters
-        </Button>
-      </div>
-      <div className="flex items-center mt-5 mb-5">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate("/joined-rooms")}
-        >
-          <HousePlus size={16} className="mr-2" /> Joined Rooms
-        </Button>
-      </div>
-      </div>
+        {
+          // No Rooms
+          rooms.length === 0 && (
+            <div className="text-center py-8 w-full h-full">
+              <p className="text-zinc-500">
+                You haven&apos;t created any rooms yet. Click the button above to
+                get started.
+              </p>
+            </div>
+          )
+        }
+        {showFilterModal && (
+          <div className="fixed inset-0 backdrop-blur-sm bg-black/60 flex items-center justify-center z-50">
+            <div className="rounded-xl p-6 w-full max-w-md bg-zinc-900 border border-zinc-800">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-white">Filter Rooms</h2>
+                <button
+                  onClick={() => setShowFilterModal(false)}
+                  className="p-1 hover:bg-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
 
-      {
-        // No Rooms
-        rooms.length === 0 && (
+              <div className="space-y-4">
+                {/* Status Filter */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Status</label>
+                  <select
+                    value={filterOptions.status}
+                    onChange={(e) =>
+                      setFilterOptions((prev) => ({
+                        ...prev,
+                        status: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-zinc-800 text-white placeholder:text-zinc-500"
+                  >
+                    <option value="all">All Rooms</option>
+                    <option value="active">Active Rooms</option>
+                    <option value="archived">Archived Rooms</option>
+                  </select>
+                </div>
+
+                {/* Links Filter */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Number of Links
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="Min Links"
+                      value={filterOptions.minLinks}
+                      onChange={(e) =>
+                        setFilterOptions((prev) => ({
+                          ...prev,
+                          minLinks: Number(e.target.value),
+                        }))
+                      }
+                      className="w-1/2 px-3 py-2 border rounded-lg bg-gray-900"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max Links"
+                      value={filterOptions.maxLinks}
+                      onChange={(e) =>
+                        setFilterOptions((prev) => ({
+                          ...prev,
+                          maxLinks: Number(e.target.value),
+                        }))
+                      }
+                      className="w-1/2 px-3 py-2 border rounded-lg bg-gray-900"
+                    />
+                  </div>
+                </div>
+
+                {/* Views Filter */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Number of Views
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="Min Views"
+                      value={filterOptions.minViews}
+                      onChange={(e) =>
+                        setFilterOptions((prev) => ({
+                          ...prev,
+                          minViews: Number(e.target.value),
+                        }))
+                      }
+                      className="w-1/2 px-3 py-2 border rounded-lg bg-gray-900"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max Views"
+                      value={filterOptions.maxViews}
+                      onChange={(e) =>
+                        setFilterOptions((prev) => ({
+                          ...prev,
+                          maxViews: Number(e.target.value),
+                        }))
+                      }
+                      className="w-1/2 px-3 py-2 border rounded-lg bg-gray-900"
+                    />
+                  </div>
+                </div>
+
+                {/* Search Filter */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Search</label>
+                  <input
+                    type="text"
+                    placeholder="Search rooms..."
+                    value={filterOptions.searchQuery}
+                    onChange={(e) =>
+                      setFilterOptions((prev) => ({
+                        ...prev,
+                        searchQuery: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-zinc-800 text-white placeholder:text-zinc-500"
+                  />
+                </div>
+
+                <div className="flex gap-3 justify-end">
+                  <Button variant="outline" onClick={resetFilters}>
+                    Reset Filters
+                  </Button>
+                  <Button onClick={() => setShowFilterModal(false)}>
+                    Apply Filters
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Room List Section */}
+        {filteredRooms.length === 0 && (
           <div className="text-center py-8 w-full h-full">
-            <p className="text-gray-500">
-              You haven&apos;t created any rooms yet. Click the button above to
-              get started.
+            <p className="text-zinc-500">
+              {rooms.length === 0
+                ? "You haven't created any rooms yet."
+                : "No rooms match your current filter criteria."}
             </p>
           </div>
-        )
-      }
-      {showFilterModal && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="rounded-lg p-6 w-full max-w-md bg-gray-950 border">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Filter Rooms</h2>
-              <button
-                onClick={() => setShowFilterModal(false)}
-                className="p-1 hover:bg-gray-900 rounded-md border"
-              >
-                <X size={20} />
-              </button>
-            </div>
+        )}
 
-            <div className="space-y-4">
-              {/* Status Filter */}
-              <div>
-                <label className="block text-sm font-medium mb-1">Status</label>
-                <select
-                  value={filterOptions.status}
-                  onChange={(e) =>
-                    setFilterOptions((prev) => ({
-                      ...prev,
-                      status: e.target.value,
-                    }))
-                  }
-                  className="w-full px-3 py-2 border rounded-lg bg-gray-900"
-                >
-                  <option value="all">All Rooms</option>
-                  <option value="active">Active Rooms</option>
-                  <option value="archived">Archived Rooms</option>
-                </select>
-              </div>
-
-              {/* Links Filter */}
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Number of Links
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    placeholder="Min Links"
-                    value={filterOptions.minLinks}
-                    onChange={(e) =>
-                      setFilterOptions((prev) => ({
-                        ...prev,
-                        minLinks: Number(e.target.value),
-                      }))
-                    }
-                    className="w-1/2 px-3 py-2 border rounded-lg bg-gray-900"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Max Links"
-                    value={filterOptions.maxLinks}
-                    onChange={(e) =>
-                      setFilterOptions((prev) => ({
-                        ...prev,
-                        maxLinks: Number(e.target.value),
-                      }))
-                    }
-                    className="w-1/2 px-3 py-2 border rounded-lg bg-gray-900"
-                  />
-                </div>
-              </div>
-
-              {/* Views Filter */}
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Number of Views
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    placeholder="Min Views"
-                    value={filterOptions.minViews}
-                    onChange={(e) =>
-                      setFilterOptions((prev) => ({
-                        ...prev,
-                        minViews: Number(e.target.value),
-                      }))
-                    }
-                    className="w-1/2 px-3 py-2 border rounded-lg bg-gray-900"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Max Views"
-                    value={filterOptions.maxViews}
-                    onChange={(e) =>
-                      setFilterOptions((prev) => ({
-                        ...prev,
-                        maxViews: Number(e.target.value),
-                      }))
-                    }
-                    className="w-1/2 px-3 py-2 border rounded-lg bg-gray-900"
-                  />
-                </div>
-              </div>
-
-              {/* Search Filter */}
-              <div>
-                <label className="block text-sm font-medium mb-1">Search</label>
-                <input
-                  type="text"
-                  placeholder="Search rooms..."
-                  value={filterOptions.searchQuery}
-                  onChange={(e) =>
-                    setFilterOptions((prev) => ({
-                      ...prev,
-                      searchQuery: e.target.value,
-                    }))
-                  }
-                  className="w-full px-3 py-2 border rounded-lg bg-gray-900"
-                />
-              </div>
-
-              <div className="flex gap-3 justify-end">
-                <Button variant="outline" onClick={resetFilters}>
-                  Reset Filters
-                </Button>
-                <Button onClick={() => setShowFilterModal(false)}>
-                  Apply Filters
-                </Button>
-              </div>
-            </div>
+        {isLoading ? (
+          <div className="text-center py-8 w-full h-full flex items-center justify-center">
+            <span className="flex gap-2 items-center">
+              Loading rooms...
+              <Loader2 className="animate-spin w-4 h-4" />
+            </span>
           </div>
-        </div>
-      )}
-
-      {/* Room List Section */}
-      {filteredRooms.length === 0 && (
-        <div className="text-center py-8 w-full h-full">
-          <p className="text-gray-500">
-            {rooms.length === 0
-              ? "You haven't created any rooms yet."
-              : "No rooms match your current filter criteria."}
-          </p>
-        </div>
-      )}
-
-      {isLoading ? (
-        <div className="text-center py-8 w-full h-full flex items-center justify-center">
-          <span className="flex gap-2 items-center">
-            Loading rooms...
-            <Loader2 className="animate-spin w-4 h-4" />
-          </span>
-        </div>
-      ) : (
-        /* Rooms Grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rooms.map((room) => (
-            <div
-              key={room.id}
-              className="border rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <span className="flex items-center gap-2">
-                    <h3 className="font-semibold text-xl">{room.title}</h3>
-                  </span>
-                  <p className="text-sm text-gray-500">{room.slug}</p>
-                  <p className="text-gray-600 text-sm mt-2">
-                    {room.profile.bio}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    // onClick={()=>handleInvite(room.id, room.user_id)}
-                    onClick={() => setIsInviteModalOpen(true)}
-                    className="p-2 hover:bg-gray-900 border rounded-md shadow-md"
-                  >
-                    <UserPlus size={16} />
-                  </button>
-                  {isInviteModalOpen && (
-                    <div className="fixed inset-0 flex justify-center items-center backdrop-blur-sm bg-opacity-40 z-20 top-0 right-0 w-full h-full">
-                      <div className="bg-gray-950 border rounded-lg p-4">
-                        <Dialog
-                          open={isInviteModalOpen}
-                          onOpenChange={setIsInviteModalOpen}
-                        >
-                          <DialogContent>
-                            <DialogTitle className="text-xl font-bold mb-5">
-                              Invite Users
-                            </DialogTitle>
-                            <RoomInvitationManager
-                              roomId={room.id}
-                              currentUserId={room.user_id}
-                            />
-                          </DialogContent>
-                        </Dialog>
+        ) : (
+          /* Rooms Grid */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {rooms.map((room) => (
+              <div
+                key={room.id}
+                className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 hover:border-zinc-700 transition-colors"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <span className="flex items-center gap-2">
+                      <h3 className="font-semibold text-lg text-white">{room.title}</h3>
+                    </span>
+                    <p className="text-sm text-zinc-500">{room.slug}</p>
+                    <p className="text-zinc-400 text-sm mt-2">
+                      {room.profile.bio}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      // onClick={()=>handleInvite(room.id, room.user_id)}
+                      onClick={() => setIsInviteModalOpen(true)}
+                      className="p-2 hover:bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-300 hover:text-white transition-colors"
+                    >
+                      <UserPlus size={14} />
+                    </button>
+                    {isInviteModalOpen && (
+                      <div className="fixed inset-0 flex justify-center items-center backdrop-blur-sm bg-black/50 z-20">
+                        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                          <Dialog
+                            open={isInviteModalOpen}
+                            onOpenChange={setIsInviteModalOpen}
+                          >
+                            <DialogContent>
+                              <DialogTitle className="text-xl font-bold mb-5">
+                                Invite Users
+                              </DialogTitle>
+                              <RoomInvitationManager
+                                roomId={room.id}
+                                currentUserId={room.user_id}
+                              />
+                            </DialogContent>
+                          </Dialog>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  <button
-                    size="sm"
-                    onClick={() => handleArchive(room.id)}
-                    className="flex items-center gap-2 text-xs hover:bg-gray-900 font-bold border p-2 rounded-md shadow-md"
-                  >
-                    {!isLoadingState && room.is_active ? (
-                      <Archive size={16} />
-                    ) : (
-                      <ArchiveRestore size={16} />
                     )}
-                    {/* {!isLoadingState && room.is_active ? "Archive" : "Restore"} */}
-                    {isLoadingState && (
-                      <Loader2 className="animate-spin w-4 h-4" />
-                    )}
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveRoom(room);
-                      setRoomData({
-                        title: room.title,
-                        slug: room.slug,
-                        profile: room.profile,
-                      });
-                      setShowEditModal(true);
-                    }}
-                    className="p-2 hover:bg-gray-900 border rounded-md shadow-md"
-                  >
-                    <Edit2 size={16} />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteRoom(room.id);
-                    }}
-                    className="p-2 hover:bg-gray-900 text-red-500 border rounded-md shadow-md"
-                  >
-                    {isLoadingState ? (
-                      <Loader2 className="animate-spin w-4 h-4" />
-                    ) : (
-                      <Trash2 size={16} />
-                    )}
-                  </button>
+                    <button
+                      size="sm"
+                      onClick={() => handleArchive(room.id)}
+                      className="flex items-center gap-2 text-xs hover:bg-zinc-800 border border-zinc-700 p-2 rounded-lg text-zinc-300 hover:text-white transition-colors"
+                    >
+                      {!isLoadingState && room.is_active ? (
+                        <Archive size={14} />
+                      ) : (
+                        <ArchiveRestore size={14} />
+                      )}
+                      {isLoadingState && (
+                        <Loader2 className="animate-spin w-4 h-4" />
+                      )}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveRoom(room);
+                        setRoomData({
+                          title: room.title,
+                          slug: room.slug,
+                          profile: room.profile,
+                        });
+                        setShowEditModal(true);
+                      }}
+                      className="p-2 hover:bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-300 hover:text-white transition-colors"
+                    >
+                      <Edit2 size={14} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteRoom(room.id);
+                      }}
+                      className="p-2 hover:bg-red-500/10 text-red-400 border border-zinc-700 rounded-lg transition-colors"
+                    >
+                      {isLoadingState ? (
+                        <Loader2 className="animate-spin w-4 h-4" />
+                      ) : (
+                        <Trash2 size={14} />
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                <div className="py-1 px-2 text-xs rounded-full border flex items-center gap-2 text-white">
-                  <Link2 size={16} />
-                  <span className="font-bold">
-                    {room.links?.length || 0} links
-                  </span>
+                <div className="flex items-center justify-between text-sm text-zinc-500 mb-4">
+                  <div className="py-1 px-2 text-xs rounded-full border border-zinc-700 flex items-center gap-2 text-zinc-300">
+                    <Link2 size={16} />
+                    <span className="font-bold">
+                      {room.links?.length || 0} links
+                    </span>
+                  </div>
+                  <div className="py-1 px-2 text-xs rounded-full border flex items-center gap-2 text-white">
+                    {/* <Users size={16} className="ml-2" /> */}
+                    <Eye size={16} />
+                    <span className="font-bold">{room.views || 0} views</span>
+                  </div>
+                  <div className="py-1 px-2 text-xs rounded-full border flex items-center gap-2 text-white">
+                    <span>
+                      {room.is_active ? (
+                        <span className="flex gap-1 text-green-500">
+                          <Activity size={16} />
+                          Active
+                        </span>
+                      ) : (
+                        <span className="flex gap-1">
+                          <Archive size={16} />
+                          Archived
+                        </span>
+                      )}
+                    </span>
+                  </div>
                 </div>
-                <div className="py-1 px-2 text-xs rounded-full border flex items-center gap-2 text-white">
-                  {/* <Users size={16} className="ml-2" /> */}
-                  <Eye size={16} />
-                  <span className="font-bold">{room.views || 0} views</span>
-                </div>
-                <div className="py-1 px-2 text-xs rounded-full border flex items-center gap-2 text-white">
-                  <span>
-                    {room.is_active ? (
-                      <span className="flex gap-1 text-green-500">
-                        <Activity size={16} />
-                        Active
-                      </span>
-                    ) : (
-                      <span className="flex gap-1">
-                        <Archive size={16} />
-                        Archived
-                      </span>
-                    )}
-                  </span>
-                </div>
+
+                <button
+                  onClick={() => handleRoomClick(room.id, room.slug)}
+                  className="w-full border py-2 rounded-lg text-sm"
+                >
+                  View Room
+                </button>
               </div>
+            ))}
+          </div>
+        )}
 
-              <button
-                onClick={() => handleRoomClick(room.id, room.slug)}
-                className="w-full border py-2 rounded-lg text-sm"
-              >
-                View Room
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* New/Edit Room Modal */}
-      {(showNewRoomModal || showEditModal) && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="rounded-lg p-6 w-full max-w-md bg-gray-950 border">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">
-                {showNewRoomModal ? "Create New Room" : "Edit Room"}
-              </h2>
-              <button
-                onClick={() => {
-                  setShowNewRoomModal(false);
-                  setShowEditModal(false);
-                  setSlugError("");
-                }}
-                className="p-1 hover:bg-gray-900 rounded-md border"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Room Title
-                </label>
-                <input
-                  type="text"
-                  value={roomData.title}
-                  onChange={handleTitleChange}
-                  className="w-full px-3 py-2 border rounded-lg bg-gray-900"
-                  placeholder="Enter room title"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Slug</label>
-                <div className="flex items-center gap-1 px-3 py-2 border rounded-lg bg-gray-900">
-                  <span className="text-gray-500">/</span>
-                  <span>{roomData.slug || "generated-slug"}</span>
-                </div>
-                {slugError && (
-                  <p className="mt-1 text-sm text-red-600">{slugError}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Bio</label>
-                <textarea
-                  value={roomData.profile.bio}
-                  onChange={(e) =>
-                    setRoomData({
-                      ...roomData,
-                      profile: {
-                        ...roomData.profile,
-                        bio: e.target.value,
-                      },
-                    })
-                  }
-                  className="w-full px-3 py-2 border rounded-lg bg-gray-900"
-                  placeholder="Enter room bio"
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex gap-3 justify-end">
+        {/* New/Edit Room Modal */}
+        {(showNewRoomModal || showEditModal) && (
+          <div className="fixed inset-0 backdrop-blur-sm bg-black/60 flex items-center justify-center z-50">
+            <div className="rounded-xl p-6 w-full max-w-md bg-zinc-900 border border-zinc-800">
+              <div className="flex justify-between items-center mb-5">
+                <h2 className="text-lg font-semibold text-white">
+                  {showNewRoomModal ? "Create New Room" : "Edit Room"}
+                </h2>
                 <button
                   onClick={() => {
                     setShowNewRoomModal(false);
                     setShowEditModal(false);
                     setSlugError("");
                   }}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                  className="p-1.5 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-white transition-colors"
                 >
-                  Cancel
+                  <X size={18} />
                 </button>
-                <button
-                  onClick={
-                    showNewRoomModal ? handleCreateRoom : handleUpdateRoom
-                  }
-                  disabled={!roomData.title || slugError}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                >
-                  {showNewRoomModal ? "Create Room" : "Update Room"}
-                  {isLoadingState ? (
-                    <Loader2 className="animate-spin w-4 h-4" />
-                  ) : null}
-                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+                    Room Title
+                  </label>
+                  <input
+                    type="text"
+                    value={roomData.title}
+                    onChange={handleTitleChange}
+                    className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-zinc-800 text-white placeholder:text-zinc-500"
+                    placeholder="Enter room title"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">Slug</label>
+                  <div className="flex items-center gap-1 px-3 py-2 border border-zinc-700 rounded-lg bg-zinc-800">
+                    <span className="text-zinc-500">/</span>
+                    <span className="text-zinc-300">{roomData.slug || "generated-slug"}</span>
+                  </div>
+                  {slugError && (
+                    <p className="mt-1 text-sm text-red-400">{slugError}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">Bio</label>
+                  <textarea
+                    value={roomData.profile.bio}
+                    onChange={(e) =>
+                      setRoomData({
+                        ...roomData,
+                        profile: {
+                          ...roomData.profile,
+                          bio: e.target.value,
+                        },
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-zinc-800 text-white placeholder:text-zinc-500"
+                    placeholder="Enter room bio"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex gap-3 justify-end mt-5">
+                  <button
+                    onClick={() => {
+                      setShowNewRoomModal(false);
+                      setShowEditModal(false);
+                      setSlugError("");
+                    }}
+                    className="px-4 py-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg border border-zinc-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={
+                      showNewRoomModal ? handleCreateRoom : handleUpdateRoom
+                    }
+                    disabled={!roomData.title || slugError}
+                    className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                  >
+                    {showNewRoomModal ? "Create Room" : "Update Room"}
+                    {isLoadingState ? (
+                      <Loader2 className="animate-spin w-4 h-4" />
+                    ) : null}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

@@ -20,12 +20,12 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-3 shadow-lg rounded-lg border">
-        <p className="font-medium text-gray-900">{label}</p>
-        <p className="text-emerald-600">
+      <div className="bg-zinc-800 p-3 shadow-lg rounded-lg border border-zinc-700">
+        <p className="font-medium text-white">{label}</p>
+        <p className="text-emerald-400">
           Visitors: {payload[0].value.toLocaleString()}
         </p>
-        <p className="text-gray-600 text-sm">
+        <p className="text-zinc-400 text-sm">
           {((payload[0].value / payload[0].payload.total) * 100).toFixed(1)}% of total
         </p>
       </div>
@@ -57,17 +57,17 @@ const ChartContent = ({ data, type }) => {
   const off = gradientOffset();
 
   const renderChart = () => {
-    switch(type) {
+    switch (type) {
       case 'line':
         return (
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-            <XAxis 
-              dataKey="city" 
+            <XAxis
+              dataKey="city"
               tick={{ fill: '#666' }}
               axisLine={{ stroke: '#ccc' }}
             />
-            <YAxis 
+            <YAxis
               tick={{ fill: '#666' }}
               axisLine={{ stroke: '#ccc' }}
             />
@@ -85,23 +85,23 @@ const ChartContent = ({ data, type }) => {
             />
           </LineChart>
         );
-      
+
       case 'area':
         return (
           <AreaChart data={data}>
             <defs>
               <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
-                <stop offset={off} stopColor="#10b981" stopOpacity={0.8}/>
-                <stop offset={off} stopColor="#ef4444" stopOpacity={0.8}/>
+                <stop offset={off} stopColor="#10b981" stopOpacity={0.8} />
+                <stop offset={off} stopColor="#ef4444" stopOpacity={0.8} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-            <XAxis 
-              dataKey="city" 
+            <XAxis
+              dataKey="city"
               tick={{ fill: '#666' }}
               axisLine={{ stroke: '#ccc' }}
             />
-            <YAxis 
+            <YAxis
               tick={{ fill: '#666' }}
               axisLine={{ stroke: '#ccc' }}
             />
@@ -117,25 +117,25 @@ const ChartContent = ({ data, type }) => {
             />
           </AreaChart>
         );
-      
+
       case 'composed':
         return (
           <ComposedChart data={data}>
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-            <XAxis 
-              dataKey="city" 
+            <XAxis
+              dataKey="city"
               tick={{ fill: '#666' }}
               axisLine={{ stroke: '#ccc' }}
             />
-            <YAxis 
+            <YAxis
               tick={{ fill: '#666' }}
               axisLine={{ stroke: '#ccc' }}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
-            <Bar 
-              dataKey="count" 
-              fill="#10b981" 
+            <Bar
+              dataKey="count"
+              fill="#10b981"
               barSize={20}
               animationDuration={1500}
               animationEasing="ease-out"
@@ -151,7 +151,7 @@ const ChartContent = ({ data, type }) => {
             />
           </ComposedChart>
         );
-      
+
       default:
         return null;
     }
@@ -197,25 +197,25 @@ const LocationStats = ({ stats = [] }) => {
     .slice(0, 5);
 
   return (
-    <Card className="w-full bg-gray-800/50 border-gray-700/50">
+    <Card className="w-full bg-zinc-900 border-zinc-800">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span className='hidden lg:flex'>Location Distribution</span>
           <Tabs defaultValue="line" className="w-[400px]">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger 
+              <TabsTrigger
                 value="line"
                 onClick={() => setChartType('line')}
               >
                 Line Chart
               </TabsTrigger>
-              <TabsTrigger 
+              <TabsTrigger
                 value="area"
                 onClick={() => setChartType('area')}
               >
                 Area Chart
               </TabsTrigger>
-              <TabsTrigger 
+              <TabsTrigger
                 value="composed"
                 onClick={() => setChartType('composed')}
               >

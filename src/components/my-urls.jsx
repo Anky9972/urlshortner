@@ -2,10 +2,9 @@ import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
 import supabase from ".././db/supabase";
-import { Copy, QrCode, ExternalLink, Calendar, Share } from "lucide-react";
+import { Copy, QrCode, ExternalLink, Calendar, Share, X } from "lucide-react";
 import QRCode from "qrcode.react";
 import { toast } from "sonner";
-import { IoClose } from "react-icons/io5";
 
 const MyUrls = ({ setIsMyUrlsOpen }) => {
   const [urls, setUrls] = useState([]);
@@ -54,7 +53,6 @@ const MyUrls = ({ setIsMyUrlsOpen }) => {
         toast.error("Failed to share URL");
       }
     } else {
-      // Fallback for browsers that don't support Web Share API
       handleCopyUrl(url);
       toast.info("Web Share not supported. URL copied to clipboard.");
     }
@@ -83,103 +81,97 @@ const MyUrls = ({ setIsMyUrlsOpen }) => {
   };
 
   const toggleQRCode = (url) => {
-    // If the same URL is clicked again, hide the QR code
     setSelectedQRUrl(selectedQRUrl === url ? null : url);
   };
 
   return (
     <motion.div
-      className="fixed h-full z-50 top-16 border-t right-0 w-full md:w-3/5 lg:w-2/5 bg-gray-900 text-white p-4 overflow-y-auto shadow-md border-l"
+      className="fixed h-full z-50 top-16 right-0 w-full md:w-3/5 lg:w-2/5 bg-zinc-900 text-white p-5 overflow-y-auto shadow-xl border-l border-zinc-800"
       initial={{ opacity: 0, x: 100 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.3 }}
     >
       <div className="w-full flex items-center justify-between mb-5">
-        <h2 className="text-2xl font-bold">My URLs</h2>
+        <h2 className="text-lg font-semibold text-white">My URLs</h2>
         <button
           onClick={() => setIsMyUrlsOpen(false)}
-          className="text-gray-400 hover:text-white"
+          className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
         >
-          <IoClose />
+          <X size={18} />
         </button>
       </div>
-      <ul className="space-y-4">
-        {/* if not url  */}
+      <ul className="space-y-3">
         {urls.length === 0 && (
-          <li className="bg-gray-800 p-4 rounded-md shadow-md">
-            <div className="text-center text-gray-400">No URLs found</div>
+          <li className="bg-zinc-800/50 border border-zinc-700/50 p-6 rounded-xl">
+            <div className="text-center text-zinc-500">No URLs found</div>
           </li>
         )}
         {urls.map((url, id) => {
           const displayUrl = url.clause ? url.original_url : url.short_code;
-          const shortUrl = `${window.location.origin}/${
-            url.clause || url.short_code
-          }`;
+          const shortUrl = `${window.location.origin}/${url.clause || url.short_code
+            }`;
 
           return (
             <li
               key={id}
-              className="bg-gray-800 p-4 rounded-md shadow-md transition-all duration-300 hover:bg-gray-700"
+              className="bg-zinc-800/50 border border-zinc-700/50 p-4 rounded-xl hover:border-zinc-700 transition-colors"
             >
               <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <a
                     href={shortUrl}
-                    className="text-blue-400 text-xl font-bold hover:text-blue-300 flex items-center"
+                    className="text-cyan-400 font-medium hover:text-cyan-300 flex items-center"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     {shortUrl}
-                    <ExternalLink size={14} className="ml-1" />
+                    <ExternalLink size={12} className="ml-1" />
                   </a>
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleShareUrl(shortUrl)}
-                    className="text-gray-400 hover:text-white"
+                    className="p-1.5 rounded-lg hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
                   >
-                    <Share size={16} />
+                    <Share size={14} />
                   </button>
                   <button
                     onClick={() => handleCopyUrl(shortUrl)}
-                    className="text-gray-400 hover:text-white"
+                    className="p-1.5 rounded-lg hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
                   >
-                    <Copy size={16} />
+                    <Copy size={14} />
                   </button>
                   <button
-                    className="text-gray-400 hover:text-white"
+                    className="p-1.5 rounded-lg hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
                     onClick={() => toggleQRCode(shortUrl)}
                   >
-                    <QrCode size={16} />
+                    <QrCode size={14} />
                   </button>
                 </div>
               </div>
 
               {selectedQRUrl === shortUrl && (
-                <div className="flex justify-center mt-2">
-                  <QRCode value={shortUrl} />
+                <div className="flex justify-center mt-3 bg-white p-3 rounded-lg w-fit mx-auto">
+                  <QRCode value={shortUrl} size={120} />
                 </div>
               )}
 
-              <div className="w-full mt-2 text-sm text-gray-300 break-words">
+              <div className="w-full mt-2 text-sm text-zinc-400 truncate">
                 Original: {displayUrl}
               </div>
 
-              <div className="mt-2 flex justify-between items-center text-xs text-gray-400">
+              <div className="mt-3 flex justify-between items-center text-xs text-zinc-500">
                 <span>Created {getDaysAgo(url.created_at)} days ago</span>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <span>{getDaysRemaining(url.expires_at)} days left</span>
                   <button
                     onClick={() => handleExtendExpiry(url.id)}
-                    className="text-blue-400 hover:text-blue-300 flex items-center"
+                    className="text-cyan-400 hover:text-cyan-300 flex items-center transition-colors"
                   >
                     <Calendar size={12} className="mr-1" />
                     Extend
                   </button>
                 </div>
-                <span>
-                  Expires: {new Date(url.expires_at).toLocaleDateString()}
-                </span>
               </div>
             </li>
           );

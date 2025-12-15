@@ -1,24 +1,16 @@
-import { useEffect, useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from './ui/input';
-import { Button } from './ui/button';
-import { BeatLoader } from 'react-spinners';
-import Error from './error';
-import * as Yup from 'yup';
-import useFetch from '@/hooks/use-fetch';
-import { login } from '@/db/apiAuth';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { UrlState } from '@/context';
+import { useState } from 'react'
+import { Input } from './ui/input'
+import { Button } from './ui/button'
+import { BeatLoader } from 'react-spinners'
+import Error from './error'
+import * as Yup from 'yup'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { UrlState } from '@/context'
 
 const Login = () => {
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -27,6 +19,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const longlink = searchParams.get("createNew");
+  const { login } = UrlState();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -34,20 +27,13 @@ const Login = () => {
       ...prevState,
       [name]: value,
     }));
-  };
-
-  const { data, error, loading, fn: fnLogin } = useFetch(login, formData);
-  const { fetchUser } = UrlState();
-  useEffect(() => {
-    if (error === null && data) {
-      navigate(`/dashboard?${longlink ? `createNew=${longlink}` : ""}`);
-      fetchUser();
-    }
-  }, [data, error]);
+  }
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrors({});
+    setApiError(null);
+
     try {
       const schema = Yup.object().shape({
         email: Yup.string().email("Invalid Email").required("Email is Required"),
@@ -55,42 +41,64 @@ const Login = () => {
       });
 
       await schema.validate(formData, { abortEarly: false });
-      await fnLogin();
+
+      setLoading(true);
+      await login(formData.email, formData.password);
+      navigate(`/dashboard?${longlink ? `createNew=${longlink}` : ""}`);
     } catch (e) {
-      const newErrors = {};
-      e?.inner?.forEach((err) => {
-        newErrors[err.path] = err.message;
-      });
-      setErrors(newErrors);
+      if (e.inner) {
+        const newErrors = {};
+        e.inner.forEach((err) => {
+          newErrors[err.path] = err.message;
+        });
+        setErrors(newErrors);
+      } else {
+        setApiError(e.message);
+      }
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Login</CardTitle>
-        <CardDescription>to your account if you already have one</CardDescription>
-        {error && <Error message={error.message} />}
-      </CardHeader>
-      <form onSubmit={handleLogin}>
-        <CardContent className="space-y-2">
-          <div className='space-y-1'>
-            <Input name="email" type="email" placeholder="Enter Email" onChange={handleInputChange} />
-            {errors.email && <Error message={errors.email} />}
-          </div>
-          <div className='space-y-1'>
-            <Input name="password" type="password" placeholder="Enter Password" onChange={handleInputChange} autoComplete='true'/>
-            {errors.password && <Error message={errors.password} />}
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button type="submit" className="w-full">
-            {loading ? <BeatLoader size={8} color="#020817" /> : "Login"}
-          </Button>
-        </CardFooter>
-      </form>
-    </Card>
-  );
-};
+    <form onSubmit={handleLogin} className="space-y-4">
+      {apiError && <Error message={apiError} />}
 
-export default Login;
+      <div className="space-y-2">
+        <label className="text-sm text-zinc-400">Email</label>
+        <Input
+          name="email"
+          type="email"
+          placeholder="you@example.com"
+          value={formData.email}
+          onChange={handleInputChange}
+          className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-cyan-500/50"
+        />
+        {errors.email && <Error message={errors.email} />}
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm text-zinc-400">Password</label>
+        <Input
+          name="password"
+          type="password"
+          placeholder="••••••••"
+          value={formData.password}
+          onChange={handleInputChange}
+          className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-cyan-500/50"
+        />
+        {errors.password && <Error message={errors.password} />}
+      </div>
+
+      <Button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold h-11"
+      >
+        {loading ? <BeatLoader size={8} color="#09090b" /> : "Sign In"}
+      </Button>
+    </form>
+  )
+}
+
+export default Login

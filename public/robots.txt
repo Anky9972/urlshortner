@@ -23,6 +23,7 @@ Disallow: /assets/temp/
 
 # Sitemap location (if you have one)
 Sitemap: https://trimlink.netlify.app/sitemap.xml
+Sitemap: https://trimlynk.com/sitemap.xml
 
 # Crawl delay to prevent server overload
 Crawl-delay: 10

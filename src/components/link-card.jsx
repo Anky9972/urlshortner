@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, Download, LinkIcon, Trash, Edit, ExternalLink, Check } from 'lucide-react';
+import { Copy, Download, LinkIcon, Trash, Edit, ExternalLink, Check, MousePointerClick, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -14,7 +14,6 @@ import PropTypes from 'prop-types';
 const LinkCard = ({ url, fetchUrls }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const [editFormValues, setEditFormValues] = useState({
     title: url?.title,
     original_url: url?.original_url,
@@ -26,14 +25,14 @@ const LinkCard = ({ url, fetchUrls }) => {
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(
-      `https://trimlink.netlify.app/${url?.short_url}`
+      `https://trimlynk.com/${url?.short_url}`
     );
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleEdit = () => setShowEditModal(true);
-  
+
   const handleCloseEditModal = () => {
     setShowEditModal(false);
     setEditFormValues({
@@ -70,153 +69,178 @@ const LinkCard = ({ url, fetchUrls }) => {
     document.body.removeChild(anchor);
   };
 
+  const shortLink = url?.custom_url || url?.short_url;
+
   return (
-    <div
-      className="group relative overflow-hidden rounded-xl transition-all duration-30 mb-5 w-full"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className="flex flex-col md:flex-row gap-5 p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border border-gray-700/50 shadow-lg transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
-        <div className="relative">
+    <div className="group bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-zinc-700 transition-all duration-200">
+      <div className="flex gap-4">
+        {/* QR Code */}
+        <div className="hidden sm:block flex-shrink-0">
           <img
             src={url?.qr}
-            className="h-32 w-32 object-contain rounded-lg ring-2 ring-blue-500/50 transition-all duration-300 hover:ring-blue-500"
-            alt="qr code"
+            className="h-20 w-20 object-contain rounded-lg bg-white p-1"
+            alt="QR code"
           />
         </div>
 
-        <Link 
-          to={`/link/${url?.id}`} 
-          className="flex flex-col flex-1 gap-3 transition-transform duration-300 hover:translate-x-2"
-        >
-          <h3 className="text-3xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            {url?.title}
-          </h3>
-          
-          <div className="flex items-center gap-2 text-2xl text-blue-400 font-bold overflow-hidden">
-            <span className="truncate hover:text-blue-300 transition-colors text-wrap">
-              https://trimlink.netlify.app/{url?.custom_url || url.short_url}
-            </span>
-            <ExternalLink className="w-5 h-5 flex-shrink-0" />
-          </div>
-          
-          <div className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
-            <LinkIcon className="w-4 h-4 flex-shrink-0" />
-            <p className="truncate text-wrap text-xs">{url?.original_url}</p>
-          </div>
-          
-          <span className="text-sm text-gray-400 mt-auto">
-            Created: {new Date(url?.created_at).toLocaleString()}
-          </span>
-        </Link>
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <Link to={`/link/${url?.id}`} className="block group/link">
+            {/* Title */}
+            <h3 className="text-lg font-semibold text-white group-hover/link:text-cyan-400 transition-colors truncate">
+              {url?.title}
+            </h3>
 
-        <div >
-          <div className="flex lg:flex-col gap-2">
-          <div>
-            <ShareButtons shortUrl={`https://trimlink.netlify.app/${url?.short_url}`} />
-          </div>
-            <Button
-              variant="ghost"
-              onClick={handleCopy}
-              className="w-full transition-all duration-300 hover:bg-blue-500/20"
-            >
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            </Button>
-            
-            <Button
-              variant="ghost"
-              onClick={downloadImage}
-              className="w-full transition-all duration-300 hover:bg-purple-500/20"
-            >
-              <Download className="w-4 h-4" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              onClick={handleEdit}
-              className="w-full transition-all duration-300 hover:bg-green-500/20"
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              onClick={() => fnDelete().then(() => fetchUrls())}
-              disabled={loadingDelete}
-              className="w-full transition-all duration-300 hover:bg-red-500/20"
-            >
-              {loadingDelete ? (
-                <BeatLoader size={5} color="white" />
-              ) : (
-                <Trash className="w-4 h-4" />
-              )}
-            </Button>
+            {/* Short URL */}
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-cyan-400 text-sm font-mono truncate">
+                trimlynk.com/{shortLink}
+              </span>
+              <ExternalLink className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+            </div>
+
+            {/* Original URL */}
+            <div className="flex items-center gap-2 mt-2 text-zinc-500">
+              <LinkIcon className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="text-xs truncate">{url?.original_url}</span>
+            </div>
+          </Link>
+
+          {/* Meta & Actions Row */}
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-800">
+            <div className="flex items-center gap-4 text-xs text-zinc-500">
+              <span>{new Date(url?.created_at).toLocaleDateString()}</span>
+              <div className="flex items-center gap-1">
+                <MousePointerClick className="w-3.5 h-3.5" />
+                <span>{url?.clicks || 0} clicks</span>
+              </div>
+              <div className={`flex items-center gap-1 ${url?.healthChecks?.[0]?.isHealthy === false ? 'text-red-400' : 'text-emerald-400'}`}>
+                {url?.healthChecks?.[0]?.isHealthy === false ? (
+                  <>
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span>Broken</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    <span>Healthy</span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-1">
+              <ShareButtons shortUrl={`https://trimlynk.com/${shortLink}`} />
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopy}
+                className="h-8 w-8 p-0 text-zinc-400 hover:text-cyan-400 hover:bg-zinc-800"
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={downloadImage}
+                className="h-8 w-8 p-0 text-zinc-400 hover:text-violet-400 hover:bg-zinc-800"
+              >
+                <Download className="w-4 h-4" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleEdit}
+                className="h-8 w-8 p-0 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800"
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => fnDelete().then(() => fetchUrls())}
+                disabled={loadingDelete}
+                className="h-8 w-8 p-0 text-zinc-400 hover:text-red-400 hover:bg-zinc-800"
+              >
+                {loadingDelete ? (
+                  <BeatLoader size={4} color="white" />
+                ) : (
+                  <Trash className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Edit Modal */}
       <Modal isOpen={showEditModal}>
-        <div className="p-6 bg-gray-900 rounded-xl">
-          <CardTitle className="text-2xl font-bold mb-6 text-center bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+        <div className="p-6 bg-zinc-900 rounded-xl border border-zinc-800 max-w-md mx-auto">
+          <CardTitle className="text-xl font-semibold mb-6 text-white">
             Edit Link
           </CardTitle>
-          
+
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm text-gray-400">Title</label>
+              <label className="text-sm text-zinc-400">Title</label>
               <Input
                 id="title"
                 placeholder="Link's Title"
                 value={editFormValues.title}
                 onChange={handleChange}
-                className="bg-gray-800 border-gray-700 focus:border-blue-500 transition-colors"
+                className="bg-zinc-800 border-zinc-700 text-white focus:border-cyan-500/50"
               />
             </div>
-            
+
             <div className="space-y-2">
-              <label className="text-sm text-gray-400">Original URL</label>
+              <label className="text-sm text-zinc-400">Original URL</label>
               <Input
                 id="original_url"
                 placeholder="Enter your Long URL"
                 value={editFormValues.original_url}
                 onChange={handleChange}
-                className="bg-gray-800 border-gray-700 focus:border-blue-500 transition-colors"
+                className="bg-zinc-800 border-zinc-700 text-white focus:border-cyan-500/50"
               />
             </div>
-            
+
             <div className="space-y-2">
-              <label className="text-sm text-gray-400">Custom URL (optional)</label>
+              <label className="text-sm text-zinc-400">Custom URL (optional)</label>
               <Input
                 id="custom_url"
                 placeholder="Custom Link"
                 value={editFormValues.custom_url}
                 onChange={handleChange}
-                className="bg-gray-800 border-gray-700 focus:border-blue-500 transition-colors"
+                className="bg-zinc-800 border-zinc-700 text-white focus:border-cyan-500/50"
               />
             </div>
-            
+
             <div className="space-y-2">
-              <label className="text-sm text-gray-400">Expiration Date</label>
+              <label className="text-sm text-zinc-400">Expiration Date</label>
               <Input
                 type="datetime-local"
                 id="expiration_date"
                 value={editFormValues.expiration_date}
                 onChange={handleChange}
-                className="bg-gray-800 border-gray-700 focus:border-blue-500 transition-colors"
+                className="bg-zinc-800 border-zinc-700 text-white focus:border-cyan-500/50"
               />
             </div>
-            
+
             <div className="flex gap-3 mt-6">
               <Button
                 onClick={handleUpdate}
-                className="flex-1 bg-blue-500 hover:bg-blue-600 transition-colors"
+                className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-zinc-900"
               >
-                Update
+                Save Changes
               </Button>
               <Button
                 onClick={handleCloseEditModal}
-                variant="destructive"
-                className="flex-1"
+                variant="outline"
+                className="flex-1 border-zinc-700 text-zinc-300 hover:bg-zinc-800"
               >
                 Cancel
               </Button>
@@ -241,6 +265,8 @@ LinkCard.propTypes = {
     short_url: PropTypes.string,
     qr: PropTypes.string,
     created_at: PropTypes.string,
+    clicks: PropTypes.number,
+    healthChecks: PropTypes.array,
   }).isRequired,
   fetchUrls: PropTypes.func.isRequired,
 };

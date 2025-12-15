@@ -9,10 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Bell, LinkIcon, LogOut, Menu, Network, X } from "lucide-react";
+import { Bell, LinkIcon, LogOut, Menu, Network, Settings, X } from "lucide-react";
 import { UrlState } from "@/context";
-import useFetch from "@/hooks/use-fetch";
-import { logout } from "@/db/apiAuth";
 import { BarLoader } from "react-spinners";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -22,25 +20,25 @@ import MyUrls from "./my-urls";
 
 const Header = () => {
   const navigate = useNavigate();
-  const { user, fetchUser } = UrlState();
-  const { loading, fn: fnLogout } = useFetch(logout);
+  const { user, logout, loading } = UrlState();
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [isMyUrlsOpen, setIsMyUrlsOpen] = useState(false);
 
   const navLinks = user
     ? [
-        { path: "/", label: "Home" },
-        { path: "/link-tree?create", label: "LinkTree" },
-        { path: "/qr-code-generator", label: "QR Generator" },
-        { path: "/rooms", label: "Rooms" },
-      ]
+      { path: "/", label: "Home" },
+      { path: "/link-tree?create", label: "LinkTree" },
+      { path: "/qr-code-generator", label: "QR Generator" },
+      { path: "/rooms", label: "Rooms" },
+    ]
     : [
-        { path: "/", label: "My URLs", onClick: () => setIsMyUrlsOpen(true) },
-        { path: "/link-tree?create", label: "LinkTree" },
-        { path: "/qr-code-generator", label: "QR Generator" },
-        { path: "/rooms", label: "Rooms" },
-      ];
+      { path: "/", label: "My URLs", onClick: () => setIsMyUrlsOpen(true) },
+      { path: "/link-tree?create", label: "LinkTree" },
+      { path: "/qr-code-generator", label: "QR Generator" },
+      { path: "/rooms", label: "Rooms" },
+    ];
 
   useEffect(() => {
     fetchNotifications().then((data) => {
@@ -53,77 +51,71 @@ const Header = () => {
       <motion.nav
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.4 }}
-        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-gray-900/80 border-b border-gray-800"
+        transition={{ duration: 0.3 }}
+        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-zinc-950/80 border-b border-zinc-800/50"
       >
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-6xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link to="/" className="flex items-center space-x-2">
-                <motion.img
-                  initial={{ rotate: -180 }}
-                  animate={{ rotate: 0 }}
-                  transition={{ duration: 0.5 }}
-                  src="https://res.cloudinary.com/dj0eulqd8/image/upload/v1719838363/17198382942675tr4l2er_w26wki.jpg"
-                  alt="TrimLink"
-                  className="w-8 h-8 rounded-lg"
-                />
-                <span className="text-xl font-bold text-white hidden sm:block">
-                  TrimLink
-                </span>
-              </Link>
-            </motion.div>
+            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <img
+                src="/images/logo.png"
+                alt="TrimLink"
+                className="w-8 h-8 rounded-lg"
+              />
+              <span className="text-lg font-semibold text-white hidden sm:block">
+                TrimLink
+              </span>
+            </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4">
-              <ul className="flex items-center gap-4">
-                {navLinks.map((link) => (
-                  <motion.li
-                    key={link.path}
-                    whileHover={{ scale: 1.05 }}
-                    onClick={link.onClick}
-                  >
-                    <NavLink
-                      to={link.path}
-                      className={({ isActive }) =>
-                        `px-3 py-1.5 rounded-lg transition-all duration-200 border border-transparent
-                        ${
-                          isActive
-                            ? "bg-blue-600/20 text-blue-400 border-blue-500/50"
-                            : "text-gray-300 hover:text-white hover:bg-gray-800"
-                        }`
-                      }
-                    >
-                      {link.label}
-                    </NavLink>
-                  </motion.li>
-                ))}
-                {user && (
-                  <li className="flex mr-2 items-center">
-                    <Bell
-                      className="w-5 h-5 text-blue-500 cursor-pointer"
-                      onClick={() => navigate("/notifications")}
-                    />
-                    <span className="mt-2 text-xs">
+            <div className="hidden md:flex items-center gap-1">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  onClick={link.onClick}
+                  className={({ isActive }) =>
+                    `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
+                      ? "text-white bg-zinc-800"
+                      : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
+                    }`
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </div>
+
+            {/* Right Side */}
+            <div className="flex items-center gap-3">
+              {/* Notification Bell */}
+              {user && (
+                <button
+                  onClick={() => navigate("/notifications")}
+                  className="relative p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+                >
+                  <Bell className="w-5 h-5" />
+                  {notifications.filter((n) => n.status).length > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-cyan-500 text-zinc-900 text-xs font-bold rounded-full flex items-center justify-center">
                       {notifications.filter((n) => n.status).length}
                     </span>
-                  </li>
-                )}
-              </ul>
+                  )}
+                </button>
+              )}
 
+              {/* Auth Button / User Menu */}
               <AnimatePresence mode="wait">
                 {!user ? (
                   <motion.div
                     key="login"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
                   >
                     <Button
                       onClick={() => navigate("/auth")}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-full transition-colors"
+                      className="bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-medium px-5 rounded-lg"
                     >
                       Login
                     </Button>
@@ -131,31 +123,19 @@ const Header = () => {
                 ) : (
                   <UserMenu
                     user={user}
-                    fnLogout={fnLogout}
-                    fetchUser={fetchUser}
+                    logout={logout}
                     navigate={navigate}
                   />
                 )}
               </AnimatePresence>
-            </div>
 
-            {/* Mobile Menu Button */}
-            <div className="flex items-center gap-4 md:hidden">
-              {user && (
-                <UserMenu
-                  user={user}
-                  fnLogout={fnLogout}
-                  fetchUser={fetchUser}
-                  navigate={navigate}
-                />
-              )}
-              <motion.button
-                whileTap={{ scale: 0.95 }}
+              {/* Mobile Menu Button */}
+              <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 text-gray-400 hover:text-white"
+                className="md:hidden p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
               >
-                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </motion.button>
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
             </div>
           </div>
         </div>
@@ -167,9 +147,9 @@ const Header = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-t border-gray-800"
+              className="md:hidden border-t border-zinc-800/50"
             >
-              <div className="px-4 py-4 space-y-3">
+              <div className="px-4 py-3 space-y-1">
                 {navLinks.map((link) => (
                   <NavLink
                     key={link.path}
@@ -179,11 +159,9 @@ const Header = () => {
                       link.onClick && link.onClick();
                     }}
                     className={({ isActive }) =>
-                      `block px-4 py-2 rounded-lg transition-all duration-200
-                      ${
-                        isActive
-                          ? "bg-blue-600/20 text-blue-400"
-                          : "text-gray-300 hover:text-white hover:bg-gray-800"
+                      `block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive
+                        ? "text-white bg-zinc-800"
+                        : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
                       }`
                     }
                   >
@@ -196,7 +174,7 @@ const Header = () => {
                       navigate("/auth");
                       setIsMobileMenuOpen(false);
                     }}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    className="w-full mt-2 bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-medium"
                   >
                     Login
                   </Button>
@@ -214,103 +192,92 @@ const Header = () => {
       <AnimatePresence>
         {loading && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed top-16 left-0 right-0 z-50"
           >
-            <BarLoader
-              height={4}
-              width="100%"
-              color="#3B82F6"
-              className="backdrop-blur-sm"
-            />
+            <BarLoader height={2} width="100%" color="#06b6d4" />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Spacer for fixed header */}
       <div className="h-16" />
     </>
   );
 };
 
-// Separate component for the user menu to reduce complexity
-const UserMenu = ({ user, fnLogout, fetchUser, navigate }) => (
-  <motion.div
-    key="user-menu"
-    initial={{ opacity: 0, x: 20 }}
-    animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: -20 }}
-    className="flex items-center"
-  >
-    <DropdownMenu>
-      <DropdownMenuTrigger className="focus:outline-none">
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Avatar className="w-10 h-10 ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900 transition-all duration-200 hover:ring-blue-400">
-            <AvatarImage
-              src={user?.user_metadata?.profile_pic}
-              className="object-cover"
-            />
-            <AvatarFallback className="bg-blue-600">
-              {user?.user_metadata?.name?.charAt(0) || "U"}
-            </AvatarFallback>
-          </Avatar>
-        </motion.div>
-      </DropdownMenuTrigger>
+const UserMenu = ({ user, logout, navigate }) => (
+  <DropdownMenu>
+    <DropdownMenuTrigger className="focus:outline-none">
+      <Avatar className="w-9 h-9 ring-2 ring-zinc-700 hover:ring-cyan-500/50 transition-all">
+        <AvatarImage
+          src={user?.avatarUrl}
+          className="object-cover"
+        />
+        <AvatarFallback className="bg-zinc-800 text-white text-sm">
+          {user?.name?.charAt(0) || user?.email?.charAt(0) || "U"}
+        </AvatarFallback>
+      </Avatar>
+    </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="w-56 mt-2 bg-gray-900 border border-gray-800">
-        <DropdownMenuLabel className="text-gray-400">
-          My Account
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-gray-800" />
-        <DropdownMenuItem className="text-white focus:bg-gray-800">
-          {user?.user_metadata?.name}
-        </DropdownMenuItem>
-        <DropdownMenuItem className="focus:bg-gray-800">
-          <Link
-            to="/dashboard"
-            className="flex items-center text-gray-300 hover:text-white transition-colors"
-          >
-            <LinkIcon className="mr-2 h-4 w-4" />
-            <span>My Links</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="focus:bg-gray-800">
-          <Link
-            to="/link-tree-gallery"
-            className="flex items-center text-gray-300 hover:text-white transition-colors"
-          >
-            <Network className="mr-2 h-4 w-4" />
-            <span>My LinkTree&apos;s</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          className="text-red-400 focus:bg-gray-800 focus:text-red-300"
-          onClick={() => {
-            fnLogout().then(() => {
-              fetchUser();
-              navigate("/");
-            });
-          }}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Logout</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  </motion.div>
+    <DropdownMenuContent className="w-56 mt-2 bg-zinc-900 border border-zinc-800">
+      <DropdownMenuLabel className="text-zinc-500 text-xs uppercase tracking-wide">
+        My Account
+      </DropdownMenuLabel>
+      <DropdownMenuSeparator className="bg-zinc-800" />
+
+      <DropdownMenuItem className="text-white focus:bg-zinc-800 cursor-default">
+        {user?.name || user?.email}
+      </DropdownMenuItem>
+
+      <DropdownMenuItem
+        className="focus:bg-zinc-800 cursor-pointer"
+        onClick={() => navigate('/dashboard')}
+      >
+        <LinkIcon className="mr-2 h-4 w-4 text-zinc-400" />
+        <span className="text-zinc-300">My Links</span>
+      </DropdownMenuItem>
+
+      <DropdownMenuItem
+        className="focus:bg-zinc-800 cursor-pointer"
+        onClick={() => navigate('/link-tree-gallery')}
+      >
+        <Network className="mr-2 h-4 w-4 text-zinc-400" />
+        <span className="text-zinc-300">My LinkTree&apos;s</span>
+      </DropdownMenuItem>
+
+      <DropdownMenuItem
+        className="focus:bg-zinc-800 cursor-pointer"
+        onClick={() => navigate('/settings')}
+      >
+        <Settings className="mr-2 h-4 w-4 text-zinc-400" />
+        <span className="text-zinc-300">Settings</span>
+      </DropdownMenuItem>
+
+      <DropdownMenuSeparator className="bg-zinc-800" />
+
+      <DropdownMenuItem
+        className="text-red-400 focus:bg-zinc-800 focus:text-red-300 cursor-pointer"
+        onClick={async () => {
+          await logout();
+          navigate("/");
+        }}
+      >
+        <LogOut className="mr-2 h-4 w-4" />
+        <span>Logout</span>
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
 );
 
 UserMenu.propTypes = {
   user: PropTypes.shape({
-    user_metadata: PropTypes.shape({
-      profile_pic: PropTypes.string,
-      name: PropTypes.string,
-    }),
+    name: PropTypes.string,
+    email: PropTypes.string,
+    avatarUrl: PropTypes.string,
   }),
-  fnLogout: PropTypes.func.isRequired,
-  fetchUser: PropTypes.func.isRequired,
+  logout: PropTypes.func.isRequired,
   navigate: PropTypes.func.isRequired,
 };
 

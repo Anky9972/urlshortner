@@ -33,19 +33,19 @@ const renderActiveShape = (props) => {
         outerRadius={innerRadius - 2}
         fill={fill}
       />
-      <text 
-        x={cx} 
-        y={cy - 10} 
-        textAnchor="middle" 
+      <text
+        x={cx}
+        y={cy - 10}
+        textAnchor="middle"
         fill="#666"
         className="text-base font-medium"
       >
         {payload.device}
       </text>
-      <text 
-        x={cx} 
-        y={cy + 10} 
-        textAnchor="middle" 
+      <text
+        x={cx}
+        y={cy + 10}
+        textAnchor="middle"
         fill="#666"
         className="text-sm"
       >
@@ -93,12 +93,12 @@ const DeviceStatsChart = ({ stats }) => {
     if (active && payload && payload.length) {
       const { device, count } = payload[0].payload;
       const percentage = ((count / stats.length) * 100).toFixed(1);
-      
+
       return (
-        <div className="bg-white p-3 shadow-lg rounded-lg border">
-          <p className="font-medium text-gray-900">{device}</p>
-          <p className="text-gray-600">Devices: {count}</p>
-          <p className="text-gray-600">Percentage: {percentage}%</p>
+        <div className="bg-zinc-800 p-3 shadow-lg rounded-lg border border-zinc-700">
+          <p className="font-medium text-white">{device}</p>
+          <p className="text-zinc-400">Devices: {count}</p>
+          <p className="text-zinc-400">Percentage: {percentage}%</p>
         </div>
       );
     }
@@ -106,7 +106,7 @@ const DeviceStatsChart = ({ stats }) => {
   };
 
   return (
-    <Card className="w-full bg-gray-800/50 border-gray-700/50">
+    <Card className="w-full bg-zinc-900 border-zinc-800">
       <CardHeader>
         <CardTitle className="hidden lg:flex">Device Distribution</CardTitle>
       </CardHeader>
@@ -130,19 +130,19 @@ const DeviceStatsChart = ({ stats }) => {
                 animationEasing="ease-out"
               >
                 {data.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
+                  <Cell
+                    key={`cell-${index}`}
                     fill={COLORS[index % COLORS.length]}
                   />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                verticalAlign="bottom" 
+              <Legend
+                verticalAlign="bottom"
                 height={36}
                 formatter={(value) => (
-                  <span className="text-gray-600">{value}</span>
-                  
+                  <span className="text-zinc-400">{value}</span>
+
                 )}
               />
             </PieChart>

@@ -52,9 +52,9 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
   //   ]);
   // };
 
-  const handleClickCount = async(url, linkId) => {
-    await trackAndUpdateTreeLinkClick(url,treeId, linkId);
-   }
+  const handleClickCount = async (url, linkId) => {
+    await trackAndUpdateTreeLinkClick(url, treeId, linkId);
+  }
   //  console.log("treeId", treeId);
 
   return (
@@ -66,7 +66,7 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center mb-8"
         >
-          <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-gray-100">
+          <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-zinc-800 border border-zinc-700">
             <img
               src={user?.user_metadata?.profile_pic}
               alt="Profile"
@@ -79,7 +79,7 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
           {/* <h1 className={`text-3xl font-bold ${theme.textColor} mt-2`}>
             {profile.treetitle}
           </h1> */}
-          <p className="text-gray-400">{profile.bio}</p>
+          <p className="text-zinc-400">{profile.bio}</p>
         </motion.div>
 
         <motion.div
@@ -119,8 +119,8 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
                   {link.title}
                 </span>
                 <span className="border rounded-full px-2 py-1 text-xs font-bold flex gap-1">
-                  <MousePointerClick size={16}/>
-                  {link.clicks||0} clicks
+                  <MousePointerClick size={16} />
+                  {link.clicks || 0} clicks
                 </span>
                 {/* <Share2
                   size={18}

@@ -24,6 +24,9 @@ import RoomDetail from './components/room/room-detail'
 import NotificationManager from './components/notification/notification'
 import RoomInvitation from './components/room/accept-invitation'
 import InvitedRooms from './components/room/invite-rooms'
+import Settings from './pages/settings'
+import Analytics from './pages/analytics'
+import TeamsPage from './pages/teams'
 
 const router = createBrowserRouter([
   {
@@ -85,22 +88,30 @@ const router = createBrowserRouter([
             <LinkTreeBuilder />
           </ErrorBoundary>
         ),
-      },{
+      },
+      {
+        path: '/linktree',
+        element: (
+          <ErrorBoundary>
+            <LinkTreeBuilder />
+          </ErrorBoundary>
+        ),
+      }, {
         path: '/share/:id',
         element: (
           <ErrorBoundary>
             <SharedLinkTree />
           </ErrorBoundary>
         ),
-      },{
+      }, {
         path: '/not-found',
         element: (
-            <NotFoundPage />
+          <NotFoundPage />
         ),
-      },{
+      }, {
         path: '/link-tree-gallery',
         element: (
-            <LinkTreeGallery />
+          <LinkTreeGallery />
         ),
       },
       {
@@ -112,16 +123,26 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path:'/edit/:id',
-        element:(
+        path: '/edit/:id',
+        element: (
           <ErrorBoundary>
             <TreeEdit />
           </ErrorBoundary>
         )
       },
       {
-        path:'/rooms',
-        element:(
+        path: '/teams',
+        element: (
+          <ErrorBoundary>
+            <RequireAuth>
+              <TeamsPage />
+            </RequireAuth>
+          </ErrorBoundary>
+        )
+      },
+      {
+        path: '/rooms',
+        element: (
           <ErrorBoundary>
             <RequireAuth>
               <RoomDashboard />
@@ -130,8 +151,8 @@ const router = createBrowserRouter([
         )
       },
       {
-        path:'/room/:slug',
-        element:(
+        path: '/room/:slug',
+        element: (
           <ErrorBoundary>
             <RequireAuth>
               <RoomDetail />
@@ -140,25 +161,45 @@ const router = createBrowserRouter([
         )
       },
       {
-        path:'/notifications',
-        element:(
-          <NotificationManager/>
+        path: '/notifications',
+        element: (
+          <NotificationManager />
         )
       },
       {
-        path:'/invitation/:roomId',
-        element:(
+        path: '/invitation/:roomId',
+        element: (
           <ErrorBoundary>
             <RequireAuth>
-              <RoomInvitation/>
+              <RoomInvitation />
             </RequireAuth>
           </ErrorBoundary>
         )
       },
       {
-        path:'/joined-rooms',
-        element:(
-          <InvitedRooms/>
+        path: '/joined-rooms',
+        element: (
+          <InvitedRooms />
+        )
+      },
+      {
+        path: '/settings',
+        element: (
+          <ErrorBoundary>
+            <RequireAuth>
+              <Settings />
+            </RequireAuth>
+          </ErrorBoundary>
+        )
+      },
+      {
+        path: '/analytics',
+        element: (
+          <ErrorBoundary>
+            <RequireAuth>
+              <Analytics />
+            </RequireAuth>
+          </ErrorBoundary>
         )
       }
     ],

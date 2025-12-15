@@ -1,42 +1,18 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_KEY;
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export const handleUrlRedirect = async (identifier) => {
   try {
-    const { data: clauseData, error: clauseError } = await supabase
-      .from('free_services')
-      .select('original_url')
-      .eq('clause', identifier)
-      .single();
+    const response = await fetch(`${API_URL}/api/free-urls/lookup/${identifier}`);
 
-    if (clauseError && clauseError.code !== 'PGRST116') {
-      throw clauseError;
+    if (!response.ok) {
+      if (response.status === 404 || response.status === 410) {
+        return null;
+      }
+      throw new Error('Failed to lookup URL');
     }
 
-    if (clauseData) {
-      return clauseData.original_url;
-    }
-
-    const { data: shortCodeData, error: shortCodeError } = await supabase
-      .from('free_services')
-      .select('original_url')
-      .eq('short_code', identifier)
-      .single();
-
-    if (shortCodeError && shortCodeError.code !== 'PGRST116') {
-      throw shortCodeError;
-    }
-
-    if (shortCodeData) {
-      return shortCodeData.original_url;
-    }
-
-    // If no URL found
-    return null;
+    const data = await response.json();
+    return data.originalUrl;
   } catch (error) {
     console.error('Redirect Error:', error);
     return null;

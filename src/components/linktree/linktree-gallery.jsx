@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Card, 
-  CardContent, 
-  CardFooter, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardTitle
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,20 +31,20 @@ import { formatDistanceToNow } from "date-fns";
 // Skeleton Loader Component
 const LinkTreeSkeleton = () => {
   return (
-    <Card className="animate-pulse">
+    <Card className="animate-pulse bg-zinc-900 border-zinc-800">
       <CardContent className="p-6">
-        <div className="h-6 bg-gray-700 rounded w-3/4 mb-2"></div>
-        <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
+        <div className="h-6 bg-zinc-800 rounded w-3/4 mb-2"></div>
+        <div className="h-4 bg-zinc-800 rounded w-1/2 mb-4"></div>
         <div className="flex gap-4">
-          <div className="h-8 bg-gray-700 rounded w-20"></div>
-          <div className="h-8 bg-gray-700 rounded w-20"></div>
+          <div className="h-8 bg-zinc-800 rounded w-20"></div>
+          <div className="h-8 bg-zinc-800 rounded w-20"></div>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between items-center p-6 border-t border-gray-700">
+      <CardFooter className="flex justify-between items-center p-6 border-t border-zinc-800">
         <div className="flex gap-2 w-full">
-          <div className="h-8 bg-gray-700 rounded w-1/3"></div>
-          <div className="h-8 bg-gray-700 rounded w-1/3"></div>
-          <div className="h-8 bg-gray-700 rounded w-1/3"></div>
+          <div className="h-8 bg-zinc-800 rounded w-1/3"></div>
+          <div className="h-8 bg-zinc-800 rounded w-1/3"></div>
+          <div className="h-8 bg-zinc-800 rounded w-1/3"></div>
         </div>
       </CardFooter>
     </Card>
@@ -135,27 +135,27 @@ const LinkTreeGallery = ({
   // Delete Link Tree
   const deleteLinkTree = async () => {
     const linkTreeId = deleteConfirmation.linkTreeId;
-    
+
     if (!linkTreeId) return;
 
     try {
       setIsLoadingState(true);
-  
+
       const { error } = await supabase
         .from('linktrees')
         .delete()
         .eq('id', linkTreeId);
-  
+
       if (error) {
         throw error;
       }
-  
-      setLinkTree(prevLinkTrees => 
+
+      setLinkTree(prevLinkTrees =>
         prevLinkTrees.filter(tree => tree.id !== linkTreeId)
       );
-  
+
       setDeleteConfirmation({ isOpen: false, linkTreeId: null });
-  
+
     } catch (error) {
       console.error("Error deleting Link Tree:", error);
     } finally {
@@ -189,7 +189,7 @@ const LinkTreeGallery = ({
             .toLowerCase()
             .includes(searchQuery.toLowerCase());
 
-        const matchesFilter = filterStatus === 'all' || 
+        const matchesFilter = filterStatus === 'all' ||
           (filterStatus === 'active' && tree.is_active) ||
           (filterStatus === 'archived' && !tree.is_active);
 
@@ -243,18 +243,18 @@ const LinkTreeGallery = ({
   // Error handling
   if (error) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-6 flex items-center justify-center"
+        className="min-h-screen bg-zinc-950 p-6 flex items-center justify-center"
       >
-        <Card className="bg-gray-800/50 backdrop-blur border-gray-700 p-6 text-center">
+        <Card className="bg-zinc-900 border-zinc-800 p-6 text-center">
           <CardTitle className="text-red-400 mb-4">
             Error Loading LinkTrees
           </CardTitle>
-          <p className="text-gray-400">{error}</p>
-          <Button className="mt-4" onClick={() => window.location.reload()}>
+          <p className="text-zinc-400">{error}</p>
+          <Button className="mt-4 bg-cyan-500 hover:bg-cyan-400 text-zinc-900" onClick={() => window.location.reload()}>
             Retry
           </Button>
         </Card>
@@ -276,7 +276,7 @@ const LinkTreeGallery = ({
         throw error;
       }
 
-      setLinkTree(prevLinkTrees => 
+      setLinkTree(prevLinkTrees =>
         prevLinkTrees.map(tree => {
           if (tree.id === linkTreeId) {
             return {
@@ -298,7 +298,7 @@ const LinkTreeGallery = ({
 
   const getTotalClicksForTree = (treeId) => {
     const tree = linkTree.find((tree) => tree.id === treeId);
-  
+
     if (!tree) {
       console.error(`Tree with ID ${treeId} not found.`);
       return 0;
@@ -321,9 +321,9 @@ const LinkTreeGallery = ({
     const date = new Date(dateString);
     return formatDistanceToNow(date, { addSuffix: true }); // Adds 'ago' suffix
   };
-  
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-6">
+    <div className="min-h-screen bg-zinc-950 p-6">
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -333,8 +333,8 @@ const LinkTreeGallery = ({
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">My LinkTrees</h1>
-            <p className="text-gray-400">
+            <h1 className="text-2xl font-bold text-white mb-1">My LinkTrees</h1>
+            <p className="text-zinc-500">
               Manage and organize your link collections
             </p>
           </div>
@@ -352,20 +352,20 @@ const LinkTreeGallery = ({
         {/* Search and Filters */}
         <div className="mb-6 flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500 w-4 h-4" />
             <Input
               type="text"
               placeholder="Search LinkTrees..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-gray-800/50 border-gray-700 text-white w-full"
+              className="pl-10 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 w-full"
             />
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-gray-800/50 border-gray-700 text-gray-400 px-4 py-2 rounded-md"
+              className="bg-zinc-800 border border-zinc-700 text-zinc-300 px-4 py-2 rounded-lg"
             >
               <option value="lastUpdated">Sort by Last Updated</option>
               <option value="views">Sort by Views</option>
@@ -374,7 +374,7 @@ const LinkTreeGallery = ({
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="bg-gray-800/50 border-gray-700 text-gray-400 px-4 py-2 rounded-md"
+              className="bg-zinc-800 border border-zinc-700 text-zinc-300 px-4 py-2 rounded-lg"
             >
               <option value="all">All</option>
               <option value="active">Active</option>
@@ -385,7 +385,7 @@ const LinkTreeGallery = ({
 
         {/* LinkTrees */}
         {isLoadingState ? (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
@@ -396,11 +396,11 @@ const LinkTreeGallery = ({
             ))}
           </motion.div>
         ) : filteredAndSortedTrees.length === 0 ? (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="text-center text-gray-400 py-12"
+            className="text-center text-zinc-500 py-12"
           >
             <p>No LinkTrees found. Create your first LinkTree!</p>
           </motion.div>
@@ -421,12 +421,12 @@ const LinkTreeGallery = ({
                   exit="exit"
                 >
                   <Card>
-                    <CardContent className="p-5" onClick={()=>handleTreeView(tree.id)}>
-                      <CardTitle className="text-lg font-bold text-white mb-2 flex items-center gap-5">
+                    <CardContent className="p-5" onClick={() => handleTreeView(tree.id)}>
+                      <CardTitle className="text-lg font-bold text-white mb-2 flex items-center gap-4">
                         {tree.title}
-                        <p className="text-xs text-gray-500">Last update: {formatTime(tree.updated_at)}</p>
+                        <p className="text-xs text-zinc-500">Last update: {formatTime(tree.updated_at)}</p>
                       </CardTitle>
-                      <p className="text-gray-400 text-sm mb-4">
+                      <p className="text-zinc-400 text-sm mb-4">
                         {tree.description}
                       </p>
                       <div className="flex gap-2">
@@ -447,20 +447,20 @@ const LinkTreeGallery = ({
                             Archived
                           </Badge>
                         )
-                        :
-                        (
-                          <Badge variant="outline" className="text-green-400">
-                            <Activity className="mr-2 w-4" />
-                            Active
-                          </Badge>
-                        )
-                      }
+                          :
+                          (
+                            <Badge variant="outline" className="text-green-400">
+                              <Activity className="mr-2 w-4" />
+                              Active
+                            </Badge>
+                          )
+                        }
                       </div>
-                      <div className="mt-5">
-                        <p className="text-gray-500 text-xs font-bold">Created: {formatDate(tree.created_at)}</p>
+                      <div className="mt-4">
+                        <p className="text-zinc-500 text-xs">Created: {formatDate(tree.created_at)}</p>
                       </div>
                     </CardContent>
-                    <CardFooter className="flex justify-between gap-2 items-center p-5 border-t border-gray-700">
+                    <CardFooter className="flex justify-between gap-2 items-center p-4 border-t border-zinc-800">
                       <div className="flex gap-2">
                         <div>
                           <ShareDialog linkTreeId={tree.id} />
@@ -468,7 +468,7 @@ const LinkTreeGallery = ({
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex items-center gap-2 text-gray-400 hover:text-white text-xs font-bold"
+                          className="flex items-center gap-1 border-zinc-700 text-zinc-300 hover:text-white text-xs"
                           onClick={() => navigate(`/edit/${tree.id}`)}
                         >
                           <Edit2 className="w-3" />
@@ -485,7 +485,7 @@ const LinkTreeGallery = ({
                         </Button>
                       </div>
                       <div>
-                      <Button
+                        <Button
                           size="sm"
                           onClick={() => handleArchive(tree.id)}
                           className="flex items-center gap-2 text-xs font-bold"
@@ -513,32 +513,32 @@ const LinkTreeGallery = ({
       {/* Delete Confirmation Modal */}
       <AnimatePresence>
         {deleteConfirmation.isOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-gray-950 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gray-900 p-6 rounded-lg shadow-xl border"
+              className="bg-zinc-900 p-6 rounded-xl border border-zinc-800"
             >
-              <h2 className="text-xl font-bold mb-4 text-white">Confirm Deletion</h2>
-              <p className="mb-6 text-gray-500">
-                Are you sure you want to delete this Link Tree? 
+              <h2 className="text-lg font-bold mb-3 text-white">Confirm Deletion</h2>
+              <p className="mb-6 text-zinc-400">
+                Are you sure you want to delete this Link Tree?
                 This action cannot be undone.
               </p>
               <div className="flex justify-end space-x-4">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={cancelDelete}
                 >
                   Cancel
                 </Button>
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   onClick={deleteLinkTree}
                   disabled={isLoadingState}
                   className="flex items-center gap-2"
