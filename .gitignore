@@ -27,4 +27,4 @@ server_error.txt
 *.sw?
 
 /src/generated/prisma
-server
+server/node_modules
