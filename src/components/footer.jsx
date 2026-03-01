@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Github, Twitter, LinkIcon, Mail, Phone } from "lucide-react";
+import { Github, Twitter, Mail, Phone } from "lucide-react";
 import { useState } from "react";
 
 const Footer = () => {
@@ -34,9 +34,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center">
-                <LinkIcon className="w-4 h-4 text-white" />
-              </div>
+              <img src="/images/logo.png" alt="TrimLink" className="w-9 h-9 rounded-xl object-contain" />
               <span className="text-lg font-bold text-white tracking-tight">TrimLink</span>
             </Link>
             <p className="text-sm text-slate-500 leading-relaxed">

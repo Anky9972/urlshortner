@@ -69,9 +69,7 @@ const Header = () => {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center group-hover:shadow-[0_0_20px_-4px_hsl(220,90%,56%,0.5)] transition-shadow">
-                <LinkIcon className="w-4.5 h-4.5 text-white" />
-              </div>
+              <img src="/images/logo.png" alt="TrimLink" className="w-9 h-9 rounded-xl object-contain group-hover:shadow-[0_0_20px_-4px_hsl(220,90%,56%,0.5)] transition-shadow" />
               <span className="text-lg font-bold text-white hidden sm:block tracking-tight">
                 TrimLink
               </span>
