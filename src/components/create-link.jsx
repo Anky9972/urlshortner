@@ -119,7 +119,7 @@ export function CreateLink() {
         />
         {errors.longUrl && <Error message={errors.longUrl} />}
         <div className="flex items-center gap-2">
-          <Card className="p-2">trimlynk.com</Card> /
+          <Card className="p-2">{import.meta.env.VITE_APP_DOMAIN || 'trimlynk.com'}</Card> /
           <Input
             id="customUrl"
             placeholder="Custom Link (optional)"

@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { Copy, Download, LinkIcon, Trash, Edit, ExternalLink, Check, MousePointerClick, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Copy, Download, LinkIcon, Trash, Edit, ExternalLink, Check, MousePointerClick, AlertTriangle, CheckCircle, Calendar, Globe } from 'lucide-react';
+
+const APP_DOMAIN = import.meta.env.VITE_APP_DOMAIN || 'trimlynk.com';
+const APP_URL = import.meta.env.VITE_APP_URL || 'https://trimlynk.com';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -8,7 +11,7 @@ import Modal from './modal';
 import ShareButtons from './share-buttons';
 import { BeatLoader } from 'react-spinners';
 import useFetch from '../hooks/use-fetch';
-import { deleteUrl, updateUrl } from '../db/apiUrls';
+import { deleteUrl, updateUrl } from '../api/urls';
 import PropTypes from 'prop-types';
 
 const LinkCard = ({ url, fetchUrls }) => {
@@ -16,17 +19,15 @@ const LinkCard = ({ url, fetchUrls }) => {
   const [copied, setCopied] = useState(false);
   const [editFormValues, setEditFormValues] = useState({
     title: url?.title,
-    original_url: url?.original_url,
-    custom_url: url?.custom_url || '',
-    expiration_date: url?.expiration_date || '',
+    originalUrl: url?.originalUrl,
+    customUrl: url?.customUrl || '',
+    expiresAt: url?.expiresAt || '',
   });
 
   const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, url.id);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(
-      `https://trimlynk.com/${url?.short_url}`
-    );
+    await navigator.clipboard.writeText(`${APP_URL}/${url?.short_url}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -37,17 +38,14 @@ const LinkCard = ({ url, fetchUrls }) => {
     setShowEditModal(false);
     setEditFormValues({
       title: url?.title,
-      original_url: url?.original_url,
-      custom_url: url?.custom_url || '',
-      expiration_date: url?.expiration_date || '',
+      originalUrl: url?.originalUrl,
+      customUrl: url?.customUrl || '',
+      expiresAt: url?.expiresAt || '',
     });
   };
 
   const handleChange = (e) => {
-    setEditFormValues({
-      ...editFormValues,
-      [e.target.id]: e.target.value,
-    });
+    setEditFormValues({ ...editFormValues, [e.target.id]: e.target.value });
   };
 
   const handleUpdate = async () => {
@@ -62,117 +60,92 @@ const LinkCard = ({ url, fetchUrls }) => {
 
   const downloadImage = () => {
     const anchor = document.createElement('a');
-    anchor.href = url?.qr;
+    anchor.href = url?.qrCode;
     anchor.download = url?.title;
     document.body.appendChild(anchor);
     anchor.click();
     document.body.removeChild(anchor);
   };
 
-  const shortLink = url?.custom_url || url?.short_url;
+  const shortLink = url?.customUrl || url?.shortUrl;
+  const clickCount = url?.currentClicks || url?._count?.clicks || 0;
+  const isHealthy = url?.healthChecks?.[0]?.isHealthy !== false;
+  const createdDate = url?.createdAt ? new Date(url.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
 
   return (
-    <div className="group bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-zinc-700 transition-all duration-200">
-      <div className="flex gap-4">
+    <div className="group relative rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] hover:border-[hsl(230,10%,22%)] transition-all duration-300 overflow-hidden">
+      {/* Top accent line on hover */}
+      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+      <div className="p-5 flex gap-5">
         {/* QR Code */}
-        <div className="hidden sm:block flex-shrink-0">
-          <img
-            src={url?.qr}
-            className="h-20 w-20 object-contain rounded-lg bg-white p-1"
-            alt="QR code"
-          />
+        <div className="hidden sm:flex flex-shrink-0">
+          <div className="w-[72px] h-[72px] rounded-xl bg-white p-1.5 shadow-sm">
+            <img src={url?.qrCode} className="w-full h-full object-contain rounded-md" alt="QR code" />
+          </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
           <Link to={`/link/${url?.id}`} className="block group/link">
             {/* Title */}
-            <h3 className="text-lg font-semibold text-white group-hover/link:text-cyan-400 transition-colors truncate">
+            <h3 className="text-[15px] font-semibold text-white group-hover/link:text-blue-400 transition-colors truncate">
               {url?.title}
             </h3>
 
             {/* Short URL */}
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-cyan-400 text-sm font-mono truncate">
-                trimlynk.com/{shortLink}
+            <div className="flex items-center gap-2 mt-1.5">
+              <span className="text-blue-400 text-sm font-mono truncate hover:underline">
+                {APP_DOMAIN}/{shortLink}
               </span>
-              <ExternalLink className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+              <ExternalLink className="w-3 h-3 text-slate-600 flex-shrink-0 opacity-0 group-hover/link:opacity-100 transition-opacity" />
             </div>
 
             {/* Original URL */}
-            <div className="flex items-center gap-2 mt-2 text-zinc-500">
-              <LinkIcon className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="text-xs truncate">{url?.original_url}</span>
+            <div className="flex items-center gap-2 mt-2 text-slate-500">
+              <LinkIcon className="w-3 h-3 flex-shrink-0" />
+              <span className="text-xs truncate max-w-[400px]">{url?.originalUrl}</span>
             </div>
           </Link>
 
-          {/* Meta & Actions Row */}
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-800">
-            <div className="flex items-center gap-4 text-xs text-zinc-500">
-              <span>{new Date(url?.created_at).toLocaleDateString()}</span>
-              <div className="flex items-center gap-1">
-                <MousePointerClick className="w-3.5 h-3.5" />
-                <span>{url?.clicks || 0} clicks</span>
-              </div>
-              <div className={`flex items-center gap-1 ${url?.healthChecks?.[0]?.isHealthy === false ? 'text-red-400' : 'text-emerald-400'}`}>
-                {url?.healthChecks?.[0]?.isHealthy === false ? (
-                  <>
-                    <AlertTriangle className="w-3.5 h-3.5" />
-                    <span>Broken</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="w-3.5 h-3.5" />
-                    <span>Healthy</span>
-                  </>
-                )}
-              </div>
+          {/* Meta & Actions */}
+          <div className="flex items-center justify-between mt-4 pt-3.5 border-t border-[hsl(230,10%,13%)]">
+            <div className="flex items-center gap-5 text-xs text-slate-500">
+              <span className="flex items-center gap-1.5">
+                <Calendar className="w-3 h-3" />
+                {createdDate}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <MousePointerClick className="w-3 h-3" />
+                <span className="text-white font-medium">{clickCount}</span> clicks
+              </span>
+              <span className={`flex items-center gap-1.5 ${isHealthy ? 'text-emerald-400' : 'text-red-400'}`}>
+                {isHealthy ? <CheckCircle className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
+                {isHealthy ? 'Healthy' : 'Broken'}
+              </span>
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-1">
-              <ShareButtons shortUrl={`https://trimlynk.com/${shortLink}`} />
+            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <ShareButtons shortUrl={`${APP_URL}/${shortLink}`} />
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopy}
-                className="h-8 w-8 p-0 text-zinc-400 hover:text-cyan-400 hover:bg-zinc-800"
-              >
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={downloadImage}
-                className="h-8 w-8 p-0 text-zinc-400 hover:text-violet-400 hover:bg-zinc-800"
-              >
-                <Download className="w-4 h-4" />
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleEdit}
-                className="h-8 w-8 p-0 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800"
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
+              <button onClick={handleCopy} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all" title="Copy">
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+              <button onClick={downloadImage} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-violet-400 hover:bg-violet-500/10 transition-all" title="Download QR">
+                <Download className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={handleEdit} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all" title="Edit">
+                <Edit className="w-3.5 h-3.5" />
+              </button>
+              <button
                 onClick={() => fnDelete().then(() => fetchUrls())}
                 disabled={loadingDelete}
-                className="h-8 w-8 p-0 text-zinc-400 hover:text-red-400 hover:bg-zinc-800"
+                className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                title="Delete"
               >
-                {loadingDelete ? (
-                  <BeatLoader size={4} color="white" />
-                ) : (
-                  <Trash className="w-4 h-4" />
-                )}
-              </Button>
+                {loadingDelete ? <BeatLoader size={3} color="white" /> : <Trash className="w-3.5 h-3.5" />}
+              </button>
             </div>
           </div>
         </div>
@@ -180,68 +153,65 @@ const LinkCard = ({ url, fetchUrls }) => {
 
       {/* Edit Modal */}
       <Modal isOpen={showEditModal}>
-        <div className="p-6 bg-zinc-900 rounded-xl border border-zinc-800 max-w-md mx-auto">
-          <CardTitle className="text-xl font-semibold mb-6 text-white">
+        <div className="p-6 bg-[hsl(230,12%,9%)] rounded-2xl border border-[hsl(230,10%,15%)] max-w-md mx-auto shadow-2xl">
+          {/* Top accent */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+
+          <CardTitle className="text-xl font-bold mb-6 text-white flex items-center gap-2">
+            <Edit className="w-5 h-5 text-blue-400" />
             Edit Link
           </CardTitle>
 
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm text-zinc-400">Title</label>
+            <div className="space-y-1.5">
+              <label className="text-sm text-slate-400 font-medium">Title</label>
               <Input
                 id="title"
                 placeholder="Link's Title"
                 value={editFormValues.title}
                 onChange={handleChange}
-                className="bg-zinc-800 border-zinc-700 text-white focus:border-cyan-500/50"
+                className="bg-[hsl(230,10%,12%)] border-[hsl(230,10%,20%)] text-white focus:border-blue-500/50"
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm text-zinc-400">Original URL</label>
+            <div className="space-y-1.5">
+              <label className="text-sm text-slate-400 font-medium">Original URL</label>
               <Input
-                id="original_url"
+                id="originalUrl"
                 placeholder="Enter your Long URL"
-                value={editFormValues.original_url}
+                value={editFormValues.originalUrl}
                 onChange={handleChange}
-                className="bg-zinc-800 border-zinc-700 text-white focus:border-cyan-500/50"
+                className="bg-[hsl(230,10%,12%)] border-[hsl(230,10%,20%)] text-white focus:border-blue-500/50"
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm text-zinc-400">Custom URL (optional)</label>
+            <div className="space-y-1.5">
+              <label className="text-sm text-slate-400 font-medium">Custom URL <span className="text-slate-600">(optional)</span></label>
               <Input
-                id="custom_url"
+                id="customUrl"
                 placeholder="Custom Link"
-                value={editFormValues.custom_url}
+                value={editFormValues.customUrl}
                 onChange={handleChange}
-                className="bg-zinc-800 border-zinc-700 text-white focus:border-cyan-500/50"
+                className="bg-[hsl(230,10%,12%)] border-[hsl(230,10%,20%)] text-white focus:border-blue-500/50"
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm text-zinc-400">Expiration Date</label>
+            <div className="space-y-1.5">
+              <label className="text-sm text-slate-400 font-medium">Expiration Date</label>
               <Input
                 type="datetime-local"
-                id="expiration_date"
-                value={editFormValues.expiration_date}
+                id="expiresAt"
+                value={editFormValues.expiresAt}
                 onChange={handleChange}
-                className="bg-zinc-800 border-zinc-700 text-white focus:border-cyan-500/50"
+                className="bg-[hsl(230,10%,12%)] border-[hsl(230,10%,20%)] text-white focus:border-blue-500/50"
               />
             </div>
 
-            <div className="flex gap-3 mt-6">
-              <Button
-                onClick={handleUpdate}
-                className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-zinc-900"
-              >
+            <div className="flex gap-3 mt-6 pt-4 border-t border-[hsl(230,10%,15%)]">
+              <Button onClick={handleUpdate} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl h-10">
                 Save Changes
               </Button>
-              <Button
-                onClick={handleCloseEditModal}
-                variant="outline"
-                className="flex-1 border-zinc-700 text-zinc-300 hover:bg-zinc-800"
-              >
+              <Button onClick={handleCloseEditModal} variant="outline" className="flex-1 border-[hsl(230,10%,20%)] text-slate-300 hover:bg-[hsl(230,10%,14%)] rounded-xl h-10">
                 Cancel
               </Button>
             </div>
@@ -254,18 +224,16 @@ const LinkCard = ({ url, fetchUrls }) => {
 
 LinkCard.propTypes = {
   url: PropTypes.shape({
-    id: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number
-    ]).isRequired,
+    id: PropTypes.string.isRequired,
     title: PropTypes.string,
-    original_url: PropTypes.string,
-    custom_url: PropTypes.string,
-    expiration_date: PropTypes.string,
-    short_url: PropTypes.string,
-    qr: PropTypes.string,
-    created_at: PropTypes.string,
-    clicks: PropTypes.number,
+    originalUrl: PropTypes.string,
+    customUrl: PropTypes.string,
+    expiresAt: PropTypes.string,
+    shortUrl: PropTypes.string,
+    qrCode: PropTypes.string,
+    createdAt: PropTypes.string,
+    currentClicks: PropTypes.number,
+    _count: PropTypes.shape({ clicks: PropTypes.number }),
     healthChecks: PropTypes.array,
   }).isRequired,
   fetchUrls: PropTypes.func.isRequired,

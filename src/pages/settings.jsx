@@ -10,15 +10,10 @@ import {
     Save,
     Code2,
     Activity,
-    Globe
+    Globe,
+    ChevronRight,
 } from 'lucide-react';
 import { BarLoader } from 'react-spinners';
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -31,6 +26,11 @@ import DomainsTab from '@/components/settings/domains-tab';
 import AuditLogViewer from '@/components/audit-log-viewer';
 import { SEOMetadata } from '@/components/seo-metadata';
 import { UrlState } from '@/context';
+import {
+    getApiKeys, createApiKey, deleteApiKey, updateApiKeyPermissions,
+    getWebhooks, createWebhook, deleteWebhook, updateWebhook,
+    updateUser
+} from '@/api';
 
 const Settings = () => {
     const { user } = UrlState();
@@ -52,14 +52,17 @@ const Settings = () => {
         weeklyReport: true
     });
 
-    useEffect(() => {
-        loadSettings();
-    }, []);
+    useEffect(() => { loadSettings(); }, []);
 
     const loadSettings = async () => {
         setLoading(true);
         try {
-            // Load settings from API
+            const [keysData, webhooksData] = await Promise.all([
+                getApiKeys().catch(() => []),
+                getWebhooks().catch(() => [])
+            ]);
+            setApiKeys(keysData);
+            setWebhooks(webhooksData);
         } catch (error) {
             console.error('Error loading settings:', error);
         } finally {
@@ -67,237 +70,240 @@ const Settings = () => {
         }
     };
 
-    const handleCreateApiKey = async (data) => {
-        const mockKey = {
-            id: Date.now().toString(),
-            ...data,
-            keyFull: 'tk_' + Math.random().toString(36).substring(2, 34),
-            keyMasked: '••••••••' + Math.random().toString(36).substring(2, 10),
-            isActive: true,
-            createdAt: new Date().toISOString()
-        };
-        setApiKeys([mockKey, ...apiKeys]);
-        return mockKey;
-    };
-
-    const handleDeleteApiKey = async (id) => {
-        setApiKeys(apiKeys.filter(k => k.id !== id));
-    };
-
-    const handleToggleApiKey = async (id, isActive) => {
-        setApiKeys(apiKeys.map(k => k.id === id ? { ...k, isActive } : k));
-    };
-
-    const handleCreateWebhook = async (data) => {
-        const mockWebhook = {
-            id: Date.now().toString(),
-            ...data,
-            secretFull: 'whsec_' + Math.random().toString(36).substring(2, 34),
-            secretMasked: '••••••••' + Math.random().toString(36).substring(2, 10),
-            isActive: true,
-            failureCount: 0,
-            createdAt: new Date().toISOString()
-        };
-        setWebhooks([mockWebhook, ...webhooks]);
-        return mockWebhook;
-    };
-
-    const handleDeleteWebhook = async (id) => {
-        setWebhooks(webhooks.filter(w => w.id !== id));
-    };
-
-    const handleToggleWebhook = async (id, isActive) => {
-        setWebhooks(webhooks.map(w => w.id === id ? { ...w, isActive } : w));
-    };
+    const handleCreateApiKey = async (data) => { const key = await createApiKey(data); setApiKeys([key, ...apiKeys]); return key; };
+    const handleDeleteApiKey = async (id) => { await deleteApiKey(id); setApiKeys(apiKeys.filter(k => k.id !== id)); };
+    const handleToggleApiKey = async (id, isActive) => { await updateApiKeyPermissions(id, { isActive }); setApiKeys(apiKeys.map(k => k.id === id ? { ...k, isActive } : k)); };
+    const handleCreateWebhook = async (data) => { const webhook = await createWebhook(data); setWebhooks([webhook, ...webhooks]); return webhook; };
+    const handleDeleteWebhook = async (id) => { await deleteWebhook(id); setWebhooks(webhooks.filter(w => w.id !== id)); };
+    const handleToggleWebhook = async (id, isActive) => { await updateWebhook(id, { isActive }); setWebhooks(webhooks.map(w => w.id === id ? { ...w, isActive } : w)); };
 
     const handleSaveProfile = async () => {
-        console.log('Saving profile:', profile);
+        try { await updateUser(user?.id, profile); } catch (error) { console.error('Error saving profile:', error); }
     };
 
     const tabItems = [
-        { value: 'profile', label: 'Profile', icon: User },
-        { value: 'domains', label: 'Domains', icon: Globe },
-        { value: 'api', label: 'API Keys', icon: Key },
-        { value: 'webhooks', label: 'Webhooks', icon: Webhook },
-        { value: 'audit', label: 'Audit Logs', icon: Shield },
-        { value: 'pixels', label: 'Pixels', icon: Code2 },
-        { value: 'health', label: 'Health', icon: Activity },
-        { value: 'notifications', label: 'Alerts', icon: Bell },
+        { value: 'profile', label: 'Profile', icon: User, desc: 'Account details' },
+        { value: 'domains', label: 'Domains', icon: Globe, desc: 'Custom domains' },
+        { value: 'api', label: 'API Keys', icon: Key, desc: 'Developer access' },
+        { value: 'webhooks', label: 'Webhooks', icon: Webhook, desc: 'Event hooks' },
+        { value: 'audit', label: 'Audit Logs', icon: Shield, desc: 'Activity history' },
+        { value: 'pixels', label: 'Pixels', icon: Code2, desc: 'Tracking pixels' },
+        { value: 'health', label: 'Health', icon: Activity, desc: 'Link monitoring' },
+        { value: 'notifications', label: 'Alerts', icon: Bell, desc: 'Notifications' },
     ];
+
+    const colorMap = {
+        profile: 'blue', domains: 'indigo', api: 'amber', webhooks: 'rose',
+        audit: 'violet', pixels: 'emerald', health: 'blue', notifications: 'amber',
+    };
 
     return (
         <>
             <SEOMetadata
                 title="Settings | TrimLink"
                 description="Manage your account settings, API keys, and webhooks."
-                canonical="https://trimlynk.com/settings"
+                canonical={`${import.meta.env.VITE_APP_URL || 'https://trimlynk.com'}/settings`}
             />
 
-            <div className="min-h-screen bg-zinc-950 p-4 lg:p-8">
+            <div className="min-h-screen bg-[hsl(230,15%,5%)] p-4 lg:p-8">
                 {loading && (
                     <div className="fixed top-16 left-0 right-0 z-50">
-                        <BarLoader width="100%" height={2} color="#06b6d4" />
+                        <BarLoader width="100%" height={2} color="#2563eb" />
                     </div>
                 )}
 
-                <div className="max-w-4xl mx-auto">
-                    <div className="mb-8">
-                        <h1 className="text-2xl font-semibold text-white flex items-center gap-3">
-                            <SettingsIcon className="w-6 h-6 text-zinc-400" />
-                            Settings
-                        </h1>
-                        <p className="text-zinc-500 text-sm mt-1">
-                            Manage your account and preferences
-                        </p>
-                    </div>
+                <div className="max-w-5xl mx-auto">
+                    {/* Header */}
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-8"
+                    >
+                        <div className="flex items-center gap-3 mb-1">
+                            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                                <SettingsIcon className="w-5 h-5 text-blue-400" />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-bold text-white">Settings</h1>
+                                <p className="text-slate-500 text-sm">Manage your account and preferences</p>
+                            </div>
+                        </div>
+                    </motion.div>
 
-                    <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                        <TabsList className="w-full flex bg-zinc-900 border border-zinc-800 p-1 rounded-lg h-auto">
-                            {tabItems.map((tab) => (
-                                <TabsTrigger
-                                    key={tab.value}
-                                    value={tab.value}
-                                    className="flex-1 flex items-center justify-center gap-2 data-[state=active]:bg-zinc-800 data-[state=active]:text-white text-zinc-500 rounded-md py-2.5 transition-colors"
-                                >
-                                    <tab.icon className="w-4 h-4" />
-                                    <span className="hidden sm:inline text-sm">{tab.label}</span>
-                                </TabsTrigger>
-                            ))}
-                        </TabsList>
+                    <div className="flex flex-col lg:flex-row gap-6">
+                        {/* Sidebar navigation */}
+                        <motion.nav
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="lg:w-56 shrink-0"
+                        >
+                            <div className="lg:sticky lg:top-24 space-y-1">
+                                {tabItems.map((tab) => {
+                                    const isActive = activeTab === tab.value;
+                                    return (
+                                        <button
+                                            key={tab.value}
+                                            onClick={() => setActiveTab(tab.value)}
+                                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
+                                                isActive
+                                                    ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20'
+                                                    : 'text-slate-400 hover:text-white hover:bg-[hsl(230,10%,12%)] border border-transparent'
+                                            }`}
+                                        >
+                                            <tab.icon className="w-4 h-4 shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium truncate">{tab.label}</p>
+                                                <p className="text-[10px] text-slate-600 truncate hidden lg:block">{tab.desc}</p>
+                                            </div>
+                                            {isActive && <ChevronRight className="w-3 h-3 shrink-0 hidden lg:block" />}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </motion.nav>
 
-                        {/* Profile Tab */}
-                        <TabsContent value="profile">
-                            <div className="space-y-6">
-                                <Card className="bg-zinc-900 border-zinc-800">
-                                    <CardHeader className="pb-4">
-                                        <CardTitle className="text-base font-medium text-white flex items-center gap-2">
-                                            <User className="w-4 h-4 text-cyan-400" />
-                                            Profile Information
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <label className="text-sm text-zinc-400">Name</label>
-                                                <Input
-                                                    value={profile.name}
-                                                    onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                                                    className="bg-zinc-800 border-zinc-700 text-white focus:border-zinc-600"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-sm text-zinc-400">Email</label>
-                                                <Input
-                                                    value={profile.email}
-                                                    disabled
-                                                    className="bg-zinc-800 border-zinc-700 text-zinc-500"
-                                                />
-                                            </div>
+                        {/* Content */}
+                        <motion.div
+                            key={activeTab}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="flex-1 min-w-0"
+                        >
+                            {/* Profile */}
+                            {activeTab === 'profile' && (
+                                <div className="space-y-5">
+                                    <div className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] overflow-hidden">
+                                        <div className="px-6 py-4 border-b border-[hsl(230,10%,13%)]">
+                                            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                                                <User className="w-4 h-4 text-blue-400" />
+                                                Profile Information
+                                            </h3>
                                         </div>
-                                        <Button onClick={handleSaveProfile} className="bg-cyan-500 hover:bg-cyan-400 text-zinc-900">
-                                            <Save className="w-4 h-4 mr-2" />
-                                            Save Changes
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-
-                                <Card className="bg-zinc-900 border-zinc-800 border-l-2 border-l-red-500/50">
-                                    <CardHeader className="pb-4">
-                                        <CardTitle className="text-base font-medium text-red-400 flex items-center gap-2">
-                                            <Shield className="w-4 h-4" />
-                                            Danger Zone
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-500/5 border border-red-500/20">
-                                            <div>
-                                                <p className="font-medium text-white text-sm">Delete Account</p>
-                                                <p className="text-sm text-zinc-500">Permanently delete your account</p>
+                                        <div className="p-6 space-y-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs text-slate-400 font-medium uppercase tracking-wider">Name</label>
+                                                    <Input
+                                                        value={profile.name}
+                                                        onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                                                        className="bg-[hsl(230,10%,12%)] border-[hsl(230,10%,20%)] text-white focus:border-blue-500/50"
+                                                    />
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs text-slate-400 font-medium uppercase tracking-wider">Email</label>
+                                                    <Input
+                                                        value={profile.email}
+                                                        disabled
+                                                        className="bg-[hsl(230,10%,12%)] border-[hsl(230,10%,20%)] text-slate-500"
+                                                    />
+                                                </div>
                                             </div>
-                                            <Button variant="outline" size="sm" className="border-red-500/30 text-red-400 hover:bg-red-500/10">
-                                                Delete
+                                            <Button onClick={handleSaveProfile} className="bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl h-10">
+                                                <Save className="w-4 h-4 mr-2" />
+                                                Save Changes
                                             </Button>
                                         </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </TabsContent>
+                                    </div>
 
-                        {/* Custom Domains Tab */}
-                        <TabsContent value="domains">
-                            <DomainsTab />
-                        </TabsContent>
-
-                        {/* API Keys Tab */}
-                        <TabsContent value="api">
-                            <ApiKeysManager
-                                apiKeys={apiKeys}
-                                onCreateKey={handleCreateApiKey}
-                                onDeleteKey={handleDeleteApiKey}
-                                onToggleKey={handleToggleApiKey}
-                            />
-                        </TabsContent>
-
-                        {/* Webhooks Tab */}
-                        <TabsContent value="webhooks">
-                            <WebhooksManager
-                                webhooks={webhooks}
-                                onCreateWebhook={handleCreateWebhook}
-                                onDeleteWebhook={handleDeleteWebhook}
-                                onToggleWebhook={handleToggleWebhook}
-                            />
-                        </TabsContent>
-
-                        {/* Audit Logs Tab */}
-                        <TabsContent value="audit">
-                            <AuditLogViewer />
-                        </TabsContent>
-
-                        {/* Retargeting Pixels Tab */}
-                        <TabsContent value="pixels">
-                            <RetargetingPixelsManager />
-                        </TabsContent>
-
-                        {/* Link Health Tab */}
-                        <TabsContent value="health">
-                            <LinkHealthDashboard />
-                        </TabsContent>
-
-                        {/* Notifications Tab */}
-                        <TabsContent value="notifications">
-                            <Card className="bg-zinc-900 border-zinc-800">
-                                <CardHeader className="pb-4">
-                                    <CardTitle className="text-base font-medium text-white flex items-center gap-2">
-                                        <Bell className="w-4 h-4 text-amber-400" />
-                                        Email Notifications
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-2">
-                                    {[
-                                        { key: 'emailOnClick', label: 'Click Milestones', description: 'Get notified at click milestones' },
-                                        { key: 'emailOnLinkExpiry', label: 'Link Expiration', description: 'Get notified before links expire' },
-                                        { key: 'emailOnClickLimit', label: 'Click Limit', description: 'Get notified when limit is reached' },
-                                        { key: 'weeklyReport', label: 'Weekly Report', description: 'Weekly performance summary' }
-                                    ].map((item) => (
-                                        <div key={item.key} className="flex items-center justify-between p-4 rounded-lg hover:bg-zinc-800/50 transition-colors">
-                                            <div>
-                                                <p className="font-medium text-white text-sm">{item.label}</p>
-                                                <p className="text-sm text-zinc-500">{item.description}</p>
-                                            </div>
-                                            <Switch
-                                                checked={notifications[item.key]}
-                                                onCheckedChange={(checked) => setNotifications({ ...notifications, [item.key]: checked })}
-                                            />
+                                    <div className="rounded-2xl border border-red-500/15 bg-[hsl(230,12%,9%)] overflow-hidden">
+                                        <div className="px-6 py-4 border-b border-red-500/10">
+                                            <h3 className="text-sm font-semibold text-red-400 flex items-center gap-2">
+                                                <Shield className="w-4 h-4" />
+                                                Danger Zone
+                                            </h3>
                                         </div>
-                                    ))}
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                    </Tabs>
+                                        <div className="p-6">
+                                            <div className="flex items-center justify-between p-4 rounded-xl bg-red-500/[0.04] border border-red-500/15">
+                                                <div>
+                                                    <p className="font-medium text-white text-sm">Delete Account</p>
+                                                    <p className="text-xs text-slate-500 mt-0.5">Permanently delete your account and all data</p>
+                                                </div>
+                                                <Button variant="outline" size="sm" className="border-red-500/25 text-red-400 hover:bg-red-500/10 rounded-xl text-xs">
+                                                    Delete
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Domains */}
+                            {activeTab === 'domains' && <DomainsTab />}
+
+                            {/* API Keys */}
+                            {activeTab === 'api' && (
+                                <ApiKeysManager
+                                    apiKeys={apiKeys}
+                                    onCreateKey={handleCreateApiKey}
+                                    onDeleteKey={handleDeleteApiKey}
+                                    onToggleKey={handleToggleApiKey}
+                                />
+                            )}
+
+                            {/* Webhooks */}
+                            {activeTab === 'webhooks' && (
+                                <WebhooksManager
+                                    webhooks={webhooks}
+                                    onCreateWebhook={handleCreateWebhook}
+                                    onDeleteWebhook={handleDeleteWebhook}
+                                    onToggleWebhook={handleToggleWebhook}
+                                />
+                            )}
+
+                            {/* Audit Logs */}
+                            {activeTab === 'audit' && <AuditLogViewer />}
+
+                            {/* Retargeting Pixels */}
+                            {activeTab === 'pixels' && <RetargetingPixelsManager />}
+
+                            {/* Link Health */}
+                            {activeTab === 'health' && <LinkHealthDashboard />}
+
+                            {/* Notifications */}
+                            {activeTab === 'notifications' && (
+                                <div className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] overflow-hidden">
+                                    <div className="px-6 py-4 border-b border-[hsl(230,10%,13%)]">
+                                        <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                                            <Bell className="w-4 h-4 text-amber-400" />
+                                            Email Notifications
+                                        </h3>
+                                    </div>
+                                    <div className="divide-y divide-[hsl(230,10%,13%)]">
+                                        {[
+                                            { key: 'emailOnClick', label: 'Click Milestones', desc: 'Get notified at click milestones', icon: MousePointerClick },
+                                            { key: 'emailOnLinkExpiry', label: 'Link Expiration', desc: 'Get notified before links expire', icon: Clock },
+                                            { key: 'emailOnClickLimit', label: 'Click Limit', desc: 'Get notified when limit is reached', icon: Shield },
+                                            { key: 'weeklyReport', label: 'Weekly Report', desc: 'Weekly performance summary', icon: BarChart3 }
+                                        ].map((item) => (
+                                            <div key={item.key} className="flex items-center justify-between px-6 py-4 hover:bg-[hsl(230,10%,11%)] transition-colors">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-[hsl(230,10%,14%)] flex items-center justify-center">
+                                                        {item.icon && <item.icon className="w-3.5 h-3.5 text-slate-400" />}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-white text-sm">{item.label}</p>
+                                                        <p className="text-xs text-slate-500">{item.desc}</p>
+                                                    </div>
+                                                </div>
+                                                <Switch
+                                                    checked={notifications[item.key]}
+                                                    onCheckedChange={(checked) => setNotifications({ ...notifications, [item.key]: checked })}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </motion.div>
+                    </div>
                 </div>
             </div>
         </>
     );
 };
+
+// Need these icons for notifications section
+import { MousePointerClick, Clock, BarChart3 } from 'lucide-react';
 
 export default Settings;

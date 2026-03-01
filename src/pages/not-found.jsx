@@ -20,7 +20,7 @@ const NotFoundPage = ({ isNotFound }) => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[hsl(230,15%,5%)] flex items-center justify-center p-4">
       <motion.div
         className="text-center max-w-2xl mx-auto"
         variants={containerVariants}
@@ -32,9 +32,9 @@ const NotFoundPage = ({ isNotFound }) => {
           className="mb-8 flex justify-center"
           variants={itemVariants}
         >
-          <div className="w-24 h-24 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+          <div className="w-24 h-24 rounded-2xl bg-[hsl(230,12%,9%)] border border-[hsl(230,10%,15%)] flex items-center justify-center">
             {isNotFound ? (
-              <CircleOff className="w-12 h-12 text-cyan-400" />
+              <CircleOff className="w-12 h-12 text-blue-400" />
             ) : (
               <AlertCircle className="w-12 h-12 text-amber-400" />
             )}
@@ -50,14 +50,14 @@ const NotFoundPage = ({ isNotFound }) => {
 
         {/* Error Message */}
         <motion.div variants={itemVariants}>
-          <h2 className="text-xl text-zinc-300 mb-6 font-medium">
+          <h2 className="text-xl text-slate-300 mb-6 font-medium">
             {isNotFound ? "Page Not Found" : "Something Went Wrong"}
           </h2>
         </motion.div>
 
         {/* Description */}
         <motion.div variants={itemVariants}>
-          <p className="text-zinc-500 max-w-md mx-auto mb-10 leading-relaxed">
+          <p className="text-slate-500 max-w-md mx-auto mb-10 leading-relaxed">
             {isNotFound
               ? "The page you're looking for might have been moved, deleted, or never existed."
               : "We encountered an unexpected error. Our team has been notified."}
@@ -70,7 +70,7 @@ const NotFoundPage = ({ isNotFound }) => {
           className="flex flex-col sm:flex-row items-center justify-center gap-3"
         >
           <button
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-medium transition-colors w-full sm:w-auto justify-center"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors w-full sm:w-auto justify-center"
             onClick={() => window.history.back()}
           >
             <ArrowLeft className="w-4 h-4" />
@@ -79,7 +79,7 @@ const NotFoundPage = ({ isNotFound }) => {
 
           <a
             href="/"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700 font-medium transition-colors w-full sm:w-auto justify-center"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[hsl(230,10%,14%)] hover:bg-[hsl(230,10%,20%)] text-slate-300 hover:text-white border border-[hsl(230,10%,20%)] font-medium transition-colors w-full sm:w-auto justify-center"
           >
             <Home className="w-4 h-4" />
             Return Home

@@ -54,7 +54,7 @@ const getPixelColor = (type) => {
         case 'tiktok': return 'text-pink-500';
         case 'linkedin': return 'text-blue-600';
         case 'twitter': return 'text-sky-500';
-        default: return 'text-gray-400';
+        default: return 'text-slate-400';
     }
 };
 
@@ -152,16 +152,16 @@ const RetargetingPixelsManager = () => {
 
     if (isLoading) {
         return (
-            <Card className="bg-zinc-900 border-zinc-800">
+            <Card className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
                 <CardContent className="flex items-center justify-center py-12">
-                    <Loader2 className="w-6 h-6 animate-spin text-cyan-500" />
+                    <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
                 </CardContent>
             </Card>
         );
     }
 
     return (
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
                     <Code2 className="w-5 h-5 text-violet-400" />
@@ -171,40 +171,40 @@ const RetargetingPixelsManager = () => {
                     <DialogTrigger asChild>
                         <Button
                             size="sm"
-                            className="bg-cyan-500 hover:bg-cyan-400 text-zinc-900"
+                            className="bg-blue-600 hover:bg-blue-500 text-white"
                         >
                             <Plus className="w-4 h-4 mr-1" />
                             Add Pixel
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-zinc-900 border-zinc-800">
+                    <DialogContent className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
                         <DialogHeader>
                             <DialogTitle className="text-white">
                                 {editingPixel ? 'Edit Pixel' : 'Add Retargeting Pixel'}
                             </DialogTitle>
-                            <DialogDescription className="text-gray-400">
+                            <DialogDescription className="text-slate-400">
                                 Add tracking pixels to collect audience data for retargeting campaigns.
                             </DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-300">Name</label>
+                                <label className="text-sm font-medium text-slate-300">Name</label>
                                 <Input
                                     value={formData.name}
                                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                                     placeholder="e.g., Facebook Main"
-                                    className="bg-zinc-800 border-zinc-700"
+                                    className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)]"
                                     required
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-300">Pixel Type</label>
+                                <label className="text-sm font-medium text-slate-300">Pixel Type</label>
                                 <Select
                                     value={formData.type}
                                     onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
                                 >
-                                    <SelectTrigger className="bg-zinc-800 border-zinc-700">
+                                    <SelectTrigger className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)]">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -221,15 +221,15 @@ const RetargetingPixelsManager = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-300">Pixel ID</label>
+                                <label className="text-sm font-medium text-slate-300">Pixel ID</label>
                                 <Input
                                     value={formData.pixelId}
                                     onChange={(e) => setFormData(prev => ({ ...prev, pixelId: e.target.value }))}
                                     placeholder="Enter your pixel/tag ID"
-                                    className="bg-zinc-800 border-zinc-700"
+                                    className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)]"
                                     required
                                 />
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-slate-500">
                                     Find this in your advertising platform's settings
                                 </p>
                             </div>
@@ -246,14 +246,14 @@ const RetargetingPixelsManager = () => {
                                     type="button"
                                     variant="outline"
                                     onClick={handleCloseDialog}
-                                    className="flex-1 border-zinc-700"
+                                    className="flex-1 border-[hsl(230,10%,20%)]"
                                 >
                                     Cancel
                                 </Button>
                                 <Button
                                     type="submit"
                                     disabled={isSaving}
-                                    className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-zinc-900"
+                                    className="flex-1 bg-blue-600 hover:bg-blue-500 text-white"
                                 >
                                     {isSaving ? (
                                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -278,9 +278,9 @@ const RetargetingPixelsManager = () => {
             <CardContent>
                 {pixels.length === 0 ? (
                     <div className="text-center py-8">
-                        <Code2 className="w-12 h-12 mx-auto text-gray-600 mb-3" />
-                        <p className="text-gray-400">No retargeting pixels yet</p>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <Code2 className="w-12 h-12 mx-auto text-slate-600 mb-3" />
+                        <p className="text-slate-400">No retargeting pixels yet</p>
+                        <p className="text-sm text-slate-500 mt-1">
                             Add Facebook, Google, or TikTok pixels to build audiences
                         </p>
                     </div>
@@ -294,31 +294,31 @@ const RetargetingPixelsManager = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
                                     className={`flex items-center justify-between p-4 rounded-lg border ${pixel.isActive
-                                            ? 'bg-zinc-800/50 border-zinc-700'
-                                            : 'bg-zinc-800/20 border-zinc-800 opacity-60'
+                                            ? 'bg-[hsl(230,10%,14%)]/50 border-[hsl(230,10%,20%)]'
+                                            : 'bg-[hsl(230,10%,14%)]/20 border-[hsl(230,10%,15%)] opacity-60'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-lg bg-zinc-800 ${getPixelColor(pixel.type)}`}>
+                                        <div className={`p-2 rounded-lg bg-[hsl(230,10%,14%)] ${getPixelColor(pixel.type)}`}>
                                             {getPixelIcon(pixel.type)}
                                         </div>
                                         <div>
                                             <p className="font-medium text-white">{pixel.name}</p>
-                                            <p className="text-sm text-gray-500">
+                                            <p className="text-sm text-slate-500">
                                                 {PIXEL_TYPES.find(t => t.value === pixel.type)?.label} • {pixel.pixelId}
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs text-gray-500 mr-2">
+                                        <span className="text-xs text-slate-500 mr-2">
                                             {pixel._count?.urls || 0} links
                                         </span>
                                         <Button
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => handleToggleActive(pixel)}
-                                            className={pixel.isActive ? 'text-emerald-400 hover:text-emerald-300' : 'text-gray-500 hover:text-gray-400'}
+                                            className={pixel.isActive ? 'text-emerald-400 hover:text-emerald-300' : 'text-slate-500 hover:text-slate-400'}
                                         >
                                             {pixel.isActive ? <Power className="w-4 h-4" /> : <PowerOff className="w-4 h-4" />}
                                         </Button>
@@ -326,7 +326,7 @@ const RetargetingPixelsManager = () => {
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => handleEdit(pixel)}
-                                            className="text-gray-400 hover:text-white"
+                                            className="text-slate-400 hover:text-white"
                                         >
                                             <Edit2 className="w-4 h-4" />
                                         </Button>

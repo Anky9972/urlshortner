@@ -20,12 +20,12 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-zinc-800 p-3 shadow-lg rounded-lg border border-zinc-700">
+      <div className="bg-[hsl(230,10%,14%)] p-3 shadow-lg rounded-lg border border-[hsl(230,10%,20%)]">
         <p className="font-medium text-white">{label}</p>
         <p className="text-emerald-400">
           Visitors: {payload[0].value.toLocaleString()}
         </p>
-        <p className="text-zinc-400 text-sm">
+        <p className="text-slate-400 text-sm">
           {((payload[0].value / payload[0].payload.total) * 100).toFixed(1)}% of total
         </p>
       </div>
@@ -197,7 +197,7 @@ const LocationStats = ({ stats = [] }) => {
     .slice(0, 5);
 
   return (
-    <Card className="w-full bg-zinc-900 border-zinc-800">
+    <Card className="w-full bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span className='hidden lg:flex'>Location Distribution</span>

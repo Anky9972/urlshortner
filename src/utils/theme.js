@@ -1,8 +1,8 @@
 export const defaultThemes = {
   default: {
       background: "bg-transparent border",
-      buttonStyle: "bg-gray-900 border",
-      textColor: "text-gray-300",
+      buttonStyle: "bg-[hsl(230,12%,9%)] border",
+      textColor: "text-slate-300",
       hoverEffect: "hover:bg-gray-950",
   },
   glassmorphism: {
@@ -44,7 +44,7 @@ export const defaultThemes = {
   candy: {
       background: "bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400",
       buttonStyle: "bg-white rounded-xl border-2 border-pink-200 shadow-lg shadow-pink-200/50",
-      textColor: "text-gray-700 font-medium",
+      textColor: "text-slate-700 font-medium",
       hoverEffect: "hover:shadow-xl hover:shadow-pink-300/50 hover:-translate-y-0.5 transition-all",
   },
   matrix: {

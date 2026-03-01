@@ -91,16 +91,16 @@ const LinkHealthDashboard = () => {
 
     if (isLoading) {
         return (
-            <Card className="bg-zinc-900 border-zinc-800">
+            <Card className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
                 <CardContent className="flex items-center justify-center py-12">
-                    <Loader2 className="w-6 h-6 animate-spin text-cyan-500" />
+                    <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
                 </CardContent>
             </Card>
         );
     }
 
     return (
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
                     <Activity className="w-5 h-5 text-emerald-400" />
@@ -110,7 +110,7 @@ const LinkHealthDashboard = () => {
                     onClick={handleCheckAll}
                     disabled={isChecking}
                     size="sm"
-                    className="bg-cyan-500 hover:bg-cyan-400 text-zinc-900"
+                    className="bg-blue-600 hover:bg-blue-500 text-white"
                 >
                     {isChecking ? (
                         <>
@@ -130,9 +130,9 @@ const LinkHealthDashboard = () => {
                 {/* Summary Stats */}
                 {summary && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700 text-center">
+                        <div className="p-4 rounded-lg bg-[hsl(230,10%,14%)]/50 border border-[hsl(230,10%,20%)] text-center">
                             <p className="text-2xl font-bold text-white">{summary.total}</p>
-                            <p className="text-sm text-gray-500">Total Links</p>
+                            <p className="text-sm text-slate-500">Total Links</p>
                         </div>
                         <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-center">
                             <p className="text-2xl font-bold text-emerald-400">{summary.healthy}</p>
@@ -142,23 +142,23 @@ const LinkHealthDashboard = () => {
                             <p className="text-2xl font-bold text-red-400">{summary.unhealthy}</p>
                             <p className="text-sm text-red-500/70">Unhealthy</p>
                         </div>
-                        <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700 text-center">
-                            <p className="text-2xl font-bold text-gray-400">{summary.unchecked}</p>
-                            <p className="text-sm text-gray-500">Not Checked</p>
+                        <div className="p-4 rounded-lg bg-[hsl(230,10%,14%)]/50 border border-[hsl(230,10%,20%)] text-center">
+                            <p className="text-2xl font-bold text-slate-400">{summary.unchecked}</p>
+                            <p className="text-sm text-slate-500">Not Checked</p>
                         </div>
                     </div>
                 )}
 
                 {/* Health Score */}
                 {summary && summary.total > 0 && (
-                    <div className="p-4 rounded-lg bg-zinc-800/30 border border-zinc-700">
+                    <div className="p-4 rounded-lg bg-[hsl(230,10%,14%)]/30 border border-[hsl(230,10%,20%)]">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm text-gray-400">Overall Health</span>
+                            <span className="text-sm text-slate-400">Overall Health</span>
                             <span className={`text-lg font-bold ${getHealthColor(summary.healthPercentage)}`}>
                                 {summary.healthPercentage}%
                             </span>
                         </div>
-                        <div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
+                        <div className="h-2 rounded-full bg-[hsl(230,10%,14%)] overflow-hidden">
                             <div
                                 className={`h-full transition-all duration-500 ${getHealthBg(summary.healthPercentage)}`}
                                 style={{ width: `${summary.healthPercentage}%` }}
@@ -170,7 +170,7 @@ const LinkHealthDashboard = () => {
                 {/* Unhealthy Links */}
                 {unhealthyLinks.length > 0 && (
                     <div className="space-y-3">
-                        <h3 className="text-sm font-medium text-gray-400 flex items-center gap-2">
+                        <h3 className="text-sm font-medium text-slate-400 flex items-center gap-2">
                             <XCircle className="w-4 h-4 text-red-400" />
                             Broken Links ({unhealthyLinks.length})
                         </h3>
@@ -187,7 +187,7 @@ const LinkHealthDashboard = () => {
                                         <XCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
                                         <div className="min-w-0">
                                             <p className="font-medium text-white truncate">{link.title}</p>
-                                            <p className="text-sm text-gray-500 truncate">{link.originalUrl}</p>
+                                            <p className="text-sm text-slate-500 truncate">{link.originalUrl}</p>
                                             {link.healthCheck && (
                                                 <div className="flex items-center gap-3 mt-1 text-xs text-red-400">
                                                     {link.healthCheck.statusCode && (
@@ -213,7 +213,7 @@ const LinkHealthDashboard = () => {
                                             size="sm"
                                             onClick={() => handleCheckOne(link.id)}
                                             disabled={checkingLinkId === link.id}
-                                            className="text-gray-400 hover:text-white"
+                                            className="text-slate-400 hover:text-white"
                                         >
                                             {checkingLinkId === link.id ? (
                                                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -225,7 +225,7 @@ const LinkHealthDashboard = () => {
                                             href={link.originalUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-gray-400 hover:text-white p-2"
+                                            className="text-slate-400 hover:text-white p-2"
                                         >
                                             <ExternalLink className="w-4 h-4" />
                                         </a>
@@ -241,7 +241,7 @@ const LinkHealthDashboard = () => {
                     <div className="text-center py-6">
                         <CheckCircle2 className="w-12 h-12 mx-auto text-emerald-400 mb-3" />
                         <p className="text-emerald-400 font-medium">All links are healthy!</p>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-slate-500 mt-1">
                             {summary.healthy} link{summary.healthy > 1 ? 's' : ''} verified
                         </p>
                     </div>
@@ -250,9 +250,9 @@ const LinkHealthDashboard = () => {
                 {/* No Links Message */}
                 {summary && summary.total === 0 && (
                     <div className="text-center py-6">
-                        <Activity className="w-12 h-12 mx-auto text-gray-600 mb-3" />
-                        <p className="text-gray-400">No links to monitor</p>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <Activity className="w-12 h-12 mx-auto text-slate-600 mb-3" />
+                        <p className="text-slate-400">No links to monitor</p>
+                        <p className="text-sm text-slate-500 mt-1">
                             Create some links to start monitoring their health
                         </p>
                     </div>

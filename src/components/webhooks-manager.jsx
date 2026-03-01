@@ -87,11 +87,11 @@ const WebhooksManager = ({
     };
 
     return (
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-base font-medium text-white flex items-center gap-2">
-                        <Webhook className="w-4 h-4 text-cyan-400" />
+                        <Webhook className="w-4 h-4 text-blue-400" />
                         Webhooks
                     </CardTitle>
 
@@ -99,20 +99,20 @@ const WebhooksManager = ({
                         <DialogTrigger asChild>
                             <Button
                                 size="sm"
-                                className="bg-cyan-500 hover:bg-cyan-400 text-zinc-900"
+                                className="bg-blue-600 hover:bg-blue-500 text-white"
                             >
                                 <Plus className="w-4 h-4 mr-1" />
                                 Add Webhook
                             </Button>
                         </DialogTrigger>
 
-                        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-lg">
+                        <DialogContent className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)] max-w-lg">
                             <DialogHeader>
                                 <DialogTitle className="text-white">
                                     {createdWebhook ? 'Webhook Created!' : 'Create New Webhook'}
                                 </DialogTitle>
                                 {!createdWebhook && (
-                                    <DialogDescription className="text-gray-400">
+                                    <DialogDescription className="text-slate-400">
                                         Receive real-time notifications when events happen on your links.
                                     </DialogDescription>
                                 )}
@@ -125,19 +125,19 @@ const WebhooksManager = ({
                                             <CheckCircle2 className="w-5 h-5" />
                                             <span className="font-medium">Webhook created successfully!</span>
                                         </div>
-                                        <p className="text-sm text-gray-400 mb-3">
+                                        <p className="text-sm text-slate-400 mb-3">
                                             Save your signing secret - you'll need it to verify webhook signatures.
                                         </p>
                                         <div className="space-y-2">
-                                            <label className="text-xs text-gray-500">Signing Secret</label>
+                                            <label className="text-xs text-slate-500">Signing Secret</label>
                                             <div className="flex items-center gap-2">
-                                                <code className="flex-1 p-3 bg-gray-800 rounded-lg text-sm text-cyan-300 font-mono break-all">
+                                                <code className="flex-1 p-3 bg-[hsl(230,10%,14%)] rounded-lg text-sm text-blue-300 font-mono break-all">
                                                     {createdWebhook.secretFull}
                                                 </code>
                                                 <Button
                                                     size="sm"
                                                     onClick={() => handleCopy(createdWebhook.secretFull, 'new')}
-                                                    className="bg-gray-700 hover:bg-gray-600"
+                                                    className="bg-[hsl(230,10%,20%)] hover:bg-[hsl(230,10%,25%)]"
                                                 >
                                                     {copiedId === 'new' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                                                 </Button>
@@ -151,36 +151,36 @@ const WebhooksManager = ({
                             ) : (
                                 <div className="space-y-4 mt-4">
                                     <div className="space-y-2">
-                                        <label className="text-sm text-gray-400">Webhook Name</label>
+                                        <label className="text-sm text-slate-400">Webhook Name</label>
                                         <Input
                                             placeholder="My Webhook"
                                             value={newWebhook.name}
                                             onChange={(e) => setNewWebhook({ ...newWebhook, name: e.target.value })}
-                                            className="bg-gray-800 border-gray-700"
+                                            className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)]"
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm text-gray-400">Endpoint URL</label>
+                                        <label className="text-sm text-slate-400">Endpoint URL</label>
                                         <Input
                                             type="url"
                                             placeholder="https://your-server.com/webhook"
                                             value={newWebhook.url}
                                             onChange={(e) => setNewWebhook({ ...newWebhook, url: e.target.value })}
-                                            className="bg-gray-800 border-gray-700"
+                                            className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)]"
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm text-gray-400">Events to subscribe</label>
+                                        <label className="text-sm text-slate-400">Events to subscribe</label>
                                         <div className="grid grid-cols-2 gap-2">
                                             {WEBHOOK_EVENTS.map((event) => (
                                                 <button
                                                     key={event.value}
                                                     onClick={() => handleEventToggle(event.value)}
                                                     className={`p-3 rounded-lg border text-left transition-all ${newWebhook.events.includes(event.value)
-                                                        ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-300'
-                                                        : 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-gray-600'
+                                                        ? 'bg-blue-600/10 border-blue-600/50 text-blue-300'
+                                                        : 'bg-[hsl(230,10%,14%)]/50 border-[hsl(230,10%,20%)] text-slate-400 hover:border-[hsl(230,10%,25%)]'
                                                         }`}
                                                 >
                                                     <p className="text-sm font-medium">{event.label}</p>
@@ -193,7 +193,7 @@ const WebhooksManager = ({
                                     <Button
                                         onClick={handleCreate}
                                         disabled={!newWebhook.name.trim() || !newWebhook.url.trim() || newWebhook.events.length === 0 || creating}
-                                        className="w-full bg-cyan-500 hover:bg-cyan-600"
+                                        className="w-full bg-blue-600 hover:bg-blue-500"
                                     >
                                         {creating ? 'Creating...' : 'Create Webhook'}
                                     </Button>
@@ -202,7 +202,7 @@ const WebhooksManager = ({
                         </DialogContent>
                     </Dialog>
                 </div>
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-sm text-slate-400 mt-1">
                     Get notified instantly when events happen on your links
                 </p>
             </CardHeader>
@@ -210,9 +210,9 @@ const WebhooksManager = ({
             <CardContent>
                 {webhooks.length === 0 ? (
                     <div className="text-center py-8">
-                        <Webhook className="w-12 h-12 mx-auto text-gray-600 mb-3" />
-                        <p className="text-gray-500">No webhooks configured</p>
-                        <p className="text-sm text-gray-600">Add a webhook to receive real-time events</p>
+                        <Webhook className="w-12 h-12 mx-auto text-slate-600 mb-3" />
+                        <p className="text-slate-500">No webhooks configured</p>
+                        <p className="text-sm text-slate-600">Add a webhook to receive real-time events</p>
                     </div>
                 ) : (
                     <div className="space-y-3">
@@ -223,8 +223,8 @@ const WebhooksManager = ({
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}
                                 className={`p-4 rounded-lg border transition-all ${webhook.isActive
-                                    ? 'bg-gray-800/30 border-gray-700 hover:border-gray-600'
-                                    : 'bg-gray-900/50 border-gray-800 opacity-60'
+                                    ? 'bg-[hsl(230,10%,14%)]/30 border-[hsl(230,10%,20%)] hover:border-[hsl(230,10%,25%)]'
+                                    : 'bg-[hsl(230,12%,9%)]/50 border-[hsl(230,10%,15%)] opacity-60'
                                     }`}
                             >
                                 <div className="flex items-start justify-between gap-4">
@@ -238,7 +238,7 @@ const WebhooksManager = ({
                                                 </span>
                                             )}
                                             {!webhook.isActive && (
-                                                <span className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-400">
+                                                <span className="text-xs px-2 py-0.5 rounded-full bg-[hsl(230,10%,20%)] text-slate-400">
                                                     Disabled
                                                 </span>
                                             )}
@@ -248,7 +248,7 @@ const WebhooksManager = ({
                                             href={webhook.url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-sm text-gray-500 hover:text-gray-400 flex items-center gap-1 truncate"
+                                            className="text-sm text-slate-500 hover:text-slate-400 flex items-center gap-1 truncate"
                                         >
                                             {webhook.url}
                                             <ExternalLink className="w-3 h-3 flex-shrink-0" />
@@ -258,7 +258,7 @@ const WebhooksManager = ({
                                             {webhook.events?.map((event) => (
                                                 <span
                                                     key={event}
-                                                    className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-400"
+                                                    className="text-xs px-2 py-0.5 rounded-full bg-[hsl(230,10%,20%)] text-slate-400"
                                                 >
                                                     {event}
                                                 </span>
@@ -266,7 +266,7 @@ const WebhooksManager = ({
                                         </div>
 
                                         {webhook.lastTriggeredAt && (
-                                            <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                                            <p className="text-xs text-slate-600 mt-2 flex items-center gap-1">
                                                 <Clock className="w-3 h-3" />
                                                 Last triggered: {new Date(webhook.lastTriggeredAt).toLocaleString()}
                                             </p>
@@ -278,7 +278,7 @@ const WebhooksManager = ({
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => onToggleWebhook?.(webhook.id, !webhook.isActive)}
-                                            className={webhook.isActive ? 'text-emerald-400' : 'text-gray-500'}
+                                            className={webhook.isActive ? 'text-emerald-400' : 'text-slate-500'}
                                         >
                                             {webhook.isActive ? (
                                                 <ToggleRight className="w-5 h-5" />
@@ -302,9 +302,9 @@ const WebhooksManager = ({
                 )}
 
                 {/* Webhook Payload Example */}
-                <div className="mt-6 p-4 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                    <h4 className="font-medium text-cyan-300 mb-2">Example Payload</h4>
-                    <pre className="p-3 bg-gray-900 rounded-lg text-xs text-gray-300 overflow-x-auto">
+                <div className="mt-6 p-4 rounded-lg bg-blue-600/10 border border-blue-600/20">
+                    <h4 className="font-medium text-blue-300 mb-2">Example Payload</h4>
+                    <pre className="p-3 bg-[hsl(230,12%,9%)] rounded-lg text-xs text-slate-300 overflow-x-auto">
                         {`{
   "event": "click",
   "timestamp": "2024-12-14T18:30:00Z",

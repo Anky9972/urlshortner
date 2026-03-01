@@ -73,9 +73,9 @@ const Sidebar = ({
   return (
     <motion.div
 
-      className={`lg:w-80 fixed lg:relative left-0 right-0 ${sidebarOpen ? "visible" : "hidden"} z-10 bg-zinc-900 top h-screen shadow-xl lg:relative lg:rounded-xl border border-zinc-800`}
+      className={`lg:w-80 fixed lg:relative left-0 right-0 ${sidebarOpen ? "visible" : "hidden"} z-10 bg-[hsl(230,12%,9%)] top h-screen shadow-xl lg:relative lg:rounded-xl border border-[hsl(230,10%,15%)]`}
     >
-      <span className="p-1.5 lg:hidden border border-zinc-700 absolute right-2 top-2 rounded-lg hover:bg-zinc-800 cursor-pointer text-zinc-400 hover:text-white transition-colors" onClick={() => setSidebarOpen(!sidebarOpen)}>
+      <span className="p-1.5 lg:hidden border border-[hsl(230,10%,20%)] absolute right-2 top-2 rounded-lg hover:bg-[hsl(230,10%,14%)] cursor-pointer text-slate-400 hover:text-white transition-colors" onClick={() => setSidebarOpen(!sidebarOpen)}>
         <IoClose />
       </span>
       <div className="p-5 h-full mt-5 lg:mt-0">
@@ -86,8 +86,8 @@ const Sidebar = ({
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-3 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${activeTab === tab
-                ? "bg-zinc-800 text-white"
-                : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50"
+                ? "bg-[hsl(230,10%,14%)] text-white"
+                : "text-slate-500 hover:text-slate-300 hover:bg-[hsl(230,10%,14%)]/50"
                 }`}
             >
               {tab}
@@ -108,14 +108,14 @@ const Sidebar = ({
                   <motion.div
                     key={link.id}
                     layout
-                    className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4"
+                    className="bg-[hsl(230,10%,14%)]/50 border border-[hsl(230,10%,20%)]/50 rounded-xl p-4"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-1">
-                        <button className="p-1.5 hover:bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-400 hover:text-white transition-colors">
+                        <button className="p-1.5 hover:bg-[hsl(230,10%,20%)] border border-[hsl(230,10%,25%)] rounded-lg text-slate-400 hover:text-white transition-colors">
                           <ChevronUp size={14} />
                         </button>
-                        <button className="p-1.5 hover:bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-400 hover:text-white transition-colors">
+                        <button className="p-1.5 hover:bg-[hsl(230,10%,20%)] border border-[hsl(230,10%,25%)] rounded-lg text-slate-400 hover:text-white transition-colors">
                           <ChevronDown size={14} />
                         </button>
                       </div>
@@ -123,7 +123,7 @@ const Sidebar = ({
                         onClick={() =>
                           setLinks(links.filter((l) => l.id !== link.id))
                         }
-                        className="p-1.5 text-red-400 hover:bg-red-500/10 border border-zinc-600 rounded-lg transition-colors"
+                        className="p-1.5 text-red-400 hover:bg-red-500/10 border border-[hsl(230,10%,25%)] rounded-lg transition-colors"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -138,7 +138,7 @@ const Sidebar = ({
                           newLinks[index].title = e.target.value;
                           setLinks(newLinks);
                         }}
-                        className="w-full px-3 py-2 text-white text-sm rounded-lg border border-zinc-700 bg-zinc-800 focus:border-cyan-500/50 focus:outline-none transition-colors"
+                        className="w-full px-3 py-2 text-white text-sm rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors"
                         placeholder="Link Title"
                       />
                       <input
@@ -149,7 +149,7 @@ const Sidebar = ({
                           newLinks[index].url = e.target.value;
                           setLinks(newLinks);
                         }}
-                        className="w-full px-3 py-2 text-white text-sm rounded-lg border border-zinc-700 bg-zinc-800 focus:border-cyan-500/50 focus:outline-none transition-colors"
+                        className="w-full px-3 py-2 text-white text-sm rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors"
                         placeholder="URL"
                       />
 
@@ -160,7 +160,7 @@ const Sidebar = ({
                           newLinks[index].icon = e.target.value;
                           setLinks(newLinks);
                         }}
-                        className="w-full px-3 py-2 text-white text-sm rounded-lg border border-zinc-700 bg-zinc-800 focus:border-cyan-500/50 focus:outline-none transition-colors"
+                        className="w-full px-3 py-2 text-white text-sm rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors"
                       >
                         {Object.keys(socialIcons).map((icon) => (
                           <option key={icon} value={icon}>
@@ -174,7 +174,7 @@ const Sidebar = ({
 
                 <button
                   onClick={addLink}
-                  className="w-full py-3 border-2 border-dashed border-zinc-700 rounded-xl text-zinc-400 hover:border-cyan-500/50 hover:text-cyan-400 flex items-center justify-center gap-2 transition-colors"
+                  className="w-full py-3 border-2 border-dashed border-[hsl(230,10%,20%)] rounded-xl text-slate-400 hover:border-blue-600/50 hover:text-blue-400 flex items-center justify-center gap-2 transition-colors"
                 >
                   <PlusCircle size={18} />
                   <span>Add New Link</span>
@@ -185,7 +185,7 @@ const Sidebar = ({
             {activeTab === "appearance" && (
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     Theme
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -194,8 +194,8 @@ const Sidebar = ({
                         key={theme}
                         onClick={() => setProfile({ ...profile, theme })}
                         className={`p-3 rounded-lg border transition-colors ${profile.theme === theme
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
-                            : "border-zinc-700 hover:border-zinc-600 text-zinc-400"
+                            ? "border-blue-600/50 bg-blue-600/10 text-blue-400"
+                            : "border-[hsl(230,10%,20%)] hover:border-[hsl(230,10%,25%)] text-slate-400"
                           }`}
                       >
                         <div className="text-sm font-medium capitalize">
@@ -207,12 +207,12 @@ const Sidebar = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     Custom Colors
                   </label>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-xs text-zinc-500">
+                      <label className="text-xs text-slate-500">
                         Background
                       </label>
                       <input
@@ -227,11 +227,11 @@ const Sidebar = ({
                             },
                           })
                         }
-                        className="w-full h-10 rounded-lg bg-zinc-800 border border-zinc-700 cursor-pointer"
+                        className="w-full h-10 rounded-lg bg-[hsl(230,10%,14%)] border border-[hsl(230,10%,20%)] cursor-pointer"
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-zinc-500">
+                      <label className="text-xs text-slate-500">
                         Button Style
                       </label>
                       <input
@@ -246,7 +246,7 @@ const Sidebar = ({
                             },
                           })
                         }
-                        className="w-full h-10 rounded-lg bg-zinc-800 border border-zinc-700 cursor-pointer"
+                        className="w-full h-10 rounded-lg bg-[hsl(230,10%,14%)] border border-[hsl(230,10%,20%)] cursor-pointer"
                       />
                     </div>
                   </div>
@@ -257,7 +257,7 @@ const Sidebar = ({
             {activeTab === "settings" && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     Profile Name
                   </label>
                   <input
@@ -266,22 +266,22 @@ const Sidebar = ({
                     onChange={(e) =>
                       setProfile({ ...profile, name: e.target.value })
                     }
-                    className="w-full px-3 py-2 text-white text-sm rounded-lg border border-zinc-700 bg-zinc-800 focus:border-cyan-500/50 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 text-white text-sm rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     LinkTree Title
                   </label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full px-3 py-2 text-white text-sm rounded-lg border border-zinc-700 bg-zinc-800 focus:border-cyan-500/50 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 text-white text-sm rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     Bio
                   </label>
                   <textarea
@@ -289,7 +289,7 @@ const Sidebar = ({
                     onChange={(e) =>
                       setProfile({ ...profile, bio: e.target.value })
                     }
-                    className="w-full px-3 py-2 text-white text-sm rounded-lg border border-zinc-700 bg-zinc-800 focus:border-cyan-500/50 focus:outline-none transition-colors resize-none"
+                    className="w-full px-3 py-2 text-white text-sm rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors resize-none"
                     rows={3}
                   />
                 </div>

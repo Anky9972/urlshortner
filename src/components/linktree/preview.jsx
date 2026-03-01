@@ -66,9 +66,9 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center mb-8"
         >
-          <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-zinc-800 border border-zinc-700">
+          <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-[hsl(230,10%,14%)] border border-[hsl(230,10%,20%)]">
             <img
-              src={user?.user_metadata?.profile_pic}
+              src={user?.avatarUrl || ""}
               alt="Profile"
               className="w-full h-full object-cover"
             />
@@ -79,7 +79,7 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
           {/* <h1 className={`text-3xl font-bold ${theme.textColor} mt-2`}>
             {profile.treetitle}
           </h1> */}
-          <p className="text-zinc-400">{profile.bio}</p>
+          <p className="text-slate-400">{profile.bio}</p>
         </motion.div>
 
         <motion.div

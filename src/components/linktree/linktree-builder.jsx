@@ -6,8 +6,7 @@ import { Plus } from "lucide-react";
 import { SEOMetadata } from "../seo-metadata";
 import { v4 as uuidv4 } from 'uuid';
 import { UrlState } from "@/context";
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { getMyLinkTrees, getLinkTree, createLinkTree, updateLinkTree, bulkUpdateLinks } from "@/api/linktrees";
 
 const LinkTreeBuilder = () => {
   const { user, loading: authLoading } = UrlState();
@@ -67,11 +66,35 @@ const LinkTreeBuilder = () => {
 
     try {
       setIsLoading(true);
-      // TODO: Implement API call to fetch existing linktrees
-      // For now, just set loading to false
-      setIsLoading(false);
+      const trees = await getMyLinkTrees();
+      if (trees && trees.length > 0) {
+        const tree = await getLinkTree(trees[0].id);
+        setLinkTreeId(tree.id);
+        setTitle(tree.title || "Your Link Tree");
+        setIsactive(tree.isPublic !== false);
+        setViews(tree.viewCount || 0);
+        setProfile({
+          name: tree.title || user?.name || "Your Name",
+          bio: tree.description || "Your Bio ✨",
+          theme: tree.theme || "default",
+          customColors: {
+            background: tree.backgroundColor || "#1a1a1a",
+            text: tree.textColor || "#ffffff",
+            button: "#ffffff20",
+          },
+        });
+        if (tree.links && tree.links.length > 0) {
+          setLinks(tree.links.map(l => ({
+            id: l.id,
+            title: l.title,
+            url: l.url,
+            icon: l.icon || "website",
+          })));
+        }
+      }
     } catch (error) {
       console.error("Error loading LinkTree:", error);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -97,30 +120,49 @@ const LinkTreeBuilder = () => {
       return;
     }
 
-    // Generate UUIDs for links
     const linksWithUuid = links.map(link => ({
       ...link,
       id: link.id || uuidv4(),
     }));
 
-    const linkTreeData = {
-      profile,
-      links: linksWithUuid,
-      userId: user.id,
-      title,
-      isActive: is_active,
-      views
-    };
-
     try {
-      // TODO: Implement actual API call to save linktree
-      // For now, simulate success
-      console.log('Saving LinkTree:', linkTreeData);
-
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      setLinkTreeId(uuidv4());
+      if (linkTreeId) {
+        // Update existing
+        await updateLinkTree(linkTreeId, {
+          title: profile.name || title,
+          description: profile.bio,
+          theme: profile.theme,
+          backgroundColor: profile.customColors?.background,
+          textColor: profile.customColors?.text,
+          isPublic: is_active,
+        });
+        await bulkUpdateLinks(linkTreeId, linksWithUuid.map((l, i) => ({
+          id: typeof l.id === 'string' && l.id.includes('-') ? l.id : undefined,
+          title: l.title,
+          url: l.url,
+          icon: l.icon,
+          order: i,
+        })));
+      } else {
+        // Create new
+        const created = await createLinkTree({
+          title: profile.name || title,
+          description: profile.bio,
+          theme: profile.theme,
+          backgroundColor: profile.customColors?.background,
+          textColor: profile.customColors?.text,
+          isPublic: is_active,
+        });
+        setLinkTreeId(created.id);
+        if (linksWithUuid.length > 0) {
+          await bulkUpdateLinks(created.id, linksWithUuid.map((l, i) => ({
+            title: l.title,
+            url: l.url,
+            icon: l.icon,
+            order: i,
+          })));
+        }
+      }
       setSaveSuccess(true);
     } catch (error) {
       console.error("Save error:", error);
@@ -132,10 +174,10 @@ const LinkTreeBuilder = () => {
 
   if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-zinc-950">
+      <div className="min-h-screen w-full flex items-center justify-center bg-[hsl(230,15%,5%)]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-zinc-400">Loading...</span>
+          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <span className="text-slate-400">Loading...</span>
         </div>
       </div>
     );
@@ -143,12 +185,12 @@ const LinkTreeBuilder = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-zinc-950">
-        <div className="text-center p-8 rounded-2xl bg-zinc-900/50 border border-zinc-800 max-w-md">
+      <div className="min-h-screen w-full flex items-center justify-center bg-[hsl(230,15%,5%)]">
+        <div className="text-center p-8 rounded-2xl bg-[hsl(230,12%,9%)]/50 border border-[hsl(230,10%,15%)] max-w-md">
           <h2 className="text-xl font-semibold text-white mb-2">Sign in Required</h2>
-          <p className="text-zinc-400 mb-6">Please sign in to create your LinkTree</p>
+          <p className="text-slate-400 mb-6">Please sign in to create your LinkTree</p>
           <button
-            className="px-6 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-medium transition-colors"
+            className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
             onClick={() => navigate("/auth")}
           >
             Sign in
@@ -163,17 +205,17 @@ const LinkTreeBuilder = () => {
       <SEOMetadata
         title="Create Your Link Tree | TrimLink"
         description="Build a personalized link tree to showcase all your important links in one place. Perfect for social media bio links and personal branding."
-        canonical="https://trimlynk.com/link-tree"
+        canonical={`${import.meta.env.VITE_APP_URL || 'https://trimlynk.com'}/link-tree`}
         keywords="link in bio, link tree, bio link page, social media links, personal landing page, multiple links"
         author="TrimLink"
         language="en"
       />
-      <div className="min-h-screen w-full bg-zinc-950">
+      <div className="min-h-screen w-full bg-[hsl(230,15%,5%)]">
         <main className="w-full flex gap-5 lg:p-2 h-full relative">
           <span className="absolute lg:hidden">
             <Plus
               size={24}
-              className="fixed top-20 right-4 bg-zinc-800 p-1 rounded-md cursor-pointer hover:bg-zinc-700 transition-colors text-white"
+              className="fixed top-20 right-4 bg-[hsl(230,10%,14%)] p-1 rounded-md cursor-pointer hover:bg-[hsl(230,10%,20%)] transition-colors text-white"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             />
           </span>

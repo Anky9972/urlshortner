@@ -1,6 +1,8 @@
 import { Helmet } from 'react-helmet-async';
 import PropTypes from 'prop-types';
 
+const APP_URL = import.meta.env.VITE_APP_URL || 'https://trimlynk.com';
+
 export const SEOMetadata = ({
   title,
   description,
@@ -60,10 +62,10 @@ export const SEOSchema = ({ type, data }) => {
       "@type": "WebSite",
       name: "TrimLink",
       description: "Professional URL shortener service with analytics",
-      url: "https://trimlynk.com",
+      url: APP_URL,
       potentialAction: {
         "@type": "SearchAction",
-        target: "https://trimlynk.com/search?q={search_term_string}",
+        target: `${APP_URL}/search?q={search_term_string}`,
         "query-input": "required name=search_term_string"
       }
     },
@@ -71,10 +73,10 @@ export const SEOSchema = ({ type, data }) => {
       "@context": "https://schema.org",
       "@type": "Organization",
       name: "TrimLink",
-      url: "https://trimlynk.com",
-      logo: "https://trimlynk.com/images/logo.png",
+      url: APP_URL,
+      logo: `${APP_URL}/images/logo.png`,
       sameAs: [
-        "https://trimlink.netlify.app",
+        APP_URL,
         "https://twitter.com/trimlink",
         "https://facebook.com/trimlink",
         "https://linkedin.com/company/trimlink"
@@ -114,9 +116,9 @@ const Dashboard = () => {
       <SEOMetadata
         title="Dashboard"
         description="Manage your shortened URLs and track their performance with detailed analytics."
-        canonical="https://trimlynk.com/dashboard"
+        canonical={`${APP_URL}/dashboard`}
         keywords="url shortener, link management, analytics, dashboard"
-        ogImage="https://trimlynk.com/dashboard-preview.jpg"
+        ogImage={`${APP_URL}/dashboard-preview.jpg`}
       />
       <SEOSchema type="website" />
 

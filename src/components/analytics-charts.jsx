@@ -36,8 +36,8 @@ const COLORS = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#06B6D4'
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-700 rounded-lg p-3 shadow-xl">
-                <p className="text-gray-300 font-medium mb-1">{label}</p>
+            <div className="bg-[hsl(230,12%,9%)]/95 backdrop-blur-sm border border-[hsl(230,10%,20%)] rounded-lg p-3 shadow-xl">
+                <p className="text-slate-300 font-medium mb-1">{label}</p>
                 {payload.map((entry, index) => (
                     <p key={index} className="text-sm" style={{ color: entry.color }}>
                         {entry.name}: {entry.value.toLocaleString()}
@@ -60,7 +60,7 @@ export const ClicksTimeChart = ({ data }) => {
     }, [data]);
 
     return (
-        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
+        <Card className="bg-[hsl(230,10%,14%)]/50 backdrop-blur-sm border-[hsl(230,10%,20%)]/50">
             <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-blue-400" />
@@ -109,7 +109,7 @@ export const DeviceChart = ({ data }) => {
     }, [data]);
 
     return (
-        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
+        <Card className="bg-[hsl(230,10%,14%)]/50 backdrop-blur-sm border-[hsl(230,10%,20%)]/50">
             <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                     <Smartphone className="w-5 h-5 text-purple-400" />
@@ -144,7 +144,7 @@ export const DeviceChart = ({ data }) => {
                                 className="w-3 h-3 rounded-full"
                                 style={{ backgroundColor: COLORS[index % COLORS.length] }}
                             />
-                            <span className="text-sm text-gray-400 capitalize">{entry.name}</span>
+                            <span className="text-sm text-slate-400 capitalize">{entry.name}</span>
                         </div>
                     ))}
                 </div>
@@ -164,7 +164,7 @@ export const CountryChart = ({ data }) => {
     }, [data]);
 
     return (
-        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
+        <Card className="bg-[hsl(230,10%,14%)]/50 backdrop-blur-sm border-[hsl(230,10%,20%)]/50">
             <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                     <Globe className="w-5 h-5 text-emerald-400" />
@@ -203,10 +203,10 @@ export const BrowserChart = ({ data }) => {
     }, [data]);
 
     return (
-        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
+        <Card className="bg-[hsl(230,10%,14%)]/50 backdrop-blur-sm border-[hsl(230,10%,20%)]/50">
             <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
-                    <Chrome className="w-5 h-5 text-cyan-400" />
+                    <Chrome className="w-5 h-5 text-blue-400" />
                     Browser Stats
                 </CardTitle>
             </CardHeader>
@@ -224,10 +224,10 @@ export const BrowserChart = ({ data }) => {
                                 className="space-y-1"
                             >
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-gray-300 capitalize">{item.name}</span>
-                                    <span className="text-gray-500">{item.value.toLocaleString()}</span>
+                                    <span className="text-slate-300 capitalize">{item.name}</span>
+                                    <span className="text-slate-500">{item.value.toLocaleString()}</span>
                                 </div>
-                                <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                <div className="h-2 bg-[hsl(230,10%,20%)] rounded-full overflow-hidden">
                                     <motion.div
                                         initial={{ width: 0 }}
                                         animate={{ width: `${percentage}%` }}
@@ -248,7 +248,7 @@ export const BrowserChart = ({ data }) => {
 // Top Referrers
 export const ReferrerChart = ({ data }) => {
     return (
-        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
+        <Card className="bg-[hsl(230,10%,14%)]/50 backdrop-blur-sm border-[hsl(230,10%,20%)]/50">
             <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                     <ExternalLink className="w-5 h-5 text-pink-400" />
@@ -258,7 +258,7 @@ export const ReferrerChart = ({ data }) => {
             <CardContent>
                 <div className="space-y-2">
                     {(!data || data.length === 0) ? (
-                        <p className="text-gray-500 text-sm text-center py-4">No referrer data available</p>
+                        <p className="text-slate-500 text-sm text-center py-4">No referrer data available</p>
                     ) : (
                         data.slice(0, 5).map((item, index) => (
                             <motion.div
@@ -266,10 +266,10 @@ export const ReferrerChart = ({ data }) => {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}
-                                className="flex items-center justify-between p-2 rounded-lg bg-gray-900/30 hover:bg-gray-900/50 transition-colors"
+                                className="flex items-center justify-between p-2 rounded-lg bg-[hsl(230,12%,9%)]/30 hover:bg-[hsl(230,12%,9%)]/50 transition-colors"
                             >
-                                <span className="text-gray-300 text-sm truncate flex-1">{item.domain}</span>
-                                <span className="text-gray-500 text-sm ml-2">{item.count.toLocaleString()}</span>
+                                <span className="text-slate-300 text-sm truncate flex-1">{item.domain}</span>
+                                <span className="text-slate-500 text-sm ml-2">{item.count.toLocaleString()}</span>
                             </motion.div>
                         ))
                     )}
@@ -295,7 +295,7 @@ export const PeakHoursChart = ({ data }) => {
     }, [data]);
 
     return (
-        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
+        <Card className="bg-[hsl(230,10%,14%)]/50 backdrop-blur-sm border-[hsl(230,10%,20%)]/50">
             <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                     <Clock className="w-5 h-5 text-amber-400" />
@@ -340,7 +340,7 @@ export const StatsSummary = ({ totalClicks, uniqueVisitors, avgClicksPerDay }) =
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-400">{stat.label}</p>
+                                    <p className="text-sm text-slate-400">{stat.label}</p>
                                     <p className="text-3xl font-bold text-white mt-1">
                                         {stat.value?.toLocaleString() || 0}
                                     </p>

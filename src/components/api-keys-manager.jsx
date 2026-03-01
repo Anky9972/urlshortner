@@ -66,7 +66,7 @@ const ApiKeysManager = ({
     };
 
     return (
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-base font-medium text-white flex items-center gap-2">
@@ -85,13 +85,13 @@ const ApiKeysManager = ({
                             </Button>
                         </DialogTrigger>
 
-                        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-lg">
+                        <DialogContent className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)] max-w-lg">
                             <DialogHeader>
                                 <DialogTitle className="text-white">
                                     {createdKey ? 'API Key Created!' : 'Create New API Key'}
                                 </DialogTitle>
                                 {!createdKey && (
-                                    <DialogDescription className="text-gray-400">
+                                    <DialogDescription className="text-slate-400">
                                         API keys allow you to access the TrimLink API programmatically.
                                     </DialogDescription>
                                 )}
@@ -104,17 +104,17 @@ const ApiKeysManager = ({
                                             <Shield className="w-5 h-5" />
                                             <span className="font-medium">Save this key now!</span>
                                         </div>
-                                        <p className="text-sm text-gray-400 mb-3">
+                                        <p className="text-sm text-slate-400 mb-3">
                                             This is the only time you'll see this key. Store it securely.
                                         </p>
                                         <div className="flex items-center gap-2">
-                                            <code className="flex-1 p-3 bg-gray-800 rounded-lg text-sm text-emerald-300 font-mono break-all">
+                                            <code className="flex-1 p-3 bg-[hsl(230,10%,14%)] rounded-lg text-sm text-emerald-300 font-mono break-all">
                                                 {createdKey.keyFull}
                                             </code>
                                             <Button
                                                 size="sm"
                                                 onClick={() => handleCopy(createdKey.keyFull, 'new')}
-                                                className="bg-gray-700 hover:bg-gray-600"
+                                                className="bg-[hsl(230,10%,20%)] hover:bg-[hsl(230,10%,25%)]"
                                             >
                                                 {copiedId === 'new' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                                             </Button>
@@ -127,21 +127,21 @@ const ApiKeysManager = ({
                             ) : (
                                 <div className="space-y-4 mt-4">
                                     <div className="space-y-2">
-                                        <label className="text-sm text-gray-400">Key Name</label>
+                                        <label className="text-sm text-slate-400">Key Name</label>
                                         <Input
                                             placeholder="Production API Key"
                                             value={newKeyData.name}
                                             onChange={(e) => setNewKeyData({ ...newKeyData, name: e.target.value })}
-                                            className="bg-gray-800 border-gray-700"
+                                            className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)]"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm text-gray-400">Description (optional)</label>
+                                        <label className="text-sm text-slate-400">Description (optional)</label>
                                         <Input
                                             placeholder="Used for main website integration"
                                             value={newKeyData.description}
                                             onChange={(e) => setNewKeyData({ ...newKeyData, description: e.target.value })}
-                                            className="bg-gray-800 border-gray-700"
+                                            className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)]"
                                         />
                                     </div>
                                     <Button
@@ -156,7 +156,7 @@ const ApiKeysManager = ({
                         </DialogContent>
                     </Dialog>
                 </div>
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-sm text-slate-400 mt-1">
                     Manage API keys for programmatic access to your links
                 </p>
             </CardHeader>
@@ -164,9 +164,9 @@ const ApiKeysManager = ({
             <CardContent>
                 {apiKeys.length === 0 ? (
                     <div className="text-center py-8">
-                        <Key className="w-12 h-12 mx-auto text-gray-600 mb-3" />
-                        <p className="text-gray-500">No API keys yet</p>
-                        <p className="text-sm text-gray-600">Create your first API key to get started</p>
+                        <Key className="w-12 h-12 mx-auto text-slate-600 mb-3" />
+                        <p className="text-slate-500">No API keys yet</p>
+                        <p className="text-sm text-slate-600">Create your first API key to get started</p>
                     </div>
                 ) : (
                     <div className="space-y-3">
@@ -177,8 +177,8 @@ const ApiKeysManager = ({
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}
                                 className={`p-4 rounded-lg border transition-all ${key.isActive
-                                    ? 'bg-gray-800/30 border-gray-700 hover:border-gray-600'
-                                    : 'bg-gray-900/50 border-gray-800 opacity-60'
+                                    ? 'bg-[hsl(230,10%,14%)]/30 border-[hsl(230,10%,20%)] hover:border-[hsl(230,10%,25%)]'
+                                    : 'bg-[hsl(230,12%,9%)]/50 border-[hsl(230,10%,15%)] opacity-60'
                                     }`}
                             >
                                 <div className="flex items-start justify-between gap-4">
@@ -186,16 +186,16 @@ const ApiKeysManager = ({
                                         <div className="flex items-center gap-2 mb-1">
                                             <h4 className="font-medium text-white truncate">{key.name}</h4>
                                             {!key.isActive && (
-                                                <span className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-400">
+                                                <span className="text-xs px-2 py-0.5 rounded-full bg-[hsl(230,10%,20%)] text-slate-400">
                                                     Disabled
                                                 </span>
                                             )}
                                         </div>
                                         {key.description && (
-                                            <p className="text-sm text-gray-500 mb-2">{key.description}</p>
+                                            <p className="text-sm text-slate-500 mb-2">{key.description}</p>
                                         )}
-                                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                                            <code className="font-mono bg-gray-800 px-2 py-1 rounded">
+                                        <div className="flex items-center gap-4 text-xs text-slate-500">
+                                            <code className="font-mono bg-[hsl(230,10%,14%)] px-2 py-1 rounded">
                                                 {key.keyMasked}
                                             </code>
                                             {key.lastUsedAt && (
@@ -212,7 +212,7 @@ const ApiKeysManager = ({
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => onToggleKey?.(key.id, !key.isActive)}
-                                            className={key.isActive ? 'text-emerald-400' : 'text-gray-500'}
+                                            className={key.isActive ? 'text-emerald-400' : 'text-slate-500'}
                                         >
                                             {key.isActive ? (
                                                 <ToggleRight className="w-5 h-5" />
@@ -238,8 +238,8 @@ const ApiKeysManager = ({
                 {/* API Documentation Link */}
                 <div className="mt-6 p-4 rounded-lg bg-purple-500/10 border border-purple-500/20">
                     <h4 className="font-medium text-purple-300 mb-2">Quick Start</h4>
-                    <code className="block p-3 bg-gray-900 rounded-lg text-sm text-gray-300 overflow-x-auto">
-                        {`curl -X GET "https://api.trimlynk.com/v1/urls" \\
+                    <code className="block p-3 bg-[hsl(230,12%,9%)] rounded-lg text-sm text-slate-300 overflow-x-auto">
+                        {`curl -X GET "${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/urls" \\
   -H "Authorization: Bearer YOUR_API_KEY"`}
                     </code>
                 </div>

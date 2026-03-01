@@ -175,7 +175,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
         <>
             <Button
                 onClick={() => setIsOpen(true)}
-                className="bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-medium transition-colors"
+                className="bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
             >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Link
@@ -188,7 +188,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                     exit={{ opacity: 0, scale: 0.95 }}
                     className="max-w-2xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar"
                 >
-                    <Card className="bg-zinc-900 border-zinc-800">
+                    <Card className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
                         <CardHeader className="pb-4">
                             <div className="flex items-center justify-between">
                                 <CardTitle className="text-xl font-semibold text-white flex items-center gap-2">
@@ -199,7 +199,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => setIsOpen(false)}
-                                    className="text-gray-400 hover:text-white"
+                                    className="text-slate-400 hover:text-white"
                                 >
                                     <X className="w-5 h-5" />
                                 </Button>
@@ -211,7 +211,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                 {/* Basic Info */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                        <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
                                             <Hash className="w-4 h-4 text-blue-400" />
                                             Title
                                         </label>
@@ -220,7 +220,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                             placeholder="My awesome link"
                                             value={formData.title}
                                             onChange={handleChange}
-                                            className={`bg-gray-800/50 border-gray-700 focus:border-blue-500 ${errors.title ? 'border-red-500' : ''
+                                            className={`bg-[hsl(230,10%,14%)]/50 border-[hsl(230,10%,20%)] focus:border-blue-500 ${errors.title ? 'border-red-500' : ''
                                                 }`}
                                         />
                                         {errors.title && (
@@ -229,25 +229,25 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                        <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
                                             <Link2 className="w-4 h-4 text-blue-400" />
                                             Custom Slug (optional)
                                         </label>
                                         <div className="flex items-center">
-                                            <span className="text-xs text-gray-500 mr-2">trimlynk.com/</span>
+                                            <span className="text-xs text-slate-500 mr-2">{import.meta.env.VITE_APP_DOMAIN || 'trimlynk.com'}/</span>
                                             <Input
                                                 name="customUrl"
                                                 placeholder="my-brand"
                                                 value={formData.customUrl}
                                                 onChange={handleChange}
-                                                className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                                                className="bg-[hsl(230,10%,14%)]/50 border-[hsl(230,10%,20%)] focus:border-blue-500"
                                             />
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                    <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
                                         <Link2 className="w-4 h-4 text-purple-400" />
                                         Destination URL
                                     </label>
@@ -257,7 +257,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                         placeholder="https://example.com/very-long-url-here"
                                         value={formData.longUrl}
                                         onChange={handleChange}
-                                        className={`bg-gray-800/50 border-gray-700 focus:border-purple-500 ${errors.longUrl ? 'border-red-500' : ''
+                                        className={`bg-[hsl(230,10%,14%)]/50 border-[hsl(230,10%,20%)] focus:border-purple-500 ${errors.longUrl ? 'border-red-500' : ''
                                             }`}
                                     />
                                     {errors.longUrl && (
@@ -287,7 +287,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                 <button
                                     type="button"
                                     onClick={() => setShowAdvanced(!showAdvanced)}
-                                    className="w-full flex items-center justify-center gap-2 py-2 text-sm text-gray-400 hover:text-gray-200 transition-colors"
+                                    className="w-full flex items-center justify-center gap-2 py-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
                                 >
                                     <Zap className="w-4 h-4" />
                                     Advanced Options
@@ -305,11 +305,11 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: 'auto' }}
                                             exit={{ opacity: 0, height: 0 }}
-                                            className="space-y-5 border-t border-gray-700/50 pt-5"
+                                            className="space-y-5 border-t border-[hsl(230,10%,20%)]/50 pt-5"
                                         >
                                             {/* Password Protection */}
                                             <div className="space-y-2">
-                                                <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                                <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
                                                     <Lock className="w-4 h-4 text-amber-400" />
                                                     Password Protection (optional)
                                                 </label>
@@ -320,12 +320,12 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                                         placeholder="Enter password to protect link"
                                                         value={formData.password}
                                                         onChange={handleChange}
-                                                        className="bg-gray-800/50 border-gray-700 focus:border-amber-500 pr-10"
+                                                        className="bg-[hsl(230,10%,14%)]/50 border-[hsl(230,10%,20%)] focus:border-amber-500 pr-10"
                                                     />
                                                     <button
                                                         type="button"
                                                         onClick={() => setShowPassword(!showPassword)}
-                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-400"
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-400"
                                                     >
                                                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                                     </button>
@@ -335,7 +335,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                             {/* Scheduling */}
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div className="space-y-2">
-                                                    <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                                    <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
                                                         <Clock className="w-4 h-4 text-emerald-400" />
                                                         Activates At
                                                     </label>
@@ -344,12 +344,12 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                                         type="datetime-local"
                                                         value={formData.activatesAt}
                                                         onChange={handleChange}
-                                                        className="bg-gray-800/50 border-gray-700 focus:border-emerald-500"
+                                                        className="bg-[hsl(230,10%,14%)]/50 border-[hsl(230,10%,20%)] focus:border-emerald-500"
                                                     />
                                                 </div>
 
                                                 <div className="space-y-2">
-                                                    <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                                    <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
                                                         <Clock className="w-4 h-4 text-rose-400" />
                                                         Deactivates At
                                                     </label>
@@ -358,7 +358,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                                         type="datetime-local"
                                                         value={formData.deactivatesAt}
                                                         onChange={handleChange}
-                                                        className="bg-gray-800/50 border-gray-700 focus:border-rose-500"
+                                                        className="bg-[hsl(230,10%,14%)]/50 border-[hsl(230,10%,20%)] focus:border-rose-500"
                                                     />
                                                 </div>
                                             </div>
@@ -366,8 +366,8 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                             {/* Click Limit & Expiration */}
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div className="space-y-2">
-                                                    <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                                                        <MousePointerClick className="w-4 h-4 text-cyan-400" />
+                                                    <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                                                        <MousePointerClick className="w-4 h-4 text-blue-400" />
                                                         Click Limit
                                                     </label>
                                                     <Input
@@ -376,12 +376,12 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                                         placeholder="Unlimited"
                                                         value={formData.clickLimit}
                                                         onChange={handleChange}
-                                                        className="bg-gray-800/50 border-gray-700 focus:border-cyan-500"
+                                                        className="bg-[hsl(230,10%,14%)]/50 border-[hsl(230,10%,20%)] focus:border-blue-600"
                                                     />
                                                 </div>
 
                                                 <div className="space-y-2">
-                                                    <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                                    <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
                                                         <Calendar className="w-4 h-4 text-pink-400" />
                                                         Expiration Date
                                                     </label>
@@ -390,7 +390,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                                         type="datetime-local"
                                                         value={formData.expirationDate}
                                                         onChange={handleChange}
-                                                        className="bg-gray-800/50 border-gray-700 focus:border-pink-500"
+                                                        className="bg-[hsl(230,10%,14%)]/50 border-[hsl(230,10%,20%)] focus:border-pink-500"
                                                     />
                                                 </div>
                                             </div>
@@ -398,7 +398,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                             {/* Folder Selection */}
                                             {folders.length > 0 && (
                                                 <div className="space-y-2">
-                                                    <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                                    <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
                                                         <Folder className="w-4 h-4 text-blue-400" />
                                                         Folder
                                                     </label>
@@ -406,7 +406,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                                         name="folderId"
                                                         value={formData.folderId}
                                                         onChange={handleChange}
-                                                        className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-gray-200 focus:border-blue-500 focus:outline-none"
+                                                        className="w-full px-3 py-2 bg-[hsl(230,10%,14%)]/50 border border-[hsl(230,10%,20%)] rounded-lg text-slate-200 focus:border-blue-500 focus:outline-none"
                                                     >
                                                         <option value="">No folder</option>
                                                         {folders.map(folder => (
@@ -421,7 +421,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                             {/* Tag Selection */}
                                             {tags.length > 0 && (
                                                 <div className="space-y-2">
-                                                    <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                                    <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
                                                         <Tag className="w-4 h-4 text-amber-400" />
                                                         Tags
                                                     </label>
@@ -442,7 +442,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                                                     }}
                                                                     className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5 ${isSelected
                                                                         ? 'bg-amber-500/20 text-amber-400 border border-amber-500/50'
-                                                                        : 'bg-gray-800/50 text-gray-400 border border-gray-700 hover:border-gray-600'
+                                                                        : 'bg-[hsl(230,10%,14%)]/50 text-slate-400 border border-[hsl(230,10%,20%)] hover:border-[hsl(230,10%,25%)]'
                                                                         }`}
                                                                 >
                                                                     {isSelected && <Check className="w-3 h-3" />}
@@ -457,7 +457,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                             {/* Pixel Selection */}
                                             {pixels.length > 0 && (
                                                 <div className="space-y-2">
-                                                    <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                                    <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
                                                         <Code2 className="w-4 h-4 text-pink-400" />
                                                         Retargeting Pixels
                                                     </label>
@@ -478,7 +478,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                                                     }}
                                                                     className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5 ${isSelected
                                                                         ? 'bg-pink-500/20 text-pink-400 border border-pink-500/50'
-                                                                        : 'bg-gray-800/50 text-gray-400 border border-gray-700 hover:border-gray-600'
+                                                                        : 'bg-[hsl(230,10%,14%)]/50 text-slate-400 border border-[hsl(230,10%,20%)] hover:border-[hsl(230,10%,25%)]'
                                                                         }`}
                                                                 >
                                                                     {isSelected && <Check className="w-3 h-3" />}
@@ -491,12 +491,12 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                             )}
 
                                             {/* URL Cloaking */}
-                                            <div className="flex items-center justify-between p-4 rounded-lg bg-gray-800/30 border border-gray-700">
+                                            <div className="flex items-center justify-between p-4 rounded-lg bg-[hsl(230,10%,14%)]/30 border border-[hsl(230,10%,20%)]">
                                                 <div className="flex items-center gap-3">
                                                     <Cloak className="w-5 h-5 text-violet-400" />
                                                     <div>
-                                                        <p className="text-sm font-medium text-gray-200">URL Cloaking</p>
-                                                        <p className="text-xs text-gray-500">Hide destination URL from browser address bar</p>
+                                                        <p className="text-sm font-medium text-slate-200">URL Cloaking</p>
+                                                        <p className="text-xs text-slate-500">Hide destination URL from browser address bar</p>
                                                     </div>
                                                 </div>
                                                 <Switch
@@ -506,13 +506,13 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                             </div>
 
                                             {/* Rotator Link Configuration */}
-                                            <div className="space-y-4 pt-4 border-t border-gray-800">
-                                                <div className="flex items-center justify-between p-4 rounded-lg bg-gray-800/30 border border-gray-700">
+                                            <div className="space-y-4 pt-4 border-t border-[hsl(230,10%,15%)]">
+                                                <div className="flex items-center justify-between p-4 rounded-lg bg-[hsl(230,10%,14%)]/30 border border-[hsl(230,10%,20%)]">
                                                     <div className="flex items-center gap-3">
                                                         <Target className="w-5 h-5 text-orange-400" />
                                                         <div>
-                                                            <p className="text-sm font-medium text-gray-200">Rotator Link</p>
-                                                            <p className="text-xs text-gray-500">Rotate between multiple destinations (Split Testing / Round Robin)</p>
+                                                            <p className="text-sm font-medium text-slate-200">Rotator Link</p>
+                                                            <p className="text-xs text-slate-500">Rotate between multiple destinations (Split Testing / Round Robin)</p>
                                                         </div>
                                                     </div>
                                                     <Switch
@@ -523,7 +523,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
 
                                                 {formData.isRotator && (
                                                     <div className="space-y-3 pl-4 border-l-2 border-orange-500/20">
-                                                        <p className="text-sm text-gray-400">Destinations (First URL is default)</p>
+                                                        <p className="text-sm text-slate-400">Destinations (First URL is default)</p>
                                                         {formData.rotatorDestinations?.map((dest, index) => (
                                                             <div key={index} className="flex gap-2">
                                                                 <Input
@@ -534,7 +534,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                                                         newDests[index].url = e.target.value;
                                                                         setFormData(prev => ({ ...prev, rotatorDestinations: newDests }));
                                                                     }}
-                                                                    className="bg-gray-800 border-gray-700"
+                                                                    className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)]"
                                                                 />
                                                                 <Input
                                                                     type="number"
@@ -545,7 +545,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                                                         newDests[index].weight = parseInt(e.target.value) || 0;
                                                                         setFormData(prev => ({ ...prev, rotatorDestinations: newDests }));
                                                                     }}
-                                                                    className="w-24 bg-gray-800 border-gray-700"
+                                                                    className="w-24 bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)]"
                                                                 />
                                                                 <Button
                                                                     type="button"
@@ -564,7 +564,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                                             type="button"
                                                             variant="outline"
                                                             size="sm"
-                                                            className="w-full border-dashed border-gray-700 text-gray-400 hover:text-white"
+                                                            className="w-full border-dashed border-[hsl(230,10%,20%)] text-slate-400 hover:text-white"
                                                             onClick={() => setFormData(prev => ({
                                                                 ...prev,
                                                                 rotatorDestinations: [...(prev.rotatorDestinations || []), { url: '', weight: 1 }]
@@ -598,10 +598,10 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                                 <Button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full h-11 bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-medium transition-colors"
+                                    className="w-full h-11 bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
                                 >
                                     {isLoading ? (
-                                        <BeatLoader size={10} color="#09090b" />
+                                        <BeatLoader size={10} color="#ffffff" />
                                     ) : (
                                         <>
                                             <Plus className="w-5 h-5 mr-2" />

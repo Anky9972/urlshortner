@@ -54,7 +54,7 @@ const Features = () => {
   ];
 
   const colorClasses = {
-    cyan: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+    cyan: "bg-blue-600/10 text-blue-400 border-blue-600/20",
     violet: "bg-violet-500/10 text-violet-400 border-violet-500/20",
     emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
     amber: "bg-amber-500/10 text-amber-400 border-amber-500/20",
@@ -71,7 +71,7 @@ const Features = () => {
               key={i}
               className="group"
             >
-              <Card className="h-full bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors p-5">
+              <Card className="h-full bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)] hover:border-[hsl(230,10%,20%)] transition-colors p-5">
                 <div className="flex flex-col space-y-3">
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${colorClasses[f.color]}`}>
                     <Icon className="w-5 h-5" />
@@ -81,7 +81,7 @@ const Features = () => {
                     {f.feature}
                   </h3>
 
-                  <p className="text-sm text-zinc-500">
+                  <p className="text-sm text-slate-500">
                     {f.description}
                   </p>
                 </div>

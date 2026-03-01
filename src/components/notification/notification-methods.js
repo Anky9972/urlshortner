@@ -37,14 +37,27 @@ export const createNotification = async (userId, type, content) => {
 };
 
 export const sendRoomInvitation = async (roomId, inviterId, invitedEmail) => {
-  // This would need a dedicated API endpoint
-  console.log('Room invitation:', { roomId, inviterId, invitedEmail });
-  // TODO: Implement room invitation API
+  try {
+    return await apiRequest(`/api/rooms/${roomId}/members`, {
+      method: 'POST',
+      body: JSON.stringify({ email: invitedEmail }),
+    });
+  } catch (error) {
+    console.error('Error sending room invitation:', error);
+    throw error;
+  }
 };
 
 export const sendGlobalAnnouncement = async (message) => {
-  // Admin only feature - would need separate endpoint
-  console.log('Global announcement:', message);
+  try {
+    return await apiRequest('/api/notifications/broadcast', {
+      method: 'POST',
+      body: JSON.stringify({ type: 'announcement', title: 'Announcement', message }),
+    });
+  } catch (error) {
+    console.error('Error sending announcement:', error);
+    throw error;
+  }
 };
 
 export const fetchNotifications = async () => {

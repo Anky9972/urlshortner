@@ -38,32 +38,32 @@ const AuditLogViewer = () => {
     };
 
     return (
-        <Card className="bg-zinc-900 border-zinc-800 text-white">
+        <Card className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)] text-white">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-gray-400" />
+                    <Shield className="h-5 w-5 text-slate-400" />
                     Security Audit Logs
                 </CardTitle>
-                <CardDescription className="text-zinc-400">
+                <CardDescription className="text-slate-400">
                     Track sensitive actions and security events on your account.
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="rounded-md border border-zinc-800 bg-zinc-950/50">
-                    <div className="flex items-center gap-2 p-3 border-b border-zinc-800 bg-zinc-900/50 text-xs font-mono text-zinc-500">
+                <div className="rounded-md border border-[hsl(230,10%,15%)] bg-[hsl(230,15%,5%)]/50">
+                    <div className="flex items-center gap-2 p-3 border-b border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)]/50 text-xs font-mono text-slate-500">
                         <Terminal className="h-3 w-3" />
                         <span>Recent Activity Log</span>
                     </div>
                     <ScrollArea className="h-[400px]">
                         {loading ? (
-                            <div className="p-8 text-center text-zinc-500 text-sm">Loading logs...</div>
+                            <div className="p-8 text-center text-slate-500 text-sm">Loading logs...</div>
                         ) : logs.length === 0 ? (
-                            <div className="p-8 text-center text-zinc-500 text-sm">No activity recorded yet.</div>
+                            <div className="p-8 text-center text-slate-500 text-sm">No activity recorded yet.</div>
                         ) : (
-                            <div className="divide-y divide-zinc-800/50">
+                            <div className="divide-y divide-[hsl(230,10%,15%)]/50">
                                 {logs.map((log) => (
-                                    <div key={log.id} className="p-4 hover:bg-zinc-900/30 transition-colors flex items-start gap-4">
-                                        <div className="min-w-[140px] text-xs text-zinc-500 flex items-center gap-1.5 pt-0.5">
+                                    <div key={log.id} className="p-4 hover:bg-[hsl(230,12%,9%)]/30 transition-colors flex items-start gap-4">
+                                        <div className="min-w-[140px] text-xs text-slate-500 flex items-center gap-1.5 pt-0.5">
                                             <Clock className="h-3 w-3" />
                                             {format(new Date(log.createdAt), 'MMM d, HH:mm:ss')}
                                         </div>
@@ -72,15 +72,15 @@ const AuditLogViewer = () => {
                                                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${getActionColor(log.action)}`}>
                                                     {log.action}
                                                 </span>
-                                                <span className="text-sm font-medium text-zinc-300">
+                                                <span className="text-sm font-medium text-slate-300">
                                                     {log.entityType}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-zinc-400 font-mono">
+                                            <p className="text-xs text-slate-400 font-mono">
                                                 {JSON.stringify(log.details)}
                                             </p>
                                         </div>
-                                        <div className="text-right text-xs text-zinc-600">
+                                        <div className="text-right text-xs text-slate-600">
                                             {log.ipAddress}
                                         </div>
                                     </div>

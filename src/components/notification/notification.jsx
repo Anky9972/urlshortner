@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import supabase from '@/db/supabase';
 import {
   Bell,
   Clock,
@@ -20,7 +19,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { fetchNotifications } from './notification-methods';
+import {
+  fetchNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+} from './notification-methods';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 const NotificationManager = () => {
   const [notifications, setNotifications] = useState([]);
@@ -28,71 +33,53 @@ const NotificationManager = () => {
   const [filter, setFilter] = useState('all');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchNotifications().then(data => {
-      if (data) setNotifications(data);
-      setIsLoading(false);
-    });
-
-    const channel = supabase
-      .channel('notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications'
-        },
-        (payload) => {
-          setNotifications(prev => [payload.new, ...prev]);
-          const content = payload.new.content;
-          toast(content.title, {
-            description: content.message,
-            action: {
-              label: 'View',
-              onClick: () => handleNotificationClick(payload.new)
-            }
-          });
-        }
-      )
-      .subscribe();
-
-    fetchNotifications();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+  const loadNotifications = useCallback(async () => {
+    const data = await fetchNotifications();
+    if (data) setNotifications(data);
   }, []);
 
-  const handleNotificationClick = async (notification) => {
-    await supabase
-      .from('notifications')
-      .update({ is_read: true })
-      .eq('id', notification.id);
+  useEffect(() => {
+    loadNotifications().then(() => setIsLoading(false));
 
-    const content = notification.content;
-    switch (content.type) {
-      case 'room_invitation':
-        navigateToInvitation(content.roomId);
-        break;
+    // Poll for new notifications every 30 seconds
+    const interval = setInterval(loadNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [loadNotifications]);
+
+  const handleNotificationClick = async (notification) => {
+    try {
+      await markNotificationRead(notification.id);
+      setNotifications(prev => prev.filter(n => n.id !== notification.id));
+
+      const data = notification.data || notification.content || {};
+      if (data.type === 'room_invitation' || notification.type === 'room_invite') {
+        navigateToInvitation(data.roomId);
+      }
+    } catch (error) {
+      console.error('Error handling notification:', error);
     }
   };
 
   const handleMarkAllRead = async () => {
-    await supabase
-      .from('notifications')
-      .update({ is_read: true })
-      .in('id', notifications.map(n => n.id));
-    setNotifications([]);
+    try {
+      await markAllNotificationsRead();
+      setNotifications([]);
+    } catch (error) {
+      console.error('Error marking all read:', error);
+    }
   };
 
   const handleDeleteNotification = async (e, notificationId) => {
     e.stopPropagation();
-    await supabase
-      .from('notifications')
-      .delete()
-      .eq('id', notificationId);
-    setNotifications(prev => prev.filter(n => n.id !== notificationId));
+    try {
+      await fetch(`${API_URL}/api/notifications/${notificationId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
   };
 
   const navigateToInvitation = (roomId) => {
@@ -115,50 +102,51 @@ const NotificationManager = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'room_invitation':
-        return <Users className="w-4 h-4 text-cyan-400" />;
+        return <Users className="w-4 h-4 text-blue-400" />;
       case 'message':
         return <MessageSquare className="w-4 h-4 text-emerald-400" />;
       case 'alert':
         return <AlertCircle className="w-4 h-4 text-red-400" />;
       default:
-        return <Bell className="w-4 h-4 text-zinc-400" />;
+        return <Bell className="w-4 h-4 text-slate-400" />;
     }
   };
 
   const getNotificationBadge = (type) => {
     const badges = {
-      'room_invitation': { label: 'Invitation', class: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
+      'room_invitation': { label: 'Invitation', class: 'bg-blue-600/10 text-blue-400 border-blue-600/20' },
       'message': { label: 'Message', class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
       'alert': { label: 'Alert', class: 'bg-red-500/10 text-red-400 border-red-500/20' },
     };
-    return badges[type] || { label: 'Notification', class: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' };
+    return badges[type] || { label: 'Notification', class: 'bg-slate-500/10 text-slate-400 border-slate-500/20' };
   };
 
-  const filteredNotifications = notifications.filter(notification =>
-    filter === 'all' || notification.content.type === filter
-  );
+  const filteredNotifications = notifications.filter(notification => {
+    const type = notification.type || notification.content?.type;
+    return filter === 'all' || type === filter;
+  });
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[hsl(230,15%,5%)] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-zinc-400">Loading notifications...</span>
+          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <span className="text-slate-400">Loading notifications...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 p-4 md:p-6">
-      <Card className="w-full max-w-2xl mx-auto bg-zinc-900 border-zinc-800">
-        <CardHeader className="border-b border-zinc-800">
+    <div className="min-h-screen bg-[hsl(230,15%,5%)] p-4 md:p-6">
+      <Card className="w-full max-w-2xl mx-auto bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
+        <CardHeader className="border-b border-[hsl(230,10%,15%)]">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-white">
-              <Bell className="w-5 h-5 text-cyan-400" />
+              <Bell className="w-5 h-5 text-blue-400" />
               Notifications
               {notifications.length > 0 && (
-                <Badge className="ml-2 bg-cyan-500/10 text-cyan-400 border-cyan-500/20">
+                <Badge className="ml-2 bg-blue-600/10 text-blue-400 border-blue-600/20">
                   {notifications.length}
                 </Badge>
               )}
@@ -166,21 +154,21 @@ const NotificationManager = () => {
             <div className="flex gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
+                  <Button variant="outline" size="sm" className="border-[hsl(230,10%,20%)] text-slate-300 hover:bg-[hsl(230,10%,14%)]">
                     Filter
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-zinc-900 border-zinc-800">
-                  <DropdownMenuItem onClick={() => setFilter('all')} className="text-zinc-300 focus:bg-zinc-800">
+                <DropdownMenuContent className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
+                  <DropdownMenuItem onClick={() => setFilter('all')} className="text-slate-300 focus:bg-[hsl(230,10%,14%)]">
                     All
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilter('room_invitation')} className="text-zinc-300 focus:bg-zinc-800">
+                  <DropdownMenuItem onClick={() => setFilter('room_invitation')} className="text-slate-300 focus:bg-[hsl(230,10%,14%)]">
                     Invitations
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilter('message')} className="text-zinc-300 focus:bg-zinc-800">
+                  <DropdownMenuItem onClick={() => setFilter('message')} className="text-slate-300 focus:bg-[hsl(230,10%,14%)]">
                     Messages
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilter('alert')} className="text-zinc-300 focus:bg-zinc-800">
+                  <DropdownMenuItem onClick={() => setFilter('alert')} className="text-slate-300 focus:bg-[hsl(230,10%,14%)]">
                     Alerts
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -190,7 +178,7 @@ const NotificationManager = () => {
                   variant="outline"
                   size="sm"
                   onClick={handleMarkAllRead}
-                  className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                  className="border-[hsl(230,10%,20%)] text-slate-300 hover:bg-[hsl(230,10%,14%)]"
                 >
                   <Check className="w-4 h-4 mr-1" />
                   Mark all read
@@ -198,14 +186,14 @@ const NotificationManager = () => {
               )}
             </div>
           </div>
-          <p className="text-sm text-zinc-500 mt-1">Stay updated with your latest notifications</p>
+          <p className="text-sm text-slate-500 mt-1">Stay updated with your latest notifications</p>
         </CardHeader>
         <CardContent className="p-0">
           {filteredNotifications.length === 0 ? (
             <div className="text-center py-12">
-              <Bell className="w-10 h-10 mx-auto mb-3 text-zinc-700" />
-              <p className="text-zinc-400 font-medium">No new notifications</p>
-              <p className="text-sm text-zinc-600 mt-1">We&apos;ll notify you when something new arrives</p>
+              <Bell className="w-10 h-10 mx-auto mb-3 text-slate-600" />
+              <p className="text-slate-400 font-medium">No new notifications</p>
+              <p className="text-sm text-slate-600 mt-1">We&apos;ll notify you when something new arrives</p>
             </div>
           ) : (
             <div className="divide-y divide-zinc-800">
@@ -213,29 +201,29 @@ const NotificationManager = () => {
                 <div
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
-                  className="flex items-start gap-3 p-4 hover:bg-zinc-800/50 transition-colors cursor-pointer group"
+                  className="flex items-start gap-3 p-4 hover:bg-[hsl(230,10%,14%)]/50 transition-colors cursor-pointer group"
                 >
-                  <div className="flex-shrink-0 mt-1 p-2 rounded-lg bg-zinc-800">
-                    {getNotificationIcon(notification.content.type)}
+                  <div className="flex-shrink-0 mt-1 p-2 rounded-lg bg-[hsl(230,10%,14%)]">
+                    {getNotificationIcon(notification.type || notification.content?.type)}
                   </div>
                   <div className="flex-grow min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <Badge
                         variant="outline"
-                        className={getNotificationBadge(notification.content.type).class}
+                        className={getNotificationBadge(notification.type || notification.content?.type).class}
                       >
-                        {getNotificationBadge(notification.content.type).label}
+                        {getNotificationBadge(notification.type || notification.content?.type).label}
                       </Badge>
-                      <span className="text-xs text-zinc-500 flex items-center gap-1">
+                      <span className="text-xs text-slate-500 flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        {formatTimestamp(notification.created_at)}
+                        {formatTimestamp(notification.createdAt || notification.created_at)}
                       </span>
                     </div>
                     <p className="font-medium text-sm text-white">
-                      {notification.content.title}
+                      {notification.title || notification.content?.title}
                     </p>
-                    <p className="text-sm text-zinc-500 mt-0.5 line-clamp-1">
-                      {notification.content.message}
+                    <p className="text-sm text-slate-500 mt-0.5 line-clamp-1">
+                      {notification.message || notification.content?.message}
                     </p>
                   </div>
                   <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">

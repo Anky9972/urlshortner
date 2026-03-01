@@ -66,7 +66,8 @@ const BulkOperations = ({
             headers.join(','),
             ...urls.map(url => [
                 `"${url.title || ''}"`,
-                `"https://trimlynk.com/${url.short_url || url.shortUrl}"`,
+                `"${import.meta.env.VITE_APP_URL || 'https://trimlynk.com'}/${url.short_url || url.shortUrl}"`,
+
                 `"${url.original_url || url.originalUrl}"`,
                 url._count?.clicks || url.currentClicks || 0,
                 url.created_at || url.createdAt,
@@ -161,7 +162,7 @@ const BulkOperations = ({
                         {/* Select All / Deselect */}
                         <button
                             onClick={() => allSelected ? onDeselectAll?.() : onSelectAll?.()}
-                            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                            className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors"
                         >
                             {allSelected ? (
                                 <CheckSquare className="w-5 h-5 text-blue-400" />
@@ -186,7 +187,7 @@ const BulkOperations = ({
                                 variant="outline"
                                 size="sm"
                                 onClick={handleExport}
-                                className="border-gray-700 hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-emerald-400"
+                                className="border-[hsl(230,10%,20%)] hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-emerald-400"
                             >
                                 <Download className="w-4 h-4 mr-2" />
                                 Export CSV
@@ -198,16 +199,16 @@ const BulkOperations = ({
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="border-gray-700 hover:bg-blue-500/10 hover:border-blue-500/50 hover:text-blue-400"
+                                        className="border-[hsl(230,10%,20%)] hover:bg-blue-500/10 hover:border-blue-500/50 hover:text-blue-400"
                                     >
                                         <Upload className="w-4 h-4 mr-2" />
                                         Import CSV
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="bg-gray-900 border-gray-700">
+                                <DialogContent className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,20%)]">
                                     <DialogHeader>
                                         <DialogTitle className="gradient-text">Import Links from CSV</DialogTitle>
-                                        <DialogDescription className="text-gray-400">
+                                        <DialogDescription className="text-slate-400">
                                             Upload a CSV file with columns: Title, Original URL, Custom URL (optional)
                                         </DialogDescription>
                                     </DialogHeader>
@@ -215,10 +216,10 @@ const BulkOperations = ({
                                     <div className="space-y-4 mt-4">
                                         <div
                                             onClick={() => fileInputRef.current?.click()}
-                                            className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500/50 transition-colors"
+                                            className="border-2 border-dashed border-[hsl(230,10%,20%)] rounded-lg p-8 text-center cursor-pointer hover:border-blue-500/50 transition-colors"
                                         >
-                                            <FileSpreadsheet className="w-12 h-12 mx-auto text-gray-500 mb-3" />
-                                            <p className="text-gray-400">Click to select CSV file</p>
+                                            <FileSpreadsheet className="w-12 h-12 mx-auto text-slate-500 mb-3" />
+                                            <p className="text-slate-400">Click to select CSV file</p>
                                             <input
                                                 ref={fileInputRef}
                                                 type="file"
@@ -229,8 +230,8 @@ const BulkOperations = ({
                                         </div>
 
                                         {importData.length > 0 && (
-                                            <div className="p-4 rounded-lg bg-gray-800/50 border border-gray-700">
-                                                <p className="text-sm text-gray-300">
+                                            <div className="p-4 rounded-lg bg-[hsl(230,10%,14%)]/50 border border-[hsl(230,10%,20%)]">
+                                                <p className="text-sm text-slate-300">
                                                     <Check className="w-4 h-4 inline mr-2 text-emerald-400" />
                                                     {importData.length} links ready to import
                                                 </p>
@@ -272,19 +273,19 @@ const BulkOperations = ({
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="border-gray-700 hover:bg-purple-500/10 hover:border-purple-500/50 hover:text-purple-400"
+                                                className="border-[hsl(230,10%,20%)] hover:bg-purple-500/10 hover:border-purple-500/50 hover:text-purple-400"
                                             >
                                                 <FolderInput className="w-4 h-4 mr-2" />
                                                 Move to Folder
                                             </Button>
                                         </DialogTrigger>
-                                        <DialogContent className="bg-gray-900 border-gray-700">
+                                        <DialogContent className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,20%)]">
                                             <DialogHeader>
                                                 <DialogTitle>Move {selectedIds.length} Links to Folder</DialogTitle>
                                             </DialogHeader>
                                             <div className="space-y-4 mt-4">
                                                 <Select value={selectedFolder} onValueChange={setSelectedFolder}>
-                                                    <SelectTrigger className="bg-gray-800 border-gray-700">
+                                                    <SelectTrigger className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)]">
                                                         <SelectValue placeholder="Select folder" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -308,19 +309,19 @@ const BulkOperations = ({
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="border-gray-700 hover:bg-amber-500/10 hover:border-amber-500/50 hover:text-amber-400"
+                                                className="border-[hsl(230,10%,20%)] hover:bg-amber-500/10 hover:border-amber-500/50 hover:text-amber-400"
                                             >
                                                 <Tag className="w-4 h-4 mr-2" />
                                                 Add Tag
                                             </Button>
                                         </DialogTrigger>
-                                        <DialogContent className="bg-gray-900 border-gray-700">
+                                        <DialogContent className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,20%)]">
                                             <DialogHeader>
                                                 <DialogTitle>Add Tag to {selectedIds.length} Links</DialogTitle>
                                             </DialogHeader>
                                             <div className="space-y-4 mt-4">
                                                 <Select value={selectedTag} onValueChange={setSelectedTag}>
-                                                    <SelectTrigger className="bg-gray-800 border-gray-700">
+                                                    <SelectTrigger className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)]">
                                                         <SelectValue placeholder="Select tag" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -344,19 +345,19 @@ const BulkOperations = ({
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="border-gray-700 hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400"
+                                                className="border-[hsl(230,10%,20%)] hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400"
                                             >
                                                 <Trash2 className="w-4 h-4 mr-2" />
                                                 Delete
                                             </Button>
                                         </DialogTrigger>
-                                        <DialogContent className="bg-gray-900 border-gray-700">
+                                        <DialogContent className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,20%)]">
                                             <DialogHeader>
                                                 <DialogTitle className="flex items-center gap-2 text-red-400">
                                                     <AlertTriangle className="w-5 h-5" />
                                                     Delete {selectedIds.length} Links?
                                                 </DialogTitle>
-                                                <DialogDescription className="text-gray-400">
+                                                <DialogDescription className="text-slate-400">
                                                     This action cannot be undone. All selected links and their analytics data will be permanently deleted.
                                                 </DialogDescription>
                                             </DialogHeader>
@@ -364,7 +365,7 @@ const BulkOperations = ({
                                                 <Button
                                                     variant="outline"
                                                     onClick={() => setShowDeleteConfirm(false)}
-                                                    className="flex-1 border-gray-700"
+                                                    className="flex-1 border-[hsl(230,10%,20%)]"
                                                 >
                                                     Cancel
                                                 </Button>

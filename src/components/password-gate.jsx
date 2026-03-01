@@ -23,14 +23,14 @@ const PasswordGate = ({ linkTitle, onSubmit, error }) => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-zinc-950">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-[hsl(230,15%,5%)]">
             <motion.div
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.5 }}
                 className="relative z-10 w-full max-w-md"
             >
-                <Card className="bg-zinc-900 border-zinc-800">
+                <Card className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
                     <CardHeader className="text-center space-y-4 pb-2">
                         <motion.div
                             initial={{ scale: 0 }}
@@ -45,15 +45,15 @@ const PasswordGate = ({ linkTitle, onSubmit, error }) => {
                             <CardTitle className="text-2xl font-bold text-white">
                                 Protected Link
                             </CardTitle>
-                            <p className="text-zinc-400 mt-2">
+                            <p className="text-slate-400 mt-2">
                                 This link is password protected
                             </p>
                         </div>
 
                         {linkTitle && (
-                            <div className="px-4 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700">
-                                <p className="text-xs text-zinc-500">Accessing:</p>
-                                <p className="text-zinc-200 font-medium truncate">{linkTitle}</p>
+                            <div className="px-4 py-2 rounded-lg bg-[hsl(230,10%,14%)]/50 border border-[hsl(230,10%,20%)]">
+                                <p className="text-xs text-slate-500">Accessing:</p>
+                                <p className="text-slate-200 font-medium truncate">{linkTitle}</p>
                             </div>
                         )}
                     </CardHeader>
@@ -61,19 +61,19 @@ const PasswordGate = ({ linkTitle, onSubmit, error }) => {
                     <CardContent className="pt-4">
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                                 <Input
                                     type={showPassword ? 'text' : 'password'}
                                     placeholder="Enter password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="pl-10 pr-10 h-12 bg-zinc-800/50 border-zinc-700 focus:border-amber-500/50 text-white placeholder:text-zinc-500"
+                                    className="pl-10 pr-10 h-12 bg-[hsl(230,10%,14%)]/50 border-[hsl(230,10%,20%)] focus:border-amber-500/50 text-white placeholder:text-slate-500"
                                     autoFocus
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
                                 >
                                     {showPassword ? (
                                         <EyeOff className="w-5 h-5" />
@@ -97,13 +97,13 @@ const PasswordGate = ({ linkTitle, onSubmit, error }) => {
                             <Button
                                 type="submit"
                                 disabled={!password.trim() || isLoading}
-                                className="w-full h-12 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-medium"
+                                className="w-full h-12 bg-amber-500 hover:bg-amber-400 text-white font-medium"
                             >
                                 {isLoading ? (
                                     <motion.div
                                         animate={{ rotate: 360 }}
                                         transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                                        className="w-5 h-5 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full"
+                                        className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
                                     />
                                 ) : (
                                     'Unlock Link'
@@ -112,7 +112,7 @@ const PasswordGate = ({ linkTitle, onSubmit, error }) => {
                         </form>
 
                         <div className="mt-6 text-center">
-                            <p className="text-xs text-zinc-500">
+                            <p className="text-xs text-slate-500">
                                 Don't have the password?{' '}
                                 <button className="text-amber-400 hover:text-amber-300 transition-colors">
                                     Contact the link owner
@@ -126,10 +126,10 @@ const PasswordGate = ({ linkTitle, onSubmit, error }) => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5 }}
-                    className="text-center mt-4 text-sm text-zinc-500"
+                    className="text-center mt-4 text-sm text-slate-500"
                 >
                     Powered by{' '}
-                    <a href="/" className="text-cyan-400 hover:text-cyan-300 transition-colors">
+                    <a href="/" className="text-blue-400 hover:text-blue-300 transition-colors">
                         TrimLink
                     </a>
                 </motion.p>

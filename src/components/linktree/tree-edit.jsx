@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
-import supabase from "@/db/supabase";
+import { getLinkTree, updateLinkTree, bulkUpdateLinks } from "../../api/linktrees";
 import { useParams, useNavigate } from "react-router-dom";
 
 const TreeEdit = () => {
@@ -27,22 +27,34 @@ const TreeEdit = () => {
     const loadTreeData = async () => {
       setIsLoading(true);
       try {
-        const { data: linkTree, error } = await supabase
-          .from("linktrees")
-          .select("*")
-          .eq("id", treeId)
-          .single();
-
-        if (error) {
-          console.error("Fetch error:", error);
-          navigate("/not-found");
-        } else if (!linkTree) {
-          navigate("/not-found");
-        } else {
-          setTreeData(linkTree);
-        }
+        const tree = await getLinkTree(treeId);
+        // Map flat API fields into the component's nested profile structure
+        setTreeData({
+          id: tree.id,
+          title: tree.title,
+          slug: tree.slug,
+          isPublic: tree.isPublic,
+          viewCount: tree.viewCount,
+          createdAt: tree.createdAt,
+          profile: {
+            name: tree.title,
+            bio: tree.description || "",
+            theme: tree.theme || "default",
+            customColors: {
+              background: tree.backgroundColor || "#1a1a2e",
+              text: tree.textColor || "#ffffff",
+            },
+          },
+          links: (tree.links || []).map((l) => ({
+            id: l.id,
+            title: l.title,
+            url: l.url,
+            icon: l.icon || "default",
+            clicks: l.clicks || 0,
+          })),
+        });
       } catch (error) {
-        console.error("Catch block error:", error);
+        console.error("Fetch error:", error);
         navigate("/not-found");
       }
       setIsLoading(false);
@@ -118,42 +130,37 @@ const TreeEdit = () => {
     }));
   };
 
-  // Save data to Supabase
+  // Save data to server API
   const saveData = async () => {
     if (!treeData) return;
     setIsSaving(true);
 
     try {
-      // Update entire tree data including profile and links
-      const { error } = await supabase
-        .from("linktrees")
-        .update({
-          id: treeId,
-          profile: {
-            name: treeData.profile.name,
-            bio: treeData.profile.bio || "",
-            theme: treeData.profile.theme || "default",
-            customColors: treeData.profile.customColors || {},
-          },
-          links: treeData.links, // Directly save links as part of the linktrees table
-          created_at: treeData.created_at,
-          updated_at: new Date().toISOString(),
-          title: treeData.title || "",
-          is_active: treeData.is_active,
-          views: treeData.views,
-        })
-        .eq("id", treeId);
+      // Update tree metadata
+      await updateLinkTree(treeId, {
+        title: treeData.title || treeData.profile.name || "",
+        description: treeData.profile.bio || "",
+        theme: treeData.profile.theme || "default",
+        backgroundColor: treeData.profile.customColors?.background,
+        textColor: treeData.profile.customColors?.text,
+      });
 
-      if (error) {
-        console.error("Tree Update Error:", error);
-        toast.error(`Update Failed: ${error.message}`);
-        return;
-      }
+      // Bulk update links
+      await bulkUpdateLinks(
+        treeId,
+        treeData.links.map((link, index) => ({
+          id: link.id?.startsWith("temp-") ? undefined : link.id,
+          title: link.title,
+          url: link.url,
+          icon: link.icon,
+          order: index,
+        }))
+      );
 
       toast.success("Tree updated successfully");
     } catch (error) {
-      console.error("Comprehensive Save Error:", error);
-      toast.error("Failed to save tree data");
+      console.error("Save Error:", error);
+      toast.error(error.message || "Failed to save tree data");
     } finally {
       setIsSaving(false);
     }
@@ -161,7 +168,7 @@ const TreeEdit = () => {
   // Render loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-[hsl(230,12%,9%)]">
         <div className="text-white">Loading...</div>
       </div>
     );
@@ -171,10 +178,10 @@ const TreeEdit = () => {
 
   // Render main component
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[hsl(230,15%,5%)] flex items-center justify-center p-4">
       <div className="w-full rounded-2xl overflow-hidden relative">
         {/* Header */}
-        <div className="fixed top-16 right-0 left-0 bg-gray-900 px-6 py-3 flex items-center justify-between border-b">
+        <div className="fixed top-16 right-0 left-0 bg-[hsl(230,12%,9%)] px-6 py-3 flex items-center justify-between border-b">
           <div className="flex items-center space-x-4">
             <Edit className="text-white w-8 h-8" />
             <h1 className="text-3xl font-bold text-white">Tree Edit</h1>
@@ -189,7 +196,7 @@ const TreeEdit = () => {
         {/* Content Container */}
         <div className="space-y-3 lg:space-y-6 overflow-y-auto mt-16">
           {/* Profile Section */}
-          <div className="bg-gray-700 rounded-xl lg:p-6">
+          <div className="bg-[hsl(230,10%,20%)] rounded-xl lg:p-6">
             <div className="grid lg:grid-cols-2 lg:gap-5 p-4">
               <div>
                 <div className="flex items-center mb-6">
@@ -205,13 +212,13 @@ const TreeEdit = () => {
                       value={profile.name}
                       onChange={(e) => updateProfile("name", e.target.value)}
                       placeholder="Name"
-                      className="w-full p-3 bg-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-3 bg-[hsl(230,10%,20%)] rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500"
                     />
                     <textarea
                       value={profile.bio}
                       onChange={(e) => updateProfile("bio", e.target.value)}
                       placeholder="Bio"
-                      className="w-full p-3 bg-gray-600 rounded-lg text-white placeholder-gray-400 h-32 focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-3 bg-[hsl(230,10%,20%)] rounded-lg text-white placeholder-slate-400 h-32 focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -230,7 +237,7 @@ const TreeEdit = () => {
                     value={treeData.title || ""}
                     onChange={(e) => updateTreeTitle(e.target.value)}
                     placeholder="LinkTree Title"
-                    className="w-full p-3 mt-3 bg-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 mt-3 bg-[hsl(230,10%,20%)] rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 {/* Custom Colors */}
@@ -243,7 +250,7 @@ const TreeEdit = () => {
                 <div className="grid grid-cols-3 gap-4 mt-5">
                   {Object.keys(profile.customColors).map((colorType) => (
                     <div key={colorType} className="flex flex-col">
-                      <label className="text-sm mb-1 text-gray-300 capitalize">
+                      <label className="text-sm mb-1 text-slate-300 capitalize">
                         {colorType}
                       </label>
                       <input
@@ -252,7 +259,7 @@ const TreeEdit = () => {
                         onChange={(e) =>
                           updateColors(colorType, e.target.value)
                         }
-                        className="w-full h-12 p-1 bg-gray-600 rounded-lg cursor-pointer"
+                        className="w-full h-12 p-1 bg-[hsl(230,10%,20%)] rounded-lg cursor-pointer"
                       />
                     </div>
                   ))}
@@ -262,7 +269,7 @@ const TreeEdit = () => {
           </div>
 
           {/* Links Section */}
-          <div className="bg-gray-700 rounded-xl p-2 lg:p-6">
+          <div className="bg-[hsl(230,10%,20%)] rounded-xl p-2 lg:p-6">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center">
                 <Link className="mr-3 text-green-400" />
@@ -277,7 +284,7 @@ const TreeEdit = () => {
               {links.map((link, index) => (
                 <div
                   key={link.id}
-                  className="bg-gray-600 p-4 rounded-lg mb-4 flex items-center space-x-4 hover:bg-gray-500/50 transition-colors"
+                  className="bg-[hsl(230,10%,20%)] p-4 rounded-lg mb-4 flex items-center space-x-4 hover:bg-[hsl(230,10%,20%)]/50 transition-colors"
                 >
                   <div className="flex-grow space-y-3">
                     <input
@@ -287,14 +294,14 @@ const TreeEdit = () => {
                         updateLink(index, "title", e.target.value)
                       }
                       placeholder="Link Title"
-                      className="w-full p-3 bg-gray-500 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-3 bg-[hsl(230,10%,18%)] rounded-lg text-white placeholder-slate-300 focus:ring-2 focus:ring-blue-500"
                     />
                     <input
                       type="text"
                       value={link.url}
                       onChange={(e) => updateLink(index, "url", e.target.value)}
                       placeholder="URL"
-                      className="w-full p-3 bg-gray-500 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-3 bg-[hsl(230,10%,18%)] rounded-lg text-white placeholder-slate-300 focus:ring-2 focus:ring-blue-500"
                     />
                     <div className="flex items-center space-x-4">
                       <select
@@ -302,7 +309,7 @@ const TreeEdit = () => {
                         onChange={(e) =>
                           updateLink(index, "icon", e.target.value)
                         }
-                        className="p-3 bg-gray-500 rounded-lg text-white"
+                        className="p-3 bg-[hsl(230,10%,18%)] rounded-lg text-white"
                       >
                         <option value="default">Default</option>
                         <option value="website">Website</option>

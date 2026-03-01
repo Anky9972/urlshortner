@@ -52,7 +52,7 @@ const ThemeToggle = () => {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="relative w-9 h-9 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700/50"
+                    className="relative w-9 h-9 rounded-lg bg-[hsl(230,10%,14%)]/50 hover:bg-[hsl(230,10%,20%)]/50 border border-[hsl(230,10%,20%)]/50"
                 >
                     <motion.div
                         key={theme}
@@ -62,14 +62,14 @@ const ThemeToggle = () => {
                     >
                         {theme === 'light' && <Sun className="h-4 w-4 text-amber-400" />}
                         {theme === 'dark' && <Moon className="h-4 w-4 text-blue-400" />}
-                        {theme === 'system' && <Monitor className="h-4 w-4 text-gray-400" />}
+                        {theme === 'system' && <Monitor className="h-4 w-4 text-slate-400" />}
                     </motion.div>
                     <span className="sr-only">Toggle theme</span>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
                 align="end"
-                className="bg-gray-800/95 backdrop-blur-xl border-gray-700 min-w-[140px]"
+                className="bg-[hsl(230,10%,14%)]/95 backdrop-blur-xl border-[hsl(230,10%,20%)] min-w-[140px]"
             >
                 {themes.map(({ value, label, icon: Icon }) => (
                     <DropdownMenuItem
@@ -77,7 +77,7 @@ const ThemeToggle = () => {
                         onClick={() => handleThemeChange(value)}
                         className={`flex items-center gap-2 cursor-pointer ${theme === value
                                 ? 'text-blue-400 bg-blue-500/10'
-                                : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                                : 'text-slate-300 hover:text-white hover:bg-[hsl(230,10%,20%)]/50'
                             }`}
                     >
                         <Icon className="h-4 w-4" />

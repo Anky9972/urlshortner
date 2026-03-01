@@ -23,15 +23,15 @@ async function apiRequest(endpoint, options = {}) {
 /**
  * Get all URLs for a user
  */
-export async function getUrls(userId) {
-    return apiRequest(`/api/urls?userId=${userId}`);
+export async function getUrls() {
+    return apiRequest('/api/urls');
 }
 
 /**
  * Get a single URL by ID
  */
-export async function getUrl({ id, userId }) {
-    return apiRequest(`/api/urls/${id}?userId=${userId}`);
+export async function getUrl(id) {
+    return apiRequest(`/api/urls/${id}`);
 }
 
 /**

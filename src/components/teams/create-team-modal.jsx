@@ -56,7 +56,7 @@ const CreateTeamModal = ({ onTeamCreated }) => {
                     <Plus className="mr-2 h-4 w-4" /> Create Team
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md bg-zinc-900 border-zinc-800 text-white">
+            <DialogContent className="sm:max-w-md bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)] text-white">
                 <DialogHeader>
                     <DialogTitle>Create New Team</DialogTitle>
                 </DialogHeader>
@@ -72,7 +72,7 @@ const CreateTeamModal = ({ onTeamCreated }) => {
                                 // Auto-generate slug
                                 setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'));
                             }}
-                            className="bg-zinc-800 border-zinc-700 text-white"
+                            className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)] text-white"
                             required
                         />
                     </div>
@@ -83,15 +83,15 @@ const CreateTeamModal = ({ onTeamCreated }) => {
                             placeholder="acme-corp"
                             value={slug}
                             onChange={(e) => setSlug(e.target.value)}
-                            className="bg-zinc-800 border-zinc-700 text-white"
+                            className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)] text-white"
                             required
                         />
-                        <p className="text-xs text-zinc-400">
-                            Your team will be accessible at trimlink.com/teams/{slug}
+                        <p className="text-xs text-slate-400">
+                            Your team will be accessible at {import.meta.env.VITE_APP_DOMAIN || 'trimlynk.com'}/teams/{slug}
                         </p>
                     </div>
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="border-zinc-700 hover:bg-zinc-800 text-white">
+                        <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="border-[hsl(230,10%,20%)] hover:bg-[hsl(230,10%,14%)] text-white">
                             Cancel
                         </Button>
                         <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white">

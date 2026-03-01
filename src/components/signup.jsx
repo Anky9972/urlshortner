@@ -67,40 +67,37 @@ const Signup = () => {
             {apiError && <Error message={apiError} />}
 
             <div className="space-y-2">
-                <label className="text-sm text-zinc-400">Name</label>
+                <label className="text-sm font-medium text-slate-300">Name</label>
                 <Input
                     name="name"
                     type="text"
                     placeholder="John Doe"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-cyan-500/50"
                 />
                 {errors.name && <Error message={errors.name} />}
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm text-zinc-400">Email</label>
+                <label className="text-sm font-medium text-slate-300">Email</label>
                 <Input
                     name="email"
                     type="email"
                     placeholder="you@example.com"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-cyan-500/50"
                 />
                 {errors.email && <Error message={errors.email} />}
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm text-zinc-400">Password</label>
+                <label className="text-sm font-medium text-slate-300">Password</label>
                 <Input
                     name="password"
                     type="password"
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-cyan-500/50"
                 />
                 {errors.password && <Error message={errors.password} />}
             </div>
@@ -108,9 +105,9 @@ const Signup = () => {
             <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold h-11"
+                className="w-full h-11 font-semibold"
             >
-                {loading ? <BeatLoader size={8} color="#09090b" /> : "Create Account"}
+                {loading ? <BeatLoader size={8} color="#ffffff" /> : "Create Account"}
             </Button>
         </form>
     )

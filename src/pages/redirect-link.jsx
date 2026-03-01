@@ -7,6 +7,7 @@ import PasswordGate from "@/components/password-gate";
 import { getLongUrl } from "@/api/urls";
 import { recordClick } from "@/api/clicks";
 import { getSplitRedirect, recordSplitClick } from "@/api/splits";
+import { handleUrlRedirect } from "@/db/freeUrls";
 import useFetch from "@/hooks/use-fetch";
 
 const RedirectLink = () => {
@@ -15,9 +16,10 @@ const RedirectLink = () => {
   const [showPasswordGate, setShowPasswordGate] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [urlData, setUrlData] = useState(null);
+  const [isFreeUrl, setIsFreeUrl] = useState(false);
 
   const { loading, data, fn } = useFetch(getLongUrl, id);
-  const { fn: fnStats } = useFetch(storeClicks, {
+  const { fn: fnStats } = useFetch(recordClick, {
     id: data?.id,
     originalUrl: data?.original_url,
   });
@@ -30,9 +32,24 @@ const RedirectLink = () => {
     if (!loading && data) {
       handleRedirectLogic(data);
     } else if (!loading && !data) {
-      navigate('/not-found');
+      // Primary URL not found - check free URLs
+      checkFreeUrl();
     }
   }, [data, loading]);
+
+  const checkFreeUrl = async () => {
+    try {
+      const originalUrl = await handleUrlRedirect(id);
+      if (originalUrl) {
+        setIsFreeUrl(true);
+        window.location.href = originalUrl;
+      } else {
+        navigate('/not-found');
+      }
+    } catch {
+      navigate('/not-found');
+    }
+  };
 
   const handleRedirectLogic = async (urlInfo) => {
     setUrlData(urlInfo);
@@ -194,17 +211,17 @@ const RedirectLink = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-950">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[hsl(230,15%,5%)]">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           className="text-center"
         >
-          <div className="w-16 h-16 mx-auto mb-6 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-            <Link2 className="w-8 h-8 text-cyan-400 animate-pulse" />
+          <div className="w-16 h-16 mx-auto mb-6 rounded-xl bg-[hsl(230,12%,9%)] border border-[hsl(230,10%,15%)] flex items-center justify-center">
+            <Link2 className="w-8 h-8 text-blue-400 animate-pulse" />
           </div>
-          <BarLoader width={200} color="#06b6d4" />
-          <p className="mt-4 text-zinc-500 text-sm">Redirecting you...</p>
+          <BarLoader width={200} color="#2563eb" />
+          <p className="mt-4 text-slate-500 text-sm">Redirecting you...</p>
         </motion.div>
       </div>
     );

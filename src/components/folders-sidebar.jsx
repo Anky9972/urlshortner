@@ -57,12 +57,12 @@ const FoldersSidebar = ({
 
     if (isCollapsed) {
         return (
-            <div className="w-16 bg-zinc-900/50 border-r border-zinc-800 p-2 space-y-2">
+            <div className="w-16 bg-[hsl(230,12%,9%)]/50 border-r border-[hsl(230,10%,15%)] p-2 space-y-2">
                 <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => onSelectFolder(null)}
-                    className={`w-full p-2 ${!selectedFolder ? 'bg-cyan-500/20 text-cyan-400' : 'text-zinc-400'}`}
+                    className={`w-full p-2 ${!selectedFolder ? 'bg-blue-600/20 text-blue-400' : 'text-slate-400'}`}
                 >
                     <Folder className="w-5 h-5" />
                 </Button>
@@ -72,7 +72,7 @@ const FoldersSidebar = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => onSelectFolder(folder.id)}
-                        className={`w-full p-2 ${selectedFolder === folder.id ? 'bg-cyan-500/20' : ''}`}
+                        className={`w-full p-2 ${selectedFolder === folder.id ? 'bg-blue-600/20' : ''}`}
                     >
                         <Folder className="w-5 h-5" style={{ color: folder.color }} />
                     </Button>
@@ -82,16 +82,16 @@ const FoldersSidebar = ({
     }
 
     return (
-        <div className="w-64 bg-zinc-900/50 backdrop-blur-sm border-r border-zinc-800 flex flex-col">
+        <div className="w-64 bg-[hsl(230,12%,9%)]/50 backdrop-blur-sm border-r border-[hsl(230,10%,15%)] flex flex-col">
             {/* Header */}
-            <div className="p-4 border-b border-zinc-800">
+            <div className="p-4 border-b border-[hsl(230,10%,15%)]">
                 <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-white">Folders</h3>
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setShowCreateForm(!showCreateForm)}
-                        className="text-zinc-400 hover:text-cyan-400"
+                        className="text-slate-400 hover:text-blue-400"
                     >
                         <FolderPlus className="w-4 h-4" />
                     </Button>
@@ -111,7 +111,7 @@ const FoldersSidebar = ({
                                 value={newFolderName}
                                 onChange={(e) => setNewFolderName(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-                                className="bg-zinc-800 border-zinc-700 text-sm"
+                                className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)] text-sm"
                                 autoFocus
                             />
                             <div className="flex gap-1 flex-wrap">
@@ -129,7 +129,7 @@ const FoldersSidebar = ({
                                 <Button
                                     size="sm"
                                     onClick={handleCreate}
-                                    className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-zinc-900"
+                                    className="flex-1 bg-blue-600 hover:bg-blue-500 text-white"
                                 >
                                     <Check className="w-4 h-4" />
                                 </Button>
@@ -153,11 +153,11 @@ const FoldersSidebar = ({
                 <motion.button
                     onClick={() => onSelectFolder(null)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group ${!selectedFolder
-                        ? 'bg-cyan-500/10 border border-cyan-500/30 text-white'
-                        : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'
+                        ? 'bg-blue-600/10 border border-blue-600/30 text-white'
+                        : 'text-slate-400 hover:bg-[hsl(230,10%,14%)]/50 hover:text-white'
                         }`}
                 >
-                    <FolderOpen className="w-5 h-5 text-cyan-400" />
+                    <FolderOpen className="w-5 h-5 text-blue-400" />
                     <span className="flex-1 text-left text-sm font-medium">All Links</span>
                     <ChevronRight className={`w-4 h-4 transition-transform ${!selectedFolder ? 'rotate-90' : ''}`} />
                 </motion.button>
@@ -174,7 +174,7 @@ const FoldersSidebar = ({
                             <div className="flex items-center gap-2 px-2">
                                 <Input
                                     defaultValue={folder.name}
-                                    className="bg-zinc-800 border-zinc-700 text-sm h-8"
+                                    className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)] text-sm h-8"
                                     autoFocus
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') handleUpdate(folder.id, e.target.value);
@@ -187,34 +187,34 @@ const FoldersSidebar = ({
                             <button
                                 onClick={() => onSelectFolder(folder.id)}
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${selectedFolder === folder.id
-                                    ? 'bg-cyan-500/10 border border-cyan-500/30 text-white'
-                                    : 'text-gray-400 hover:bg-gray-700/30 hover:text-gray-200'
+                                    ? 'bg-blue-600/10 border border-blue-600/30 text-white'
+                                    : 'text-slate-400 hover:bg-[hsl(230,10%,20%)]/30 hover:text-slate-200'
                                     }`}
                             >
                                 <Folder className="w-5 h-5" style={{ color: folder.color }} />
                                 <span className="flex-1 text-left text-sm font-medium truncate">
                                     {folder.name}
                                 </span>
-                                <span className="text-xs text-zinc-500 mr-1">
+                                <span className="text-xs text-slate-500 mr-1">
                                     {folder._count?.urls || 0}
                                 </span>
 
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <div
-                                            className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-zinc-700/50 transition-all"
+                                            className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-[hsl(230,10%,20%)]/50 transition-all"
                                             onClick={(e) => e.stopPropagation()}
                                         >
                                             <MoreHorizontal className="w-4 h-4" />
                                         </div>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="bg-zinc-800 border-zinc-700">
+                                    <DropdownMenuContent align="end" className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)]">
                                         <DropdownMenuItem
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 setEditingId(folder.id);
                                             }}
-                                            className="text-zinc-300 hover:text-white"
+                                            className="text-slate-300 hover:text-white"
                                         >
                                             <Pencil className="w-4 h-4 mr-2" />
                                             Rename

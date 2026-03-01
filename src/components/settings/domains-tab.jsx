@@ -74,13 +74,13 @@ const DomainsTab = () => {
 
     return (
         <div className="space-y-6">
-            <Card className="bg-zinc-900 border-zinc-800 text-white">
+            <Card className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)] text-white">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Globe className="h-5 w-5 text-purple-400" />
                         Custom Domains
                     </CardTitle>
-                    <CardDescription className="text-zinc-400">
+                    <CardDescription className="text-slate-400">
                         Connect your own domain to brand your short links (e.g., links.mybrand.com).
                     </CardDescription>
                 </CardHeader>
@@ -91,7 +91,7 @@ const DomainsTab = () => {
                                 placeholder="links.yourdomain.com"
                                 value={newDomain}
                                 onChange={(e) => setNewDomain(e.target.value)}
-                                className="bg-zinc-800 border-zinc-700 text-white"
+                                className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)] text-white"
                             />
                         </div>
                         <Button type="submit" disabled={isLoading || !newDomain} className="bg-purple-600 hover:bg-purple-700">
@@ -101,14 +101,14 @@ const DomainsTab = () => {
 
                     <div className="space-y-4">
                         {domains.map(domain => (
-                            <div key={domain.id} className="flex flex-col md:flex-row items-center justify-between p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 gap-4">
+                            <div key={domain.id} className="flex flex-col md:flex-row items-center justify-between p-4 rounded-lg border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)]/50 gap-4">
                                 <div className="flex items-center gap-4">
                                     <div className={`p-2 rounded-full ${domain.verified ? 'bg-green-500/10' : 'bg-yellow-500/10'}`}>
                                         <Globe className={`h-5 w-5 ${domain.verified ? 'text-green-500' : 'text-yellow-500'}`} />
                                     </div>
                                     <div>
                                         <h3 className="font-medium text-white">{domain.domain}</h3>
-                                        <p className="text-sm text-zinc-500 flex items-center gap-2">
+                                        <p className="text-sm text-slate-500 flex items-center gap-2">
                                             {domain.verified ? (
                                                 <span className="flex items-center text-green-400"><CheckCircle2 className="h-3 w-3 mr-1" /> Verified</span>
                                             ) : (
@@ -122,7 +122,7 @@ const DomainsTab = () => {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                                            className="border-[hsl(230,10%,20%)] text-slate-300 hover:bg-[hsl(230,10%,14%)]"
                                             onClick={() => handleVerify(domain.id)}
                                             disabled={isVerifying === domain.id}
                                         >
@@ -130,7 +130,7 @@ const DomainsTab = () => {
                                             Verify DNS
                                         </Button>
                                     )}
-                                    <Button variant="ghost" size="icon" className="text-zinc-500 hover:text-red-400 hover:bg-red-500/10">
+                                    <Button variant="ghost" size="icon" className="text-slate-500 hover:text-red-400 hover:bg-red-500/10">
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </div>
@@ -138,7 +138,7 @@ const DomainsTab = () => {
                         ))}
 
                         {domains.length === 0 && (
-                            <div className="text-center py-8 text-zinc-500 text-sm">
+                            <div className="text-center py-8 text-slate-500 text-sm">
                                 No custom domains added yet.
                             </div>
                         )}
@@ -146,11 +146,11 @@ const DomainsTab = () => {
                 </CardContent>
             </Card>
 
-            <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/20 text-sm text-zinc-300">
+            <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/20 text-sm text-slate-300">
                 <h4 className="font-medium text-blue-400 mb-2 flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4" /> configuration Instructions
                 </h4>
-                <p>To verify your domain, create a <b>CNAME</b> record pointing to <code>cname.trimlink.com</code> and a <b>TXT</b> record with your verification code (click verify to see details).</p>
+                <p>To verify your domain, create a <b>CNAME</b> record pointing to <code>cname.{import.meta.env.VITE_APP_DOMAIN || 'trimlynk.com'}</code> and a <b>TXT</b> record with your verification code (click verify to see details).</p>
             </div>
         </div>
     );

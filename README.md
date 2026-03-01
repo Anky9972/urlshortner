@@ -45,12 +45,23 @@ npm install
 ```
 
 ### Environment Configuration
-1. Create `.env` file in project root
-2. Add necessary environment variables:
+1. Copy `.env.example` to `.env` in the project root
+2. Fill in your environment variables:
    ```
-   VITE_SUPABASE_KEY= your_supabase_anon_key
-   VITE_SUPABASE_URL= your_supabase_project_url
-   VITE_GA_TRACKING_ID= your_google_analytics_id
+   # Frontend (Vite)
+   VITE_GA_TRACKING_ID=G-XXXXXXXXXX
+   VITE_APP_DOMAIN=trimlynk.com
+   VITE_APP_URL=https://trimlynk.com
+   VITE_API_URL=http://localhost:3001
+
+   # Server
+   PORT=3001
+   NODE_ENV=development
+   JWT_SECRET=change-me-to-a-strong-random-secret
+   FRONTEND_URL=http://localhost:5173
+
+   # Database
+   DATABASE_URL="postgresql://user:password@host:5432/dbname?sslmode=require"
    ```
 ### Running the Application
 ```bash

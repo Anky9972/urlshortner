@@ -11,7 +11,7 @@ const SaveStatus = ({
   setLinkTreeId,
   isCreate,
 }) => (
-  <div className="w-full absolute bottom-0 p-5 bg-zinc-900 border-t border-zinc-800">
+  <div className="w-full absolute bottom-0 p-5 bg-[hsl(230,12%,9%)] border-t border-[hsl(230,10%,15%)]">
     {/* {isCreate && "Create your LinkTree and share it with the world!"} */}
     {saveError && (
       <Alert variant="destructive" className="mb-2 bg-red-500/10 border-red-500/20 text-red-400">
@@ -27,7 +27,7 @@ const SaveStatus = ({
       {isCreate ? (
         <button
           onClick={saveLinkTree}
-          className="w-full gap-2 p-2.5 bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-medium flex justify-center items-center rounded-lg text-sm transition-colors"
+          className="w-full gap-2 p-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium flex justify-center items-center rounded-lg text-sm transition-colors"
           disabled={isSaving}
         >
           <Save size={16} />
@@ -36,7 +36,7 @@ const SaveStatus = ({
       ) : (
         <button
           onClick={saveLinkTree}
-          className="w-full gap-2 p-2.5 bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-medium flex justify-center items-center rounded-lg text-sm transition-colors"
+          className="w-full gap-2 p-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium flex justify-center items-center rounded-lg text-sm transition-colors"
           disabled={isSaving}
         >
           <Save size={16} />

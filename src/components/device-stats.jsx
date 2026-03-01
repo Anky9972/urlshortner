@@ -95,10 +95,10 @@ const DeviceStatsChart = ({ stats }) => {
       const percentage = ((count / stats.length) * 100).toFixed(1);
 
       return (
-        <div className="bg-zinc-800 p-3 shadow-lg rounded-lg border border-zinc-700">
+        <div className="bg-[hsl(230,10%,14%)] p-3 shadow-lg rounded-lg border border-[hsl(230,10%,20%)]">
           <p className="font-medium text-white">{device}</p>
-          <p className="text-zinc-400">Devices: {count}</p>
-          <p className="text-zinc-400">Percentage: {percentage}%</p>
+          <p className="text-slate-400">Devices: {count}</p>
+          <p className="text-slate-400">Percentage: {percentage}%</p>
         </div>
       );
     }
@@ -106,7 +106,7 @@ const DeviceStatsChart = ({ stats }) => {
   };
 
   return (
-    <Card className="w-full bg-zinc-900 border-zinc-800">
+    <Card className="w-full bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
       <CardHeader>
         <CardTitle className="hidden lg:flex">Device Distribution</CardTitle>
       </CardHeader>
@@ -141,7 +141,7 @@ const DeviceStatsChart = ({ stats }) => {
                 verticalAlign="bottom"
                 height={36}
                 formatter={(value) => (
-                  <span className="text-zinc-400">{value}</span>
+                  <span className="text-slate-400">{value}</span>
 
                 )}
               />

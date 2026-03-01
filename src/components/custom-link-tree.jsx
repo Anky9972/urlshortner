@@ -20,7 +20,7 @@ import {
   Copy,
   Check,
 } from "lucide-react";
-import supabase from "../db/supabase";
+import { getMyLinkTrees, createLinkTree, updateLinkTree, bulkUpdateLinks } from "../api/linktrees";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Dialog,
@@ -49,9 +49,9 @@ const defaultThemes = {
   },
   minimal: {
     background: "bg-white",
-    buttonStyle: "bg-gray-50 border border-gray-200",
-    textColor: "text-gray-800",
-    hoverEffect: "hover:bg-gray-100",
+    buttonStyle: "bg-slate-50 border border-slate-200",
+    textColor: "text-slate-800",
+    hoverEffect: "hover:bg-slate-100",
   },
   neon: {
     background: "bg-black",
@@ -112,51 +112,82 @@ const LinkTreeBuilder = () => {
   // Load existing LinkTree data if available
   useEffect(() => {
     const loadLinkTree = async () => {
-      const { data: linkTree, error } = await supabase
-        .from("linktrees")
-        .select("*")
-        .single();
-
-      if (linkTree) {
-        setLinkTreeId(linkTree.id);
-        setProfile(linkTree.profile);
-        setLinks(linkTree.links);
+      try {
+        const trees = await getMyLinkTrees();
+        if (trees && trees.length > 0) {
+          const tree = trees[0];
+          setLinkTreeId(tree.id);
+          setProfile({
+            name: tree.title || 'Your Name',
+            bio: tree.description || 'Your Bio ✨',
+            theme: tree.theme || 'modern',
+            customColors: {
+              background: tree.backgroundColor || '#1a1a1a',
+              text: tree.textColor || '#ffffff',
+              button: '#ffffff20',
+            },
+          });
+          if (tree.links && tree.links.length > 0) {
+            setLinks(tree.links.map(link => ({
+              id: link.id,
+              title: link.title,
+              url: link.url,
+              icon: link.icon || 'default',
+              isActive: link.isActive,
+              customStyle: { color: '#ffffff', background: '#ffffff20' },
+            })));
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load linktree:', error);
       }
     };
 
     loadLinkTree();
   }, []);
 
-  // Save LinkTree to Supabase
+  // Save LinkTree to server
   const saveLinkTree = async () => {
     setIsSaving(true);
     setSaveError(null);
     setSaveSuccess(false);
 
-    const linkTreeData = {
-      profile,
-      links,
-      updated_at: new Date().toISOString(),
-    };
-
     try {
-      let result;
+      const treeData = {
+        title: profile.name,
+        description: profile.bio,
+        slug: profile.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        theme: profile.theme,
+        backgroundColor: profile.customColors?.background,
+        textColor: profile.customColors?.text,
+      };
+
       if (linkTreeId) {
-        // Update existing LinkTree
-        result = await supabase
-          .from("linktrees")
-          .update(linkTreeData)
-          .eq("id", linkTreeId);
+        // Update existing
+        await updateLinkTree(linkTreeId, treeData);
+        // Update links
+        await bulkUpdateLinks(linkTreeId, links.map((link, index) => ({
+          title: link.title,
+          url: link.url,
+          icon: link.icon,
+          isActive: link.isActive,
+          order: index,
+        })));
       } else {
-        // Create new LinkTree
-        result = await supabase
-          .from("linktrees")
-          .insert([{ ...linkTreeData, created_at: new Date().toISOString() }]);
+        // Create new
+        const result = await createLinkTree({
+          ...treeData,
+          links: links.map((link, index) => ({
+            title: link.title,
+            url: link.url,
+            icon: link.icon,
+            isActive: link.isActive,
+            order: index,
+          })),
+        });
+        setLinkTreeId(result.id);
       }
 
-      if (result.error) throw result.error;
-
-      setLinkTreeId(result.data[0]?.id || linkTreeId);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error) {
@@ -192,7 +223,7 @@ const LinkTreeBuilder = () => {
             <DialogTitle>Share your LinkTree</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="flex items-center gap-2 p-2 bg-gray-100 rounded-lg">
+            <div className="flex items-center gap-2 p-2 bg-slate-100 rounded-lg">
               <input
                 type="text"
                 value={shareUrl}
@@ -216,7 +247,7 @@ const LinkTreeBuilder = () => {
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 hover:bg-gray-100 rounded-full"
+                className="p-2 hover:bg-slate-100 rounded-full"
               >
                 <Twitter size={20} />
               </a>
@@ -226,7 +257,7 @@ const LinkTreeBuilder = () => {
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 hover:bg-gray-100 rounded-full"
+                className="p-2 hover:bg-slate-100 rounded-full"
               >
                 <LinkIcon size={20} />
               </a>
@@ -268,14 +299,14 @@ const LinkTreeBuilder = () => {
     <motion.div
       initial={{ x: -300, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="w-80 bg-white h-screen fixed left-0 top-0 shadow-xl border-r border-gray-200 overflow-y-auto"
+      className="w-80 bg-white h-screen fixed left-0 top-0 shadow-xl border-r border-slate-200 overflow-y-auto"
     >
       <div className="p-6">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-xl font-bold text-gray-800">LinkTree Builder</h1>
+          <h1 className="text-xl font-bold text-slate-800">LinkTree Builder</h1>
           <button
             onClick={() => setIsEditing(false)}
-            className="p-2 hover:bg-gray-100 rounded-full"
+            className="p-2 hover:bg-slate-100 rounded-full"
           >
             <Eye size={20} />
           </button>
@@ -289,8 +320,8 @@ const LinkTreeBuilder = () => {
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded-full text-sm font-medium capitalize ${
                 activeTab === tab
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-[hsl(230,12%,9%)] text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
               {tab}
@@ -313,15 +344,15 @@ const LinkTreeBuilder = () => {
                   <motion.div
                     key={link.id}
                     layout
-                    className="bg-gray-50 rounded-xl p-4"
+                    className="bg-slate-50 rounded-xl p-4"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-2">
-                        <button className="p-1.5 hover:bg-gray-200 rounded-lg">
-                          <ChevronUp size={16} className="text-gray-600" />
+                        <button className="p-1.5 hover:bg-slate-200 rounded-lg">
+                          <ChevronUp size={16} className="text-slate-600" />
                         </button>
-                        <button className="p-1.5 hover:bg-gray-200 rounded-lg">
-                          <ChevronDown size={16} className="text-gray-600" />
+                        <button className="p-1.5 hover:bg-slate-200 rounded-lg">
+                          <ChevronDown size={16} className="text-slate-600" />
                         </button>
                       </div>
                       <button
@@ -343,7 +374,7 @@ const LinkTreeBuilder = () => {
                           newLinks[index].title = e.target.value;
                           setLinks(newLinks);
                         }}
-                        className="w-full px-3 py-2 text-gray-600 text-xs rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 text-slate-600 text-xs rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Link Title"
                       />
                       <input
@@ -354,7 +385,7 @@ const LinkTreeBuilder = () => {
                           newLinks[index].url = e.target.value;
                           setLinks(newLinks);
                         }}
-                        className="w-full px-3 py-2 text-gray-600 text-xs rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 text-slate-600 text-xs rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="URL"
                       />
 
@@ -365,7 +396,7 @@ const LinkTreeBuilder = () => {
                           newLinks[index].icon = e.target.value;
                           setLinks(newLinks);
                         }}
-                        className="w-full px-3 py-2 text-gray-600 text-xs rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 text-slate-600 text-xs rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         {Object.keys(socialIcons).map((icon) => (
                           <option key={icon} value={icon}>
@@ -379,7 +410,7 @@ const LinkTreeBuilder = () => {
 
                 <button
                   onClick={addLink}
-                  className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-gray-400 hover:text-gray-600 flex items-center justify-center space-x-2"
+                  className="w-full py-3 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 hover:border-gray-400 hover:text-slate-600 flex items-center justify-center space-x-2"
                 >
                   <PlusCircle size={20} />
                   <span>Add New Link</span>
@@ -390,7 +421,7 @@ const LinkTreeBuilder = () => {
             {activeTab === "appearance" && (
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
                     Theme
                   </label>
                   <div className="grid grid-cols-2 gap-3">
@@ -401,10 +432,10 @@ const LinkTreeBuilder = () => {
                         className={`p-4 rounded-xl border ${
                           profile.theme === theme
                             ? "border-blue-500 ring-2 ring-blue-500 ring-opacity-50"
-                            : "border-gray-200 hover:border-gray-300"
+                            : "border-slate-200 hover:border-slate-300"
                         }`}
                       >
-                        <div className="text-sm font-medium capitalize text-gray-600 ">
+                        <div className="text-sm font-medium capitalize text-slate-600 ">
                           {theme}
                         </div>
                       </button>
@@ -413,12 +444,12 @@ const LinkTreeBuilder = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
                     Custom Colors
                   </label>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm text-gray-600">
+                      <label className="text-sm text-slate-600">
                         Background
                       </label>
                       <input
@@ -437,7 +468,7 @@ const LinkTreeBuilder = () => {
                       />
                     </div>
                     <div>
-                      <label className="text-sm text-gray-600">
+                      <label className="text-sm text-slate-600">
                         Button Style
                       </label>
                       <input
@@ -463,7 +494,7 @@ const LinkTreeBuilder = () => {
             {activeTab === "settings" && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
                     Profile Name
                   </label>
                   <input
@@ -472,11 +503,11 @@ const LinkTreeBuilder = () => {
                     onChange={(e) =>
                       setProfile({ ...profile, name: e.target.value })
                     }
-                    className="w-full px-3 py-2 text-gray-600 text-xs rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 text-slate-600 text-xs rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
                     Bio
                   </label>
                   <textarea
@@ -484,7 +515,7 @@ const LinkTreeBuilder = () => {
                     onChange={(e) =>
                       setProfile({ ...profile, bio: e.target.value })
                     }
-                    className="w-full px-3 py-2 text-gray-600 text-xs rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 text-slate-600 text-xs rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     rows={3}
                   />
                 </div>
@@ -516,7 +547,7 @@ const LinkTreeBuilder = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="text-center mb-8"
           >
-            <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-gray-100">
+            <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-slate-100">
               <img
                 src="/api/placeholder/96/96"
                 alt="Profile"
@@ -526,7 +557,7 @@ const LinkTreeBuilder = () => {
             <h1 className={`text-2xl font-bold ${theme.textColor} mb-2`}>
               {profile.name}
             </h1>
-            <p className="text-gray-400">{profile.bio}</p>
+            <p className="text-slate-400">{profile.bio}</p>
           </motion.div>
 
           <motion.div

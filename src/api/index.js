@@ -21,8 +21,11 @@ export {
     recordClick,
     getClicksForUrl,
     getClicksForUrls,
-    getUrlAnalytics,
-    getDashboardAnalytics
+    getClickAnalytics,
+    getClicksByDateRange,
+    getGeoAnalytics,
+    getDeviceAnalytics,
+    getReferrerAnalytics
 } from './clicks';
 
 // Folders & Tags
@@ -42,11 +45,10 @@ export {
 
 // Users
 export {
-    getOrCreateUser,
-    getUserBySupabaseId,
-    getUserById,
+    getUser,
     updateUser,
-    getUserStats
+    getUserStats,
+    getUserDashboard
 } from './users';
 
 // API Keys
@@ -54,8 +56,8 @@ export {
     getApiKeys,
     createApiKey,
     deleteApiKey,
-    toggleApiKey,
-    validateApiKey
+    regenerateApiKey,
+    updateApiKeyPermissions
 } from './apiKeys';
 
 // Webhooks
@@ -64,7 +66,72 @@ export {
     createWebhook,
     updateWebhook,
     deleteWebhook,
-    toggleWebhook,
-    triggerWebhooks,
-    WEBHOOK_EVENTS
+    testWebhook
 } from './webhooks';
+
+// Pixels
+export {
+    getPixels,
+    getPixel,
+    createPixel,
+    updatePixel,
+    deletePixel,
+    attachPixelToUrl,
+    detachPixelFromUrl,
+    PIXEL_TYPES
+} from './pixels';
+
+// Splits
+export {
+    getSplits,
+    createSplit,
+    updateSplit,
+    deleteSplit,
+    getSplitStats,
+    getSplitRedirect,
+    recordSplitClick
+} from './splits';
+
+// Health
+export {
+    getHealthHistory,
+    getLatestHealth,
+    getUnhealthyLinks,
+    checkHealth,
+    checkAllHealth,
+    getHealthSummary
+} from './health';
+
+// LinkTrees
+export {
+    getPublicLinkTree,
+    recordLinkTreeClick,
+    getLinkTreeGallery,
+    getMyLinkTrees,
+    getLinkTree,
+    createLinkTree,
+    updateLinkTree,
+    deleteLinkTree,
+    addLinkTreeItem,
+    updateLinkTreeItem,
+    deleteLinkTreeItem,
+    reorderLinkTreeItems,
+    bulkUpdateLinks
+} from './linktrees';
+
+// Rooms
+export {
+    getPublicRoom,
+    getMyRooms,
+    getJoinedRooms,
+    getRoomBySlug,
+    getRoom,
+    createRoom,
+    updateRoom,
+    deleteRoom,
+    addRoomMember,
+    removeRoomMember,
+    leaveRoom,
+    addRoomUrl,
+    removeRoomUrl
+} from './rooms';

@@ -112,13 +112,13 @@ const UTMBuilder = ({ url, onChange }) => {
     };
 
     return (
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
             <CardHeader className="pb-3">
                 <CardTitle className="text-base font-medium text-white flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-amber-400" />
                     UTM Campaign Builder
                 </CardTitle>
-                <p className="text-sm text-zinc-500">
+                <p className="text-sm text-slate-500">
                     Add tracking parameters to measure campaign performance
                 </p>
             </CardHeader>
@@ -135,12 +135,12 @@ const UTMBuilder = ({ url, onChange }) => {
                                 className="space-y-2"
                             >
                                 <div className="flex items-center gap-2">
-                                    <label className="text-sm font-medium text-gray-300">
+                                    <label className="text-sm font-medium text-slate-300">
                                         {param.label}
                                     </label>
                                     <Tooltip>
                                         <TooltipTrigger>
-                                            <HelpCircle className="w-3.5 h-3.5 text-gray-500" />
+                                            <HelpCircle className="w-3.5 h-3.5 text-slate-500" />
                                         </TooltipTrigger>
                                         <TooltipContent side="top" className="max-w-xs">
                                             <p>{param.description}</p>
@@ -152,7 +152,7 @@ const UTMBuilder = ({ url, onChange }) => {
                                     placeholder={param.placeholder}
                                     value={utmParams[param.key]}
                                     onChange={(e) => handleChange(param.key, e.target.value)}
-                                    className="bg-gray-900/50 border-gray-700 focus:border-amber-500/50 transition-colors"
+                                    className="bg-[hsl(230,12%,9%)]/50 border-[hsl(230,10%,20%)] focus:border-amber-500/50 transition-colors"
                                 />
 
                                 {param.suggestions.length > 0 && (
@@ -162,7 +162,7 @@ const UTMBuilder = ({ url, onChange }) => {
                                                 key={suggestion}
                                                 type="button"
                                                 onClick={() => handleSuggestionClick(param.key, suggestion)}
-                                                className="text-xs px-2 py-0.5 rounded-full bg-gray-700/50 text-gray-400 hover:bg-amber-500/20 hover:text-amber-300 transition-colors"
+                                                className="text-xs px-2 py-0.5 rounded-full bg-[hsl(230,10%,20%)]/50 text-slate-400 hover:bg-amber-500/20 hover:text-amber-300 transition-colors"
                                             >
                                                 {suggestion}
                                             </button>
@@ -199,7 +199,7 @@ const UTMBuilder = ({ url, onChange }) => {
                                 )}
                             </Button>
                         </div>
-                        <p className="text-sm text-gray-300 break-all font-mono bg-gray-900/50 p-2 rounded">
+                        <p className="text-sm text-slate-300 break-all font-mono bg-[hsl(230,12%,9%)]/50 p-2 rounded">
                             {generatedUrl}
                         </p>
                     </motion.div>
@@ -213,7 +213,7 @@ const UTMBuilder = ({ url, onChange }) => {
                             .map(([key, value]) => (
                                 <span
                                     key={key}
-                                    className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-gray-700/50 text-gray-300"
+                                    className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-[hsl(230,10%,20%)]/50 text-slate-300"
                                 >
                                     <span className="text-amber-400">utm_{key}:</span>
                                     {value}

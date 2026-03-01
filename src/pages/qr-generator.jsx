@@ -148,41 +148,42 @@ const QRCodeGenerator = () => {
       <SEOMetadata
         title="Free QR Code Generator | TrimLink"
         description="Create customizable QR codes for your URLs, business cards, or marketing materials."
-        canonical="https://trimlynk.com/qr-code-generator"
+        canonical={`${import.meta.env.VITE_APP_URL || 'https://trimlynk.com'}/qr-code-generator`}
         keywords="QR code generator, create QR code, custom QR codes"
         author="TrimLink"
         language="en"
       />
 
-      <div className="min-h-screen p-4 lg:p-8">
+      <div className="min-h-screen bg-[hsl(230,15%,5%)] p-4 lg:p-8">
         <div className="max-w-3xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 mb-4">
-              <QrCode className="w-6 h-6 text-cyan-400" />
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600/20 to-violet-600/10 border border-blue-500/20 mb-5">
+              <QrCode className="w-7 h-7 text-blue-400" />
             </div>
-            <h1 className="text-2xl font-bold text-white">QR Code Generator</h1>
-            <p className="text-zinc-500 text-sm mt-1">Create custom QR codes for any purpose</p>
+            <h1 className="text-3xl font-bold text-white">QR Code Generator</h1>
+            <p className="text-slate-400 text-sm mt-2">Create custom QR codes for any purpose</p>
           </div>
 
-          <Card className="bg-zinc-900 border-zinc-800">
-            <CardContent className="p-6">
+          <div className="relative rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+            <div className="p-6 md:p-8">
               <div className="grid md:grid-cols-2 gap-8">
                 {/* Controls */}
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm text-zinc-400">QR Type</label>
+                    <label className="text-sm text-slate-400">QR Type</label>
                     <Select value={qrType} onValueChange={(value) => {
                       setQrType(value);
                       setQrData('');
                       setError('');
                     }}>
-                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                      <SelectTrigger className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)] text-white">
                         <SelectValue placeholder="Select QR Type" />
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-zinc-800">
+                      <SelectContent className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
                         {Object.entries(qrTypes).map(([key, { label, icon: Icon }]) => (
-                          <SelectItem key={key} value={key} className="text-zinc-300 focus:bg-zinc-800">
+                          <SelectItem key={key} value={key} className="text-slate-300 focus:bg-[hsl(230,10%,14%)]">
                             <div className="flex items-center gap-2">
                               <Icon className="w-4 h-4" />
                               <span>{label}</span>
@@ -194,61 +195,61 @@ const QRCodeGenerator = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm text-zinc-400">Content</label>
+                    <label className="text-sm text-slate-400">Content</label>
                     <Input
                       placeholder={qrTypes[qrType].placeholder}
                       value={qrData}
                       onChange={(e) => handleDataChange(e.target.value)}
-                      className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-cyan-500/50"
+                      className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)] text-white placeholder:text-slate-500 focus:border-blue-600/50"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-sm text-zinc-400">Size (px)</label>
+                      <label className="text-sm text-slate-400">Size (px)</label>
                       <Input
                         type="number"
                         min="100"
                         max="400"
                         value={size}
                         onChange={(e) => setSize(Number(e.target.value))}
-                        className="bg-zinc-800 border-zinc-700 text-white"
+                        className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)] text-white"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm text-zinc-400">Logo (optional)</label>
+                      <label className="text-sm text-slate-400">Logo (optional)</label>
                       <Input
                         type="file"
                         accept="image/*"
                         onChange={handleLogoUpload}
-                        className="bg-zinc-800 border-zinc-700 text-zinc-400 file:bg-zinc-700 file:text-zinc-300 file:border-0 file:rounded"
+                        className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)] text-slate-400 file:bg-[hsl(230,10%,20%)] file:text-slate-300 file:border-0 file:rounded"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-sm text-zinc-400">QR Color</label>
+                      <label className="text-sm text-slate-400">QR Color</label>
                       <div className="flex items-center gap-2">
                         <Input
                           type="color"
                           value={fgColor}
                           onChange={(e) => setFgColor(e.target.value)}
-                          className="w-12 h-10 p-1 bg-zinc-800 border-zinc-700 cursor-pointer"
+                          className="w-12 h-10 p-1 bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)] cursor-pointer"
                         />
-                        <span className="text-sm text-zinc-500 font-mono">{fgColor}</span>
+                        <span className="text-sm text-slate-500 font-mono">{fgColor}</span>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm text-zinc-400">Background</label>
+                      <label className="text-sm text-slate-400">Background</label>
                       <div className="flex items-center gap-2">
                         <Input
                           type="color"
                           value={bgColor}
                           onChange={(e) => setBgColor(e.target.value)}
-                          className="w-12 h-10 p-1 bg-zinc-800 border-zinc-700 cursor-pointer"
+                          className="w-12 h-10 p-1 bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)] cursor-pointer"
                         />
-                        <span className="text-sm text-zinc-500 font-mono">{bgColor}</span>
+                        <span className="text-sm text-slate-500 font-mono">{bgColor}</span>
                       </div>
                     </div>
                   </div>
@@ -263,7 +264,7 @@ const QRCodeGenerator = () => {
                   <Button
                     onClick={downloadQRCode}
                     disabled={!qrData || !!error}
-                    className="w-full bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold disabled:opacity-50"
+                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold disabled:opacity-50 rounded-xl h-11 hover:shadow-lg hover:shadow-blue-600/20 transition-all"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Download QR Code
@@ -273,7 +274,7 @@ const QRCodeGenerator = () => {
                 {/* Preview */}
                 <div
                   ref={canvasRef}
-                  className="flex items-center justify-center p-6 bg-white rounded-xl min-h-[280px]"
+                  className="flex items-center justify-center p-6 bg-white rounded-2xl min-h-[280px] shadow-inner"
                 >
                   <QRCodeWrapper>
                     {qrData ? (
@@ -291,7 +292,7 @@ const QRCodeGenerator = () => {
                         } : undefined}
                       />
                     ) : (
-                      <div className="flex flex-col items-center text-zinc-400">
+                      <div className="flex flex-col items-center text-slate-400">
                         <QrCode className="w-16 h-16 mb-3 opacity-30" />
                         <p className="text-sm">Enter content to generate QR code</p>
                       </div>
@@ -299,8 +300,8 @@ const QRCodeGenerator = () => {
                   </QRCodeWrapper>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </>

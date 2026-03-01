@@ -14,7 +14,7 @@ import {
   Filter,
   HousePlus,
 } from "lucide-react";
-import supabase from "@/db/supabase";
+import { getMyRooms, createRoom, updateRoom, deleteRoom } from "../../api/rooms";
 import RoomInvitationManager from "./room-invitation-manager";
 import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
 import { Button } from "../ui/button";
@@ -75,33 +75,28 @@ const RoomDashboard = () => {
 
     // Status filter
     if (filterOptions.status === "active") {
-      result = result.filter((room) => room.is_active);
+      result = result.filter((room) => room.isPublic);
     } else if (filterOptions.status === "archived") {
-      result = result.filter((room) => !room.is_active);
+      result = result.filter((room) => !room.isPublic);
     }
 
     // Links filter
     result = result.filter(
       (room) =>
-        (room.links?.length || 0) >= filterOptions.minLinks &&
-        (room.links?.length || 0) <= filterOptions.maxLinks
+        (room.sharedUrls?.length || room._count?.sharedUrls || 0) >= filterOptions.minLinks &&
+        (room.sharedUrls?.length || room._count?.sharedUrls || 0) <= filterOptions.maxLinks
     );
 
-    // Views filter
-    result = result.filter(
-      (room) =>
-        (room.views || 0) >= filterOptions.minViews &&
-        (room.views || 0) <= filterOptions.maxViews
-    );
+    // Views filter — removed (no views field in Prisma Room model)
 
     // Search query filter
     if (filterOptions.searchQuery) {
       const query = filterOptions.searchQuery.toLowerCase();
       result = result.filter(
         (room) =>
-          room.title.toLowerCase().includes(query) ||
+          room.name.toLowerCase().includes(query) ||
           room.slug.toLowerCase().includes(query) ||
-          room.profile.bio?.toLowerCase().includes(query)
+          (room.description || "").toLowerCase().includes(query)
       );
     }
 
@@ -128,13 +123,7 @@ const RoomDashboard = () => {
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("rooms")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
+      const data = await getMyRooms();
       setRooms(data || []);
     } catch (error) {
       console.error("Error fetching rooms:", error);
@@ -155,41 +144,11 @@ const RoomDashboard = () => {
       .replace(/-+$/, ""); // Remove trailing hyphens
   };
 
-  // Check if slug exists in database
-  const checkSlugExists = async (slug) => {
-    try {
-      const { error } = await supabase
-        .from("rooms")
-        .select("id")
-        .eq("slug", slug)
-        .single();
-
-      if (error && error.code === "PGRST116") {
-        // PGRST116 means no rows returned - slug is available
-        return false;
-      }
-
-      return true; // Slug exists
-    } catch (error) {
-      console.error("Error checking slug:", error);
-      return true; // Assume slug exists on error to be safe
-    }
-  };
+  // Check if slug exists is now handled server-side
+  const checkSlugExists = async () => false;
 
   // Generate unique slug
-  const generateUniqueSlug = async (baseSlug) => {
-    let slug = baseSlug;
-    let counter = 1;
-    let slugExists = await checkSlugExists(slug);
-
-    while (slugExists) {
-      slug = `${baseSlug}-${counter}`;
-      slugExists = await checkSlugExists(slug);
-      counter++;
-    }
-
-    return slug;
-  };
+  const generateUniqueSlug = async (baseSlug) => baseSlug;
 
   // Handle title change and update slug
   const handleTitleChange = async (e) => {
@@ -222,33 +181,12 @@ const RoomDashboard = () => {
   const handleCreateRoom = async () => {
     setIsLoadingState(true);
     try {
-      // Final slug check before creation
-      const slugExists = await checkSlugExists(roomData.slug);
-      if (slugExists) {
-        setSlugError(
-          "This slug is already taken. Please try a different title."
-        );
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("rooms")
-        .insert([
-          {
-            title: roomData.title,
-            slug: roomData.slug,
-            profile: {
-              ...roomData.profile,
-              name: roomData.title,
-            },
-            links: [],
-            user_id: user?.id,
-          },
-        ])
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await createRoom({
+        name: roomData.title,
+        slug: roomData.slug,
+        description: roomData.profile.bio || "",
+        isPublic: true,
+      });
 
       setRooms([data, ...rooms]);
       setRoomData({
@@ -269,11 +207,8 @@ const RoomDashboard = () => {
       setSlugError("");
     } catch (error) {
       console.error("Error creating room:", error);
-      if (error.code === "23505") {
-        // Unique violation
-        setSlugError(
-          "This slug is already taken. Please try a different title."
-        );
+      if (error.message?.includes("Slug already taken")) {
+        setSlugError("This slug is already taken. Please try a different title.");
       }
     } finally {
       setIsLoadingState(false);
@@ -284,43 +219,18 @@ const RoomDashboard = () => {
   const handleUpdateRoom = async () => {
     setIsLoadingState(true);
     try {
-      // Only check slug if it changed
-      if (activeRoom.slug !== roomData.slug) {
-        const slugExists = await checkSlugExists(roomData.slug);
-        if (slugExists) {
-          setSlugError(
-            "This slug is already taken. Please try a different title."
-          );
-          return;
-        }
-      }
-
-      const { data, error } = await supabase
-        .from("rooms")
-        .update({
-          title: roomData.title,
-          slug: roomData.slug,
-          profile: {
-            ...roomData.profile,
-            name: roomData.title,
-          },
-        })
-        .eq("id", activeRoom.id)
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await updateRoom(activeRoom.id, {
+        name: roomData.title,
+        description: roomData.profile.bio || "",
+      });
 
       setRooms(rooms.map((room) => (room.id === activeRoom.id ? data : room)));
       setShowEditModal(false);
       setSlugError("");
     } catch (error) {
       console.error("Error updating room:", error);
-      if (error.code === "23505") {
-        // Unique violation
-        setSlugError(
-          "This slug is already taken. Please try a different title."
-        );
+      if (error.message?.includes("Slug already taken")) {
+        setSlugError("This slug is already taken. Please try a different title.");
       }
     } finally {
       setIsLoadingState(false);
@@ -332,15 +242,7 @@ const RoomDashboard = () => {
     if (!window.confirm("Are you sure you want to delete this room?")) return;
     setIsLoadingState(true);
     try {
-      const { error } = await supabase
-        .from("rooms")
-        .delete()
-        .eq("id", roomId)
-        .select();
-
-      if (error) throw error;
-
-      // setRooms(rooms.filter((room) => room.id !== roomId));
+      await deleteRoom(roomId);
       fetchRooms();
     } catch (error) {
       console.error("Error deleting room:", error);
@@ -356,26 +258,14 @@ const RoomDashboard = () => {
   const handleArchive = async (roomId) => {
     setIsLoadingState(true);
     try {
-      const { error } = await supabase
-        .from("rooms")
-        .update({
-          is_active: rooms.find((room) => room.id === roomId).is_active
-            ? false
-            : true,
-        })
-        .eq("id", roomId);
-
-      if (error) {
-        throw error;
-      }
+      const currentRoom = rooms.find((room) => room.id === roomId);
+      const newIsPublic = !currentRoom.isPublic;
+      await updateRoom(roomId, { isPublic: newIsPublic });
 
       setRooms((prevRooms) =>
         prevRooms.map((room) => {
           if (room.id === roomId) {
-            return {
-              ...room,
-              is_active: false,
-            };
+            return { ...room, isPublic: newIsPublic };
           }
           return room;
         })
@@ -388,13 +278,13 @@ const RoomDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 p-6">
+    <div className="min-h-screen bg-[hsl(230,15%,5%)] p-6">
       <div className="max-w-6xl mx-auto">
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-white">Rooms</div>
-              <Button size="sm" onClick={() => setShowNewRoomModal(true)} className="bg-cyan-500 hover:bg-cyan-400 text-zinc-900">
+              <Button size="sm" onClick={() => setShowNewRoomModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white">
                 Create Room
               </Button>
             </CardTitle>
@@ -407,7 +297,7 @@ const RoomDashboard = () => {
               variant="outline"
               size="sm"
               onClick={() => setShowFilterModal(true)}
-              className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+              className="border-[hsl(230,10%,20%)] text-slate-300 hover:bg-[hsl(230,10%,14%)]"
             >
               <Filter size={16} className="mr-2" /> Filters
             </Button>
@@ -417,7 +307,7 @@ const RoomDashboard = () => {
               variant="outline"
               size="sm"
               onClick={() => navigate("/joined-rooms")}
-              className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+              className="border-[hsl(230,10%,20%)] text-slate-300 hover:bg-[hsl(230,10%,14%)]"
             >
               <HousePlus size={16} className="mr-2" /> Joined Rooms
             </Button>
@@ -428,7 +318,7 @@ const RoomDashboard = () => {
           // No Rooms
           rooms.length === 0 && (
             <div className="text-center py-8 w-full h-full">
-              <p className="text-zinc-500">
+              <p className="text-slate-500">
                 You haven&apos;t created any rooms yet. Click the button above to
                 get started.
               </p>
@@ -437,12 +327,12 @@ const RoomDashboard = () => {
         }
         {showFilterModal && (
           <div className="fixed inset-0 backdrop-blur-sm bg-black/60 flex items-center justify-center z-50">
-            <div className="rounded-xl p-6 w-full max-w-md bg-zinc-900 border border-zinc-800">
+            <div className="rounded-xl p-6 w-full max-w-md bg-[hsl(230,12%,9%)] border border-[hsl(230,10%,15%)]">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold text-white">Filter Rooms</h2>
                 <button
                   onClick={() => setShowFilterModal(false)}
-                  className="p-1 hover:bg-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors"
+                  className="p-1 hover:bg-[hsl(230,10%,14%)] rounded-md text-slate-400 hover:text-white transition-colors"
                 >
                   <X size={20} />
                 </button>
@@ -460,7 +350,7 @@ const RoomDashboard = () => {
                         status: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-zinc-800 text-white placeholder:text-zinc-500"
+                    className="w-full px-3 py-2 border border-[hsl(230,10%,20%)] rounded-lg bg-[hsl(230,10%,14%)] text-white placeholder:text-slate-500"
                   >
                     <option value="all">All Rooms</option>
                     <option value="active">Active Rooms</option>
@@ -484,7 +374,7 @@ const RoomDashboard = () => {
                           minLinks: Number(e.target.value),
                         }))
                       }
-                      className="w-1/2 px-3 py-2 border rounded-lg bg-gray-900"
+                      className="w-1/2 px-3 py-2 border rounded-lg bg-[hsl(230,12%,9%)]"
                     />
                     <input
                       type="number"
@@ -496,7 +386,7 @@ const RoomDashboard = () => {
                           maxLinks: Number(e.target.value),
                         }))
                       }
-                      className="w-1/2 px-3 py-2 border rounded-lg bg-gray-900"
+                      className="w-1/2 px-3 py-2 border rounded-lg bg-[hsl(230,12%,9%)]"
                     />
                   </div>
                 </div>
@@ -517,7 +407,7 @@ const RoomDashboard = () => {
                           minViews: Number(e.target.value),
                         }))
                       }
-                      className="w-1/2 px-3 py-2 border rounded-lg bg-gray-900"
+                      className="w-1/2 px-3 py-2 border rounded-lg bg-[hsl(230,12%,9%)]"
                     />
                     <input
                       type="number"
@@ -529,7 +419,7 @@ const RoomDashboard = () => {
                           maxViews: Number(e.target.value),
                         }))
                       }
-                      className="w-1/2 px-3 py-2 border rounded-lg bg-gray-900"
+                      className="w-1/2 px-3 py-2 border rounded-lg bg-[hsl(230,12%,9%)]"
                     />
                   </div>
                 </div>
@@ -547,7 +437,7 @@ const RoomDashboard = () => {
                         searchQuery: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-zinc-800 text-white placeholder:text-zinc-500"
+                    className="w-full px-3 py-2 border border-[hsl(230,10%,20%)] rounded-lg bg-[hsl(230,10%,14%)] text-white placeholder:text-slate-500"
                   />
                 </div>
 
@@ -567,7 +457,7 @@ const RoomDashboard = () => {
         {/* Room List Section */}
         {filteredRooms.length === 0 && (
           <div className="text-center py-8 w-full h-full">
-            <p className="text-zinc-500">
+            <p className="text-slate-500">
               {rooms.length === 0
                 ? "You haven't created any rooms yet."
                 : "No rooms match your current filter criteria."}
@@ -588,29 +478,29 @@ const RoomDashboard = () => {
             {rooms.map((room) => (
               <div
                 key={room.id}
-                className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 hover:border-zinc-700 transition-colors"
+                className="bg-[hsl(230,12%,9%)] border border-[hsl(230,10%,15%)] rounded-xl p-5 hover:border-[hsl(230,10%,20%)] transition-colors"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <span className="flex items-center gap-2">
-                      <h3 className="font-semibold text-lg text-white">{room.title}</h3>
+                      <h3 className="font-semibold text-lg text-white">{room.name}</h3>
                     </span>
-                    <p className="text-sm text-zinc-500">{room.slug}</p>
-                    <p className="text-zinc-400 text-sm mt-2">
-                      {room.profile.bio}
+                    <p className="text-sm text-slate-500">{room.slug}</p>
+                    <p className="text-slate-400 text-sm mt-2">
+                      {room.description}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     <button
                       // onClick={()=>handleInvite(room.id, room.user_id)}
                       onClick={() => setIsInviteModalOpen(true)}
-                      className="p-2 hover:bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-300 hover:text-white transition-colors"
+                      className="p-2 hover:bg-[hsl(230,10%,14%)] border border-[hsl(230,10%,20%)] rounded-lg text-slate-300 hover:text-white transition-colors"
                     >
                       <UserPlus size={14} />
                     </button>
                     {isInviteModalOpen && (
                       <div className="fixed inset-0 flex justify-center items-center backdrop-blur-sm bg-black/50 z-20">
-                        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                        <div className="bg-[hsl(230,12%,9%)] border border-[hsl(230,10%,15%)] rounded-xl p-5">
                           <Dialog
                             open={isInviteModalOpen}
                             onOpenChange={setIsInviteModalOpen}
@@ -621,7 +511,7 @@ const RoomDashboard = () => {
                               </DialogTitle>
                               <RoomInvitationManager
                                 roomId={room.id}
-                                currentUserId={room.user_id}
+                        currentUserId={room.ownerId}
                               />
                             </DialogContent>
                           </Dialog>
@@ -631,9 +521,9 @@ const RoomDashboard = () => {
                     <button
                       size="sm"
                       onClick={() => handleArchive(room.id)}
-                      className="flex items-center gap-2 text-xs hover:bg-zinc-800 border border-zinc-700 p-2 rounded-lg text-zinc-300 hover:text-white transition-colors"
+                      className="flex items-center gap-2 text-xs hover:bg-[hsl(230,10%,14%)] border border-[hsl(230,10%,20%)] p-2 rounded-lg text-slate-300 hover:text-white transition-colors"
                     >
-                      {!isLoadingState && room.is_active ? (
+                      {!isLoadingState && room.isPublic ? (
                         <Archive size={14} />
                       ) : (
                         <ArchiveRestore size={14} />
@@ -647,13 +537,13 @@ const RoomDashboard = () => {
                         e.stopPropagation();
                         setActiveRoom(room);
                         setRoomData({
-                          title: room.title,
+                          title: room.name,
                           slug: room.slug,
-                          profile: room.profile,
+                          profile: { bio: room.description || "" },
                         });
                         setShowEditModal(true);
                       }}
-                      className="p-2 hover:bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-300 hover:text-white transition-colors"
+                      className="p-2 hover:bg-[hsl(230,10%,14%)] border border-[hsl(230,10%,20%)] rounded-lg text-slate-300 hover:text-white transition-colors"
                     >
                       <Edit2 size={14} />
                     </button>
@@ -662,7 +552,7 @@ const RoomDashboard = () => {
                         e.stopPropagation();
                         handleDeleteRoom(room.id);
                       }}
-                      className="p-2 hover:bg-red-500/10 text-red-400 border border-zinc-700 rounded-lg transition-colors"
+                      className="p-2 hover:bg-red-500/10 text-red-400 border border-[hsl(230,10%,20%)] rounded-lg transition-colors"
                     >
                       {isLoadingState ? (
                         <Loader2 className="animate-spin w-4 h-4" />
@@ -673,21 +563,21 @@ const RoomDashboard = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-zinc-500 mb-4">
-                  <div className="py-1 px-2 text-xs rounded-full border border-zinc-700 flex items-center gap-2 text-zinc-300">
+                <div className="flex items-center justify-between text-sm text-slate-500 mb-4">
+                  <div className="py-1 px-2 text-xs rounded-full border border-[hsl(230,10%,20%)] flex items-center gap-2 text-slate-300">
                     <Link2 size={16} />
                     <span className="font-bold">
-                      {room.links?.length || 0} links
+                      {room._count?.sharedUrls || 0} links
                     </span>
                   </div>
                   <div className="py-1 px-2 text-xs rounded-full border flex items-center gap-2 text-white">
                     {/* <Users size={16} className="ml-2" /> */}
                     <Eye size={16} />
-                    <span className="font-bold">{room.views || 0} views</span>
+                    <span className="font-bold">{room._count?.members || 0} members</span>
                   </div>
                   <div className="py-1 px-2 text-xs rounded-full border flex items-center gap-2 text-white">
                     <span>
-                      {room.is_active ? (
+                      {room.isPublic ? (
                         <span className="flex gap-1 text-green-500">
                           <Activity size={16} />
                           Active
@@ -716,7 +606,7 @@ const RoomDashboard = () => {
         {/* New/Edit Room Modal */}
         {(showNewRoomModal || showEditModal) && (
           <div className="fixed inset-0 backdrop-blur-sm bg-black/60 flex items-center justify-center z-50">
-            <div className="rounded-xl p-6 w-full max-w-md bg-zinc-900 border border-zinc-800">
+            <div className="rounded-xl p-6 w-full max-w-md bg-[hsl(230,12%,9%)] border border-[hsl(230,10%,15%)]">
               <div className="flex justify-between items-center mb-5">
                 <h2 className="text-lg font-semibold text-white">
                   {showNewRoomModal ? "Create New Room" : "Edit Room"}
@@ -727,7 +617,7 @@ const RoomDashboard = () => {
                     setShowEditModal(false);
                     setSlugError("");
                   }}
-                  className="p-1.5 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-white transition-colors"
+                  className="p-1.5 hover:bg-[hsl(230,10%,14%)] rounded-lg text-slate-400 hover:text-white transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -735,23 +625,23 @@ const RoomDashboard = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
                     Room Title
                   </label>
                   <input
                     type="text"
                     value={roomData.title}
                     onChange={handleTitleChange}
-                    className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-zinc-800 text-white placeholder:text-zinc-500"
+                    className="w-full px-3 py-2 border border-[hsl(230,10%,20%)] rounded-lg bg-[hsl(230,10%,14%)] text-white placeholder:text-slate-500"
                     placeholder="Enter room title"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">Slug</label>
-                  <div className="flex items-center gap-1 px-3 py-2 border border-zinc-700 rounded-lg bg-zinc-800">
-                    <span className="text-zinc-500">/</span>
-                    <span className="text-zinc-300">{roomData.slug || "generated-slug"}</span>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Slug</label>
+                  <div className="flex items-center gap-1 px-3 py-2 border border-[hsl(230,10%,20%)] rounded-lg bg-[hsl(230,10%,14%)]">
+                    <span className="text-slate-500">/</span>
+                    <span className="text-slate-300">{roomData.slug || "generated-slug"}</span>
                   </div>
                   {slugError && (
                     <p className="mt-1 text-sm text-red-400">{slugError}</p>
@@ -759,7 +649,7 @@ const RoomDashboard = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">Bio</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Bio</label>
                   <textarea
                     value={roomData.profile.bio}
                     onChange={(e) =>
@@ -771,7 +661,7 @@ const RoomDashboard = () => {
                         },
                       })
                     }
-                    className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-zinc-800 text-white placeholder:text-zinc-500"
+                    className="w-full px-3 py-2 border border-[hsl(230,10%,20%)] rounded-lg bg-[hsl(230,10%,14%)] text-white placeholder:text-slate-500"
                     placeholder="Enter room bio"
                     rows={3}
                   />
@@ -784,7 +674,7 @@ const RoomDashboard = () => {
                       setShowEditModal(false);
                       setSlugError("");
                     }}
-                    className="px-4 py-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg border border-zinc-700 transition-colors"
+                    className="px-4 py-2 text-slate-400 hover:text-white hover:bg-[hsl(230,10%,14%)] rounded-lg border border-[hsl(230,10%,20%)] transition-colors"
                   >
                     Cancel
                   </button>
@@ -793,7 +683,7 @@ const RoomDashboard = () => {
                       showNewRoomModal ? handleCreateRoom : handleUpdateRoom
                     }
                     disabled={!roomData.title || slugError}
-                    className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
                   >
                     {showNewRoomModal ? "Create Room" : "Update Room"}
                     {isLoadingState ? (

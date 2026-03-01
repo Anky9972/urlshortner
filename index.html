@@ -37,7 +37,7 @@
       property="og:description"
       content="Shorten your long URLs with our URL shortener service. Create custom short links and track their performance."
     />
-    <meta property="og:url" content="https://trimlink.netlify.app/" />
+    <meta property="og:url" content="%VITE_APP_URL%" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/images/logo.png" />
     <meta property="og:site_name" content="TrimLink" />
@@ -69,12 +69,11 @@
         "@type": "WebApplication",
         "name": "TrimLink",
         "url": [
-          "https://trimlink.netlify.app/",
-          "https://trimlynk.com/"
+          "%VITE_APP_URL%"
         ],
         "description": "Shorten your long URLs with our URL shortener service. Create custom short links and track their performance.",
         "applicationCategory": "UtilityApplication",
-        "image": "https://trimlynk.com/images/logo.png",
+        "image": "%VITE_APP_URL%/images/logo.png",
         "offers": {
           "@type": "Offer",
           "price": "0",
@@ -82,7 +81,7 @@
         },
         "potentialAction": {
           "@type": "SearchAction",
-          "target": "https://trimlynk.com/?q={search_term_string}",
+          "target": "%VITE_APP_URL%/?q={search_term_string}",
           "query-input": "required name=search_term_string"
         }
       }
@@ -105,6 +104,6 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <script type="module" src="./src//main.jsx"></script>
+    <script type="module" src="./src/main.jsx"></script>
   </body>
 </html>

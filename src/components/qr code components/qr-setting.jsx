@@ -10,7 +10,7 @@ const QRCodeSettings = ({ size, setSize, fgColor, setFgColor, bgColor, setBgColo
           type="number"
           value={size}
           onChange={(e) => setSize(Number(e.target.value))}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-blue-500"
         />
       </div>
       <div>
@@ -19,7 +19,7 @@ const QRCodeSettings = ({ size, setSize, fgColor, setFgColor, bgColor, setBgColo
           type="color"
           value={fgColor}
           onChange={(e) => setFgColor(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-blue-500"
         />
       </div>
       <div>
@@ -28,7 +28,7 @@ const QRCodeSettings = ({ size, setSize, fgColor, setFgColor, bgColor, setBgColo
           type="color"
           value={bgColor}
           onChange={(e) => setBgColor(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-blue-500"
         />
       </div>
     </div>

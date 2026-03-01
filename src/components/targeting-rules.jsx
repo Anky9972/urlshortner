@@ -87,20 +87,20 @@ const TargetingRules = ({ rules = [], onAdd, onRemove, onUpdate }) => {
     };
 
     return (
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
             <CardHeader className="pb-3">
                 <CardTitle className="text-base font-medium flex items-center justify-between">
                     <span className="text-white">Smart Targeting Rules</span>
                     <Button
                         size="sm"
                         onClick={() => setShowAddForm(!showAddForm)}
-                        className="bg-emerald-500 hover:bg-emerald-400 text-zinc-900"
+                        className="bg-emerald-500 hover:bg-emerald-400 text-white"
                     >
                         <Plus className="w-4 h-4 mr-1" />
                         Add Rule
                     </Button>
                 </CardTitle>
-                <p className="text-sm text-zinc-500">
+                <p className="text-sm text-slate-500">
                     Redirect visitors based on their location, device, or browser
                 </p>
             </CardHeader>
@@ -112,16 +112,16 @@ const TargetingRules = ({ rules = [], onAdd, onRemove, onUpdate }) => {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="p-4 rounded-lg bg-gray-900/50 border border-gray-700 space-y-4"
+                            className="p-4 rounded-lg bg-[hsl(230,12%,9%)]/50 border border-[hsl(230,10%,20%)] space-y-4"
                         >
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <label className="text-sm text-gray-400">Rule Type</label>
+                                    <label className="text-sm text-slate-400">Rule Type</label>
                                     <Select
                                         value={newRule.type}
                                         onValueChange={(value) => setNewRule({ ...newRule, type: value, condition: '' })}
                                     >
-                                        <SelectTrigger className="bg-gray-800 border-gray-700">
+                                        <SelectTrigger className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)]">
                                             <SelectValue placeholder="Select type" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -138,12 +138,12 @@ const TargetingRules = ({ rules = [], onAdd, onRemove, onUpdate }) => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-sm text-gray-400">Condition</label>
+                                    <label className="text-sm text-slate-400">Condition</label>
                                     <Select
                                         value={newRule.condition}
                                         onValueChange={(value) => setNewRule({ ...newRule, condition: value })}
                                     >
-                                        <SelectTrigger className="bg-gray-800 border-gray-700">
+                                        <SelectTrigger className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)]">
                                             <SelectValue placeholder="Select condition" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -158,13 +158,13 @@ const TargetingRules = ({ rules = [], onAdd, onRemove, onUpdate }) => {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm text-gray-400">Redirect URL</label>
+                                <label className="text-sm text-slate-400">Redirect URL</label>
                                 <Input
                                     type="url"
                                     placeholder="https://example.com/specific-page"
                                     value={newRule.targetUrl}
                                     onChange={(e) => setNewRule({ ...newRule, targetUrl: e.target.value })}
-                                    className="bg-gray-800 border-gray-700 focus:border-cyan-500"
+                                    className="bg-[hsl(230,10%,14%)] border-[hsl(230,10%,20%)] focus:border-blue-600"
                                 />
                             </div>
 
@@ -172,7 +172,7 @@ const TargetingRules = ({ rules = [], onAdd, onRemove, onUpdate }) => {
                                 <Button variant="ghost" onClick={() => setShowAddForm(false)}>
                                     Cancel
                                 </Button>
-                                <Button onClick={handleAddRule} className="bg-cyan-500 hover:bg-cyan-600">
+                                <Button onClick={handleAddRule} className="bg-blue-600 hover:bg-blue-500">
                                     Add Rule
                                 </Button>
                             </div>
@@ -183,7 +183,7 @@ const TargetingRules = ({ rules = [], onAdd, onRemove, onUpdate }) => {
                 {/* Existing Rules */}
                 <div className="space-y-2">
                     {rules.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
+                        <div className="text-center py-8 text-slate-500">
                             <Globe className="w-12 h-12 mx-auto mb-3 opacity-50" />
                             <p>No targeting rules configured</p>
                             <p className="text-sm">Add rules to redirect visitors based on their attributes</p>
@@ -197,9 +197,9 @@ const TargetingRules = ({ rules = [], onAdd, onRemove, onUpdate }) => {
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: 20 }}
-                                    className="flex items-center gap-3 p-3 rounded-lg bg-gray-900/30 border border-gray-700/50 group hover:border-gray-600 transition-colors"
+                                    className="flex items-center gap-3 p-3 rounded-lg bg-[hsl(230,12%,9%)]/30 border border-[hsl(230,10%,20%)]/50 group hover:border-[hsl(230,10%,25%)] transition-colors"
                                 >
-                                    <GripVertical className="w-4 h-4 text-gray-600 cursor-grab" />
+                                    <GripVertical className="w-4 h-4 text-slate-600 cursor-grab" />
 
                                     <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                                         <Icon className="w-4 h-4 text-emerald-400" />
@@ -207,14 +207,14 @@ const TargetingRules = ({ rules = [], onAdd, onRemove, onUpdate }) => {
 
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm font-medium text-gray-200">
+                                            <span className="text-sm font-medium text-slate-200">
                                                 {rule.condition.split(':')[1]?.toUpperCase() || rule.condition}
                                             </span>
-                                            <span className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-400">
+                                            <span className="text-xs px-2 py-0.5 rounded-full bg-[hsl(230,10%,20%)] text-slate-400">
                                                 {rule.type}
                                             </span>
                                         </div>
-                                        <p className="text-xs text-gray-500 truncate">{rule.targetUrl}</p>
+                                        <p className="text-xs text-slate-500 truncate">{rule.targetUrl}</p>
                                     </div>
 
                                     <Button
