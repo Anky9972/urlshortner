@@ -375,7 +375,7 @@ const LandingPage = () => {
                   <div className="w-3 h-3 rounded-full bg-red-500/60" />
                   <div className="w-3 h-3 rounded-full bg-amber-500/60" />
                   <div className="w-3 h-3 rounded-full bg-emerald-500/60" />
-                  <span className="text-slate-600 text-[10px] ml-2 font-mono">trimlink.com/dashboard</span>
+                  <span className="text-slate-600 text-[10px] ml-2 font-mono">trimlynk.com/dashboard</span>
                 </div>
 
                 {/* Mini stats row */}
@@ -437,7 +437,7 @@ const LandingPage = () => {
                         <Link2 className="w-3.5 h-3.5 text-blue-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-white font-medium truncate">trimlink.com/{link.slug}</p>
+                        <p className="text-xs text-white font-medium truncate">trimlynk.com/{link.slug}</p>
                         <p className="text-[10px] text-slate-600 truncate">{link.orig}</p>
                       </div>
                       <span className="text-xs text-slate-400 font-mono shrink-0">{link.clicks}</span>
@@ -655,7 +655,7 @@ const LandingPage = () => {
                 <div className="w-3 h-3 rounded-full bg-red-500/60" />
                 <div className="w-3 h-3 rounded-full bg-amber-500/60" />
                 <div className="w-3 h-3 rounded-full bg-emerald-500/60" />
-                <span className="text-slate-600 text-xs ml-3 font-mono">trimlink.com/dashboard</span>
+                <span className="text-slate-600 text-xs ml-3 font-mono">trimlynk.com/dashboard</span>
               </div>
               <div className="grid grid-cols-4 gap-3 mb-6">
                 {[

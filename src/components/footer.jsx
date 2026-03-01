@@ -103,7 +103,7 @@ const Footer = () => {
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Call Us</p>
               <p className="text-sm text-slate-500">+62 123 4567 890</p>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-3">Email Us</p>
-              <p className="text-sm text-slate-500">hello@trimlink.com</p>
+              <p className="text-sm text-slate-500">hello@trimlynk.com</p>
             </div>
           </div>
 
