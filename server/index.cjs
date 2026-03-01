@@ -29,6 +29,11 @@ const rateLimitMiddleware = require('./middleware/rateLimit.cjs');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust proxy (Render, Railway, etc. terminate TLS at the load balancer)
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
+
 // Middleware
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
     .split(',')
