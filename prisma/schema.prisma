@@ -51,6 +51,7 @@ model User {
   teams         TeamMember[]
   auditLogs     AuditLog[]
   domains       CustomDomain[]
+  dynamicQrs    DynamicQr[]
 }
 
 // ============================================
@@ -569,6 +570,27 @@ model AuditLog {
   @@index([userId])
   @@index([teamId])
   @@index([createdAt])
+}
+
+// ============================================
+// DYNAMIC QR CODES
+// ============================================
+
+model DynamicQr {
+  id          String    @id @default(cuid())
+  shortCode   String    @unique          // used in redirect URL /qr/:shortCode
+  targetUrl   String                     // current redirect destination
+  title       String?                    // human-readable label
+  scans       Int       @default(0)
+
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([shortCode])
 }
 
 // ============================================

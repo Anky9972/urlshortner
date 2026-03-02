@@ -9,10 +9,13 @@ import { Slider } from '@/components/ui/slider';
 import {
   Link, Mail, Smartphone, Map, Wifi, Calendar, FileText, Download,
   AlertCircle, QrCode, Copy, Check, User, History, Trash2,
-  Layers, Eye, Palette, FileDown, Sparkles, LayoutTemplate, Upload, Package
+  Layers, Eye, Palette, FileDown, Sparkles, LayoutTemplate, Upload, Package, Zap, Edit2, RefreshCw, ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { SEOMetadata } from '@/components/seo-metadata';
+import { getToken } from '@/api/token';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 const QR_HISTORY_KEY = 'trimlink_qr_history';
 const MAX_HISTORY = 8;
@@ -92,6 +95,54 @@ const QRCodeGenerator = () => {
   const [bulkProgress, setBulkProgress] = useState(0);
   const bulkFileRef = useRef(null);
 
+  // Dynamic QR state
+  const [dynList, setDynList] = useState([]);
+  const [dynLoading, setDynLoading] = useState(false);
+  const [dynForm, setDynForm] = useState({ title: '', targetUrl: '' });
+  const [dynEditing, setDynEditing] = useState(null); // id being edited
+  const [dynEditUrl, setDynEditUrl] = useState('');
+
+  const dynHeaders = () => {
+    const token = getToken();
+    return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+  };
+
+  const loadDynQrs = async () => {
+    setDynLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/dynamic-qr`, { credentials: 'include', headers: dynHeaders() });
+      if (res.ok) setDynList(await res.json());
+    } catch { /* ignore */ } finally { setDynLoading(false); }
+  };
+
+  const createDynQr = async () => {
+    if (!dynForm.targetUrl) return toast.error('Target URL is required');
+    const res = await fetch(`${API_URL}/api/dynamic-qr`, {
+      method: 'POST', credentials: 'include', headers: dynHeaders(),
+      body: JSON.stringify(dynForm),
+    });
+    if (res.ok) { toast.success('Dynamic QR created!'); setDynForm({ title: '', targetUrl: '' }); loadDynQrs(); }
+    else { const d = await res.json(); toast.error(d.error || 'Failed'); }
+  };
+
+  const updateDynQr = async (id) => {
+    if (!dynEditUrl) return;
+    const res = await fetch(`${API_URL}/api/dynamic-qr/${id}`, {
+      method: 'PUT', credentials: 'include', headers: dynHeaders(),
+      body: JSON.stringify({ targetUrl: dynEditUrl }),
+    });
+    if (res.ok) { toast.success('Updated!'); setDynEditing(null); loadDynQrs(); }
+    else { const d = await res.json(); toast.error(d.error || 'Failed'); }
+  };
+
+  const deleteDynQr = async (id) => {
+    if (!confirm('Delete this dynamic QR?')) return;
+    const res = await fetch(`${API_URL}/api/dynamic-qr/${id}`, {
+      method: 'DELETE', credentials: 'include', headers: dynHeaders(),
+    });
+    if (res.ok) { toast.success('Deleted'); loadDynQrs(); }
+  };
+
   // UI state
   const [copied, setCopied] = useState(false);
   const [activePanel, setActivePanel] = useState('content');
@@ -102,6 +153,11 @@ const QRCodeGenerator = () => {
       const saved = JSON.parse(localStorage.getItem(QR_HISTORY_KEY) || '[]');
       setHistory(saved);
     } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    if (getToken()) loadDynQrs();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const saveToHistory = useCallback((value, type) => {
@@ -328,6 +384,7 @@ const QRCodeGenerator = () => {
     { id: 'style',   icon: Palette,  label: 'Style' },
     { id: 'history', icon: History,  label: `History${history.length ? ` (${history.length})` : ''}` },
     { id: 'bulk',    icon: Package,  label: 'Bulk' },
+    { id: 'dynamic', icon: Zap,      label: 'Dynamic' },
   ];
 
   return (
@@ -643,6 +700,94 @@ const QRCodeGenerator = () => {
                     <Download className="w-4 h-4" />
                     {bulkGenerating ? `Generating (${bulkProgress}%)...` : `Download ${bulkItems.length > 0 ? bulkItems.length + ' ' : ''}QR Codes as ZIP`}
                   </button>
+                </div>
+              )}
+
+              {/* ---- DYNAMIC QR PANEL ---- */}
+              {activePanel === 'dynamic' && (
+                <div className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] p-5 space-y-5">
+                  <div>
+                    <p className="text-xs text-slate-300 font-semibold mb-0.5">Dynamic QR Codes</p>
+                    <p className="text-[11px] text-slate-500">The QR image stays the same — only the destination changes. Perfect for print/labels.</p>
+                  </div>
+
+                  {/* Create form */}
+                  <div className="space-y-2 p-4 rounded-xl bg-[hsl(230,10%,11%)] border border-[hsl(230,10%,18%)]">
+                    <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Create New</p>
+                    <Input
+                      value={dynForm.title}
+                      onChange={e => setDynForm(p => ({ ...p, title: e.target.value }))}
+                      placeholder="Label (optional)"
+                      className="bg-[hsl(230,10%,10%)] border-[hsl(230,10%,20%)] text-white text-sm"
+                    />
+                    <Input
+                      value={dynForm.targetUrl}
+                      onChange={e => setDynForm(p => ({ ...p, targetUrl: e.target.value }))}
+                      placeholder="Destination URL *"
+                      className="bg-[hsl(230,10%,10%)] border-[hsl(230,10%,20%)] text-white text-sm"
+                    />
+                    <button
+                      onClick={createDynQr}
+                      className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Zap className="w-4 h-4" /> Create Dynamic QR
+                    </button>
+                  </div>
+
+                  {/* List */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-slate-500 uppercase tracking-wider">Your Dynamic QRs</p>
+                      <button onClick={loadDynQrs} className="text-slate-500 hover:text-white transition-colors">
+                        <RefreshCw className={`w-3.5 h-3.5 ${dynLoading ? 'animate-spin' : ''}`} />
+                      </button>
+                    </div>
+                    {dynList.length === 0 && !dynLoading && (
+                      <p className="text-xs text-slate-600 text-center py-4">No dynamic QRs yet</p>
+                    )}
+                    {dynList.map(item => (
+                      <div key={item.id} className="rounded-xl border border-[hsl(230,10%,18%)] bg-[hsl(230,10%,11%)] p-3 space-y-2">
+                        <div className="flex items-start gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-white font-medium truncate">{item.title || 'Untitled'}</p>
+                            <p className="text-[11px] text-slate-500 font-mono truncate">/qr/{item.shortCode}</p>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className="text-[10px] text-slate-500">{item.scans} scans</span>
+                            <button
+                              onClick={() => { setDynEditing(item.id); setDynEditUrl(item.targetUrl); }}
+                              className="p-1 text-slate-500 hover:text-blue-400 transition-colors"
+                            ><Edit2 className="w-3.5 h-3.5" /></button>
+                            <button
+                              onClick={() => window.open(item.targetUrl, '_blank')}
+                              className="p-1 text-slate-500 hover:text-emerald-400 transition-colors"
+                            ><ExternalLink className="w-3.5 h-3.5" /></button>
+                            <button
+                              onClick={() => deleteDynQr(item.id)}
+                              className="p-1 text-slate-500 hover:text-red-400 transition-colors"
+                            ><Trash2 className="w-3.5 h-3.5" /></button>
+                          </div>
+                        </div>
+                        {dynEditing === item.id && (
+                          <div className="flex gap-2">
+                            <Input
+                              value={dynEditUrl}
+                              onChange={e => setDynEditUrl(e.target.value)}
+                              placeholder="New destination URL"
+                              className="flex-1 bg-[hsl(230,10%,9%)] border-blue-600/40 text-white text-xs h-8"
+                            />
+                            <button onClick={() => updateDynQr(item.id)}
+                              className="px-3 h-8 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-500 transition-colors">Save</button>
+                            <button onClick={() => setDynEditing(null)}
+                              className="px-2 h-8 rounded-lg bg-[hsl(230,10%,16%)] text-slate-400 text-xs hover:bg-[hsl(230,10%,20%)] transition-colors">✕</button>
+                          </div>
+                        )}
+                        {dynEditing !== item.id && (
+                          <p className="text-[11px] text-slate-600 truncate">→ {item.targetUrl}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

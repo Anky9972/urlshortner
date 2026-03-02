@@ -20,6 +20,25 @@ const socialIcons = {
   website: FaGlobe,
   default: Link2Icon,
 };
+
+// Auto-favicon helper – tries Google favicon service, falls back to Link2 icon
+const FaviconImg = ({ url }) => {
+  try {
+    const domain = new URL(url).hostname;
+    return (
+      <img
+        src={`https://www.google.com/s2/favicons?domain=${domain}&sz=32`}
+        alt=""
+        width={18}
+        height={18}
+        className="rounded-sm shrink-0"
+        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+      />
+    );
+  } catch {
+    return <Link2Icon size={18} />;
+  }
+};
 const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
   const { user } = UrlState();
   const theme = defaultThemes[profile.theme];
@@ -144,7 +163,8 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
           className="space-y-4"
         >
           {visibleLinks.map((link) => {
-            const Icon = socialIcons[link.icon] || socialIcons.default;
+            const Icon = socialIcons[link.icon];
+            const useFavicon = !link.icon || link.icon === 'default' || !Icon;
 
             // Section Header block
             if (link.type === 'header') {
@@ -187,7 +207,7 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
                 onClick={() => handleClickCount(link.url, link.id)}
               >
                 <span className="flex items-center gap-3">
-                  <Icon size={18} />
+                  {useFavicon ? <FaviconImg url={link.url} /> : <Icon size={18} />}
                   {link.title}
                 </span>
                 <span className="border rounded-full px-2 py-1 text-xs font-bold flex gap-1">

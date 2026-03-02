@@ -14,6 +14,7 @@ import {
     Eye,
     Users,
     Map,
+    SlidersHorizontal,
 } from "lucide-react";
 import ClickMap from "@/components/click-map";
 import { motion, AnimatePresence } from "framer-motion";
@@ -37,9 +38,26 @@ const AnimatedBar = ({ percentage, color, delay = 0 }) => (
     </div>
 );
 
+const WIDGETS_KEY = 'trimlink_analytics_widgets';
+const DEFAULT_WIDGETS = { devices: true, countries: true, map: true, topLinks: true };
+
 const Analytics = () => {
     const { user } = UrlState();
     const [timeRange, setTimeRange] = useState("7d");
+    const [showCustomize, setShowCustomize] = useState(false);
+    const [widgets, setWidgets] = useState(() => {
+        try {
+            return { ...DEFAULT_WIDGETS, ...JSON.parse(localStorage.getItem(WIDGETS_KEY) || '{}') };
+        } catch { return DEFAULT_WIDGETS; }
+    });
+
+    const toggleWidget = (key) => {
+        setWidgets(prev => {
+            const next = { ...prev, [key]: !prev[key] };
+            try { localStorage.setItem(WIDGETS_KEY, JSON.stringify(next)); } catch {}
+            return next;
+        });
+    };
 
     const { loading, data: urls, fn: fnUrls } = useFetch(getUrls, user?.id);
     const { loading: loadingClicks, data: clicks, fn: fnClicks } = useFetch(
@@ -167,20 +185,57 @@ const Analytics = () => {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-1 p-1 rounded-xl bg-[hsl(230,12%,9%)] border border-[hsl(230,10%,15%)]">
-                            {timeRanges.map((range) => (
+                        <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 p-1 rounded-xl bg-[hsl(230,12%,9%)] border border-[hsl(230,10%,15%)]">
+                                {timeRanges.map((range) => (
+                                    <button
+                                        key={range.value}
+                                        onClick={() => setTimeRange(range.value)}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                                            timeRange === range.value
+                                                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                                                : "text-slate-500 hover:text-white"
+                                        }`}
+                                    >
+                                        {range.label}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="relative">
                                 <button
-                                    key={range.value}
-                                    onClick={() => setTimeRange(range.value)}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                        timeRange === range.value
-                                            ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                                            : "text-slate-500 hover:text-white"
-                                    }`}
+                                    onClick={() => setShowCustomize(p => !p)}
+                                    className={`p-2 rounded-xl border transition-all ${showCustomize ? 'bg-blue-600/10 border-blue-500/40 text-blue-400' : 'bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)] text-slate-500 hover:text-white'}`}
+                                    title="Customize widgets"
                                 >
-                                    {range.label}
+                                    <SlidersHorizontal className="w-4 h-4" />
                                 </button>
-                            ))}
+                                <AnimatePresence>
+                                    {showCustomize && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                                            className="absolute right-0 top-11 z-30 w-52 rounded-2xl border border-[hsl(230,10%,18%)] bg-[hsl(230,12%,8%)] shadow-2xl p-3 space-y-1"
+                                        >
+                                            <p className="text-[10px] text-slate-500 uppercase tracking-wider px-1 pb-1">Show Widgets</p>
+                                            {[
+                                                { key: 'devices',  label: 'Device Breakdown' },
+                                                { key: 'countries', label: 'Top Countries' },
+                                                { key: 'map',      label: 'Click World Map' },
+                                                { key: 'topLinks', label: 'Top Links' },
+                                            ].map(({ key, label }) => (
+                                                <button key={key} onClick={() => toggleWidget(key)}
+                                                    className="w-full flex items-center justify-between px-2 py-2 rounded-xl hover:bg-[hsl(230,10%,14%)] transition-colors">
+                                                    <span className="text-sm text-slate-300">{label}</span>
+                                                    <div className={`w-9 h-5 rounded-full transition-colors ${widgets[key] ? 'bg-blue-600' : 'bg-[hsl(230,10%,20%)]'}`}>
+                                                        <div className={`w-3.5 h-3.5 rounded-full bg-white m-0.5 transition-transform ${widgets[key] ? 'translate-x-4' : 'translate-x-0'}`} />
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </div>
                     </motion.div>
 
@@ -213,7 +268,7 @@ const Analytics = () => {
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                         {/* Device Breakdown */}
-                        <motion.div
+                        {widgets.devices && (<motion.div
                             initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.25 }}
@@ -273,10 +328,10 @@ const Analytics = () => {
                                     </div>
                                 )}
                             </div>
-                        </motion.div>
+                        </motion.div>)}
 
                         {/* Top Countries */}
-                        <motion.div
+                        {widgets.countries && (<motion.div
                             initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
@@ -325,13 +380,13 @@ const Analytics = () => {
                                         <Globe className="w-10 h-10 mx-auto text-slate-700 mb-2" />
                                         <p className="text-slate-600 text-sm">No location data yet</p>
                                     </div>
-                                )}
+                                )}            
                             </div>
-                        </motion.div>
+                        </motion.div>)}
                     </div>
 
                     {/* Click World Map */}
-                    <motion.div
+                    {widgets.map && (<motion.div
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
@@ -346,10 +401,10 @@ const Analytics = () => {
                         <div className="p-4">
                             <ClickMap clicks={clicks || []} />
                         </div>
-                    </motion.div>
+                    </motion.div>)}
 
                     {/* Top Performing Links */}
-                    <motion.div
+                    {widgets.topLinks && (<motion.div
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.35 }}
@@ -421,7 +476,7 @@ const Analytics = () => {
                                 </div>
                             )}
                         </div>
-                    </motion.div>
+                    </motion.div>)}
                 </div>
             </div>
         </>

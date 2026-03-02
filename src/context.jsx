@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { authApi } from "./api/client";
-import { removeToken } from "./api/token";
+import { removeToken, setToken } from "./api/token";
 
 const UrlContext = createContext();
 
@@ -24,8 +24,25 @@ const UrlProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const result = await authApi.login({ email, password });
-    setUser(result.user);
+    if (result.user) setUser(result.user);
     return result;
+  };
+
+  const completeTwoFactorLogin = async (userId, token) => {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    const res = await fetch(`${API_URL}/api/2fa/login`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, token }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '2FA verification failed');
+    if (data.token) {
+      setToken(data.token);
+    }
+    if (data.user) setUser(data.user);
+    return data;
   };
 
   const register = async (name, email, password) => {
@@ -57,6 +74,7 @@ const UrlProvider = ({ children }) => {
       loading,
       isAuthenticated,
       login,
+      completeTwoFactorLogin,
       register,
       logout
     }}>

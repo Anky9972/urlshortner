@@ -33,6 +33,7 @@ import VerifyEmail from './pages/verify-email'
 import MyLinkTrees from './pages/my-linktrees'
 import SearchPage from './pages/search'
 import ApiDocsPage from './pages/api-docs'
+import OAuthCallback from './pages/oauth-callback'
 import OnboardingTour from './components/onboarding-tour'
 
 const router = createBrowserRouter([
@@ -238,6 +239,10 @@ const router = createBrowserRouter([
       {
         path: '/api-docs',
         element: <ApiDocsPage />,
+      },
+      {
+        path: '/oauth-callback',
+        element: <OAuthCallback />,
       },
     ],
   },

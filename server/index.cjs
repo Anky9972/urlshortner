@@ -25,6 +25,8 @@ const linktreeRoutes = require('./routes/linktrees.cjs');
 const roomRoutes = require('./routes/rooms.cjs');
 const searchRoutes = require('./routes/search.cjs');
 const twoFactorRoutes = require('./routes/twoFactor.cjs');
+const dynamicQrRoutes = require('./routes/dynamicQr.cjs');
+const oauthRoutes = require('./routes/oauth.cjs');
 const { startExpiryNotifier } = require('./lib/expiry-notifier.cjs');
 
 const rateLimitMiddleware = require('./middleware/rateLimit.cjs');
@@ -83,6 +85,19 @@ app.use('/api/linktrees', linktreeRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/2fa', twoFactorRoutes);
+app.use('/api/dynamic-qr', dynamicQrRoutes);
+app.use('/api/oauth', oauthRoutes);
+
+// Public Dynamic QR redirect
+app.get('/qr/:shortCode', async (req, res) => {
+  const { prisma } = require('./lib/prisma.cjs');
+  try {
+    const item = await prisma.dynamicQr.findUnique({ where: { shortCode: req.params.shortCode } });
+    if (!item) return res.status(404).send('QR code not found');
+    await prisma.dynamicQr.update({ where: { id: item.id }, data: { scans: item.scans + 1 } });
+    res.redirect(item.targetUrl);
+  } catch { res.status(500).send('Server error'); }
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
