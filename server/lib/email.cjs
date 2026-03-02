@@ -2,7 +2,17 @@
 
 const { Resend } = require('resend');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy instantiation — avoids crashing on startup if env var is not set yet
+let _resend = null;
+function getResend() {
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('[email] RESEND_API_KEY is not set — emails will not be sent.');
+    return null;
+  }
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY);
+  return _resend;
+}
+
 const FROM = process.env.RESEND_FROM_EMAIL || 'TrimLink <noreply@trimlynk.com>';
 const APP_URL = process.env.FRONTEND_URL || 'https://trimlynk.com';
 
@@ -10,6 +20,8 @@ const APP_URL = process.env.FRONTEND_URL || 'https://trimlynk.com';
  * Send a password-reset email with a one-click link.
  */
 async function sendPasswordResetEmail(to, token) {
+  const resend = getResend();
+  if (!resend) return;
   const link = `${APP_URL}/reset-password?token=${token}`;
 
   await resend.emails.send({
@@ -36,6 +48,8 @@ async function sendPasswordResetEmail(to, token) {
  * Send an email-verification link to a new user.
  */
 async function sendVerificationEmail(to, token) {
+  const resend = getResend();
+  if (!resend) return;
   const link = `${APP_URL}/verify-email?token=${token}`;
 
   await resend.emails.send({
