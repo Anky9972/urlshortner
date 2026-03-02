@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { authApi } from "./api/client";
+import { removeToken } from "./api/token";
 
 const UrlContext = createContext();
 
@@ -34,7 +35,12 @@ const UrlProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await authApi.logout();
+    try {
+      await authApi.logout();
+    } catch {
+      // Even if server call fails, clear local auth state
+    }
+    removeToken();
     setUser(null);
   };
 

@@ -6,10 +6,21 @@ if (!JWT_SECRET) {
     process.exit(1);
 }
 
-// Verify JWT from HTTP-only cookie
+// Extract token from Authorization header or cookie
+const extractToken = (req) => {
+    // 1. Check Authorization: Bearer <token> header first
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        return authHeader.slice(7);
+    }
+    // 2. Fall back to HTTP-only cookie
+    return req.cookies?.auth_token || null;
+};
+
+// Verify JWT from Bearer header or HTTP-only cookie
 const authMiddleware = (req, res, next) => {
     try {
-        const token = req.cookies?.auth_token;
+        const token = extractToken(req);
 
         if (!token) {
             return res.status(401).json({ error: 'Authentication required' });
@@ -26,7 +37,7 @@ const authMiddleware = (req, res, next) => {
 // Optional auth - doesn't fail if no token
 const optionalAuth = (req, res, next) => {
     try {
-        const token = req.cookies?.auth_token;
+        const token = extractToken(req);
         if (token) {
             const decoded = jwt.verify(token, JWT_SECRET);
             req.user = decoded;

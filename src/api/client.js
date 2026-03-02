@@ -1,17 +1,22 @@
 // API Base URL
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
+import { getToken, setToken, removeToken } from './token';
+
 /**
  * Base API client with credentials support for HTTP-only cookies
+ * and Authorization header fallback for cross-origin deployments.
  */
 async function apiRequest(endpoint, options = {}) {
     const url = `${API_URL}${endpoint}`;
 
+    const token = getToken();
     const config = {
         ...options,
         credentials: 'include', // Important for cookies
         headers: {
             'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
             ...options.headers,
         },
     };
@@ -29,23 +34,29 @@ async function apiRequest(endpoint, options = {}) {
 // Auth API
 export const authApi = {
     async register({ name, email, password }) {
-        return apiRequest('/api/auth/register', {
+        const data = await apiRequest('/api/auth/register', {
             method: 'POST',
             body: JSON.stringify({ name, email, password }),
         });
+        if (data.token) setToken(data.token);
+        return data;
     },
 
     async login({ email, password }) {
-        return apiRequest('/api/auth/login', {
+        const data = await apiRequest('/api/auth/login', {
             method: 'POST',
             body: JSON.stringify({ email, password }),
         });
+        if (data.token) setToken(data.token);
+        return data;
     },
 
     async logout() {
-        return apiRequest('/api/auth/logout', {
+        const data = await apiRequest('/api/auth/logout', {
             method: 'POST',
         });
+        removeToken();
+        return data;
     },
 
     async getCurrentUser() {

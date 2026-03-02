@@ -1,14 +1,18 @@
 /**
  * Linktrees API - Calls server endpoints
  */
+import { getToken } from './token';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 async function apiRequest(endpoint, options = {}) {
+    const token = getToken();
     const response = await fetch(`${API_URL}${endpoint}`, {
         ...options,
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
             ...options.headers,
         },
     });
