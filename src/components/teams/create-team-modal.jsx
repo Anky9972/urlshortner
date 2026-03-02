@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Users, Plus } from "lucide-react";
 import { UrlState } from "@/context";
+import { getToken } from "@/api/token";
 
 const CreateTeamModal = ({ onTeamCreated }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -25,11 +26,12 @@ const CreateTeamModal = ({ onTeamCreated }) => {
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teams`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/teams`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${user.token}` // Assuming token is stored in user object or similar
+                    'Authorization': `Bearer ${getToken()}`
                 },
                 body: JSON.stringify({ name, slug })
             });

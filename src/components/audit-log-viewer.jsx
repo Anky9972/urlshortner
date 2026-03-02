@@ -4,8 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Clock, Shield, Search, Terminal } from "lucide-react";
 import { UrlState } from "@/context";
-import { format } from 'date-fns';
-
+import { format } from 'date-fns';import { getToken } from '@/api/token';
 const AuditLogViewer = () => {
     const { user } = UrlState();
     const [logs, setLogs] = useState([]);
@@ -17,8 +16,9 @@ const AuditLogViewer = () => {
 
     const fetchLogs = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/audit`, {
-                headers: { 'Authorization': `Bearer ${user?.token}` }
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/audit`, {
+                credentials: 'include',
+                headers: { 'Authorization': `Bearer ${getToken()}` }
             });
             if (res.ok) {
                 setLogs(await res.json());

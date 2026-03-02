@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Globe, Plus, CheckCircle2, AlertTriangle, RefreshCw, Trash2 } from "lucide-react";
 import { UrlState } from "@/context";
+import { getToken } from "@/api/token";
 
 const DomainsTab = () => {
     const { user } = UrlState();
@@ -20,8 +21,9 @@ const DomainsTab = () => {
 
     const loadDomains = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/domains`, {
-                headers: { 'Authorization': `Bearer ${user?.token}` }
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/domains`, {
+                credentials: 'include',
+                headers: { 'Authorization': `Bearer ${getToken()}` }
             });
             if (res.ok) setDomains(await res.json());
         } catch (error) {
@@ -35,11 +37,12 @@ const DomainsTab = () => {
         setIsLoading(true);
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/domains`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/domains`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${user?.token}`
+                    'Authorization': `Bearer ${getToken()}`
                 },
                 body: JSON.stringify({ domain: newDomain })
             });
@@ -58,9 +61,10 @@ const DomainsTab = () => {
     const handleVerify = async (id) => {
         setIsVerifying(id);
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/domains/${id}/verify`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/domains/${id}/verify`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${user?.token}` }
+                credentials: 'include',
+                headers: { 'Authorization': `Bearer ${getToken()}` }
             });
             if (res.ok) {
                 await loadDomains();

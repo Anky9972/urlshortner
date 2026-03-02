@@ -19,6 +19,7 @@ const Header = () => {
   const navLinks = user
     ? [
         { path: "/", label: "Home" },
+        { path: "/dashboard", label: "Dashboard" },
         { path: "/link-tree?create", label: "LinkTree" },
         { path: "/qr-code-generator", label: "QR Code" },
         { path: "/rooms", label: "Rooms" },

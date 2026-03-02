@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { UrlState } from '@/context';
+import { getToken } from '@/api/token';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Settings, ArrowRight } from "lucide-react";
@@ -15,9 +16,10 @@ const TeamsPage = () => {
 
     const fetchTeams = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teams`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/teams`, {
+                credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${user?.token}`
+                    'Authorization': `Bearer ${getToken()}`
                 }
             });
             if (response.ok) {

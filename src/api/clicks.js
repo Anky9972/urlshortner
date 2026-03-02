@@ -60,7 +60,7 @@ export async function getClicksForUrls(urlIds) {
  * Get click analytics summary
  */
 export async function getClickAnalytics(urlId) {
-    return apiRequest(`/api/clicks/url/${urlId}/analytics`);
+    return apiRequest(`/api/clicks/analytics/${urlId}`);
 }
 
 /**
@@ -74,19 +74,19 @@ export async function getClicksByDateRange(urlId, startDate, endDate) {
  * Get geographic analytics
  */
 export async function getGeoAnalytics(urlId) {
-    return apiRequest(`/api/clicks/url/${urlId}/geo`);
+    return apiRequest(`/api/clicks/analytics/${urlId}`).then(d => d.countryStats || []);
 }
 
 /**
  * Get device analytics
  */
 export async function getDeviceAnalytics(urlId) {
-    return apiRequest(`/api/clicks/url/${urlId}/devices`);
+    return apiRequest(`/api/clicks/analytics/${urlId}`).then(d => d.deviceStats || []);
 }
 
 /**
  * Get referrer analytics
  */
 export async function getReferrerAnalytics(urlId) {
-    return apiRequest(`/api/clicks/url/${urlId}/referrers`);
+    return apiRequest(`/api/clicks/analytics/${urlId}`).then(d => d.referrerStats || []);
 }
