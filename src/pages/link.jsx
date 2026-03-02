@@ -48,7 +48,7 @@ const LinkPage = () => {
         data: url,
         fn,
         error,
-    } = useFetch(getUrl, { id, user_id: user?.id });
+    } = useFetch(getUrl, id);
     const {
         loading: loadingStats,
         data: stats,
