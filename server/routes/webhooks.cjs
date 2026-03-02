@@ -29,8 +29,9 @@ router.get('/', async (req, res) => {
 // Create webhook
 router.post('/', async (req, res) => {
     try {
-        const { userId, name, url, events } = req.body;
-        if (!userId || !name || !url) return res.status(400).json({ error: 'userId, name, and url are required' });
+        const { name, url, events } = req.body;
+        const userId = req.user.userId;
+        if (!name || !url) return res.status(400).json({ error: 'name and url are required' });
 
         const secret = generateWebhookSecret();
         const webhook = await prisma.webhook.create({ data: { name, url, secret, events: events || ['click'], userId } });

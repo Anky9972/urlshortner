@@ -39,8 +39,7 @@ router.get('/url/:urlId/latest', async (req, res) => {
 // Get all unhealthy links for a user
 router.get('/unhealthy', async (req, res) => {
     try {
-        const { userId } = req.query;
-        if (!userId) return res.status(400).json({ error: 'userId is required' });
+        const userId = req.user.userId;
 
         // Get URLs belonging to user
         const urls = await prisma.url.findMany({

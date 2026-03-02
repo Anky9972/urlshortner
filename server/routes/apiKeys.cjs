@@ -30,8 +30,9 @@ router.get('/', async (req, res) => {
 // Create API key
 router.post('/', async (req, res) => {
     try {
-        const { userId, name, description, permissions, rateLimit, expiresAt } = req.body;
-        if (!userId || !name) return res.status(400).json({ error: 'userId and name are required' });
+        const { name, description, permissions, rateLimit, expiresAt } = req.body;
+        const userId = req.user.userId;
+        if (!name) return res.status(400).json({ error: 'name is required' });
 
         const key = generateApiKey();
         const apiKey = await prisma.apiKey.create({

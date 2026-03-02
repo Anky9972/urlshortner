@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
 const router = express.Router();
-const { prisma } = require('../lib/prisma.cjs');
+const prisma = require('../lib/prisma.cjs');
 const { authMiddleware } = require('../middleware/auth.cjs');
 
 // Alias
@@ -16,7 +16,7 @@ function generateCode(len = 7) {
 router.get('/', requireAuth, async (req, res) => {
   try {
     const items = await prisma.dynamicQr.findMany({
-      where: { userId: req.user.id },
+      where: { userId: req.user.userId },
       orderBy: { createdAt: 'desc' },
     });
     res.json(items);
@@ -37,7 +37,7 @@ router.post('/', requireAuth, async (req, res) => {
       exists = await prisma.dynamicQr.findUnique({ where: { shortCode } });
     }
     const item = await prisma.dynamicQr.create({
-      data: { shortCode, targetUrl, title: title || null, userId: req.user.id },
+      data: { shortCode, targetUrl, title: title || null, userId: req.user.userId },
     });
     res.status(201).json(item);
   } catch (e) {
@@ -50,7 +50,7 @@ router.put('/:id', requireAuth, async (req, res) => {
   const { targetUrl, title } = req.body;
   try {
     const item = await prisma.dynamicQr.findUnique({ where: { id: req.params.id } });
-    if (!item || item.userId !== req.user.id) return res.status(404).json({ error: 'Not found' });
+    if (!item || item.userId !== req.user.userId) return res.status(404).json({ error: 'Not found' });
     const updated = await prisma.dynamicQr.update({
       where: { id: req.params.id },
       data: { ...(targetUrl && { targetUrl }), ...(title !== undefined && { title }) },
@@ -65,7 +65,7 @@ router.put('/:id', requireAuth, async (req, res) => {
 router.delete('/:id', requireAuth, async (req, res) => {
   try {
     const item = await prisma.dynamicQr.findUnique({ where: { id: req.params.id } });
-    if (!item || item.userId !== req.user.id) return res.status(404).json({ error: 'Not found' });
+    if (!item || item.userId !== req.user.userId) return res.status(404).json({ error: 'Not found' });
     await prisma.dynamicQr.delete({ where: { id: req.params.id } });
     res.json({ message: 'Deleted' });
   } catch (e) {

@@ -41,9 +41,10 @@ router.get('/:id', async (req, res) => {
 // Create pixel
 router.post('/', async (req, res) => {
     try {
-        const { userId, name, type, pixelId } = req.body;
-        if (!userId || !name || !type || !pixelId) {
-            return res.status(400).json({ error: 'userId, name, type, and pixelId are required' });
+        const { name, type, pixelId } = req.body;
+        const userId = req.user.userId;
+        if (!name || !type || !pixelId) {
+            return res.status(400).json({ error: 'name, type, and pixelId are required' });
         }
 
         const pixel = await prisma.retargetingPixel.create({
