@@ -86,7 +86,7 @@ router.post('/', authMiddleware, async (req, res) => {
 
         const url = await prisma.url.create({
             data: {
-                title, originalUrl: longUrl, shortUrl, customUrl: customUrl || null, qrCode: qrCode || null,
+                title, originalUrl: longUrl, shortUrl, customUrl: customUrl || null, qrCode: (qrCode && typeof qrCode === 'string') ? qrCode : null,
                 password: password || null, clickLimit: clickLimit ? parseInt(clickLimit) : null,
                 activatesAt: activatesAt ? new Date(activatesAt) : null, deactivatesAt: deactivatesAt ? new Date(deactivatesAt) : null,
                 expiresAt: expirationDate ? new Date(expirationDate) : null, folderId: folderId || null,
@@ -121,7 +121,9 @@ router.patch('/:id', authMiddleware, async (req, res) => {
         // Verify ownership
         const existing = await prisma.url.findFirst({ where: { id, userId: req.user.userId } });
         if (!existing) return res.status(404).json({ error: 'URL not found' });
-        const url = await prisma.url.update({ where: { id }, data: req.body });
+        const { qrCode: rawQr, ...rest } = req.body;
+        const updateData = { ...rest, ...(rawQr !== undefined && { qrCode: (rawQr && typeof rawQr === 'string') ? rawQr : null }) };
+        const url = await prisma.url.update({ where: { id }, data: updateData });
         res.json(url);
     } catch (error) {
         console.error('Error updating URL:', error);
