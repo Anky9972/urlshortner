@@ -27,6 +27,10 @@ import InvitedRooms from './components/room/invite-rooms'
 import Settings from './pages/settings'
 import Analytics from './pages/analytics'
 import TeamsPage from './pages/teams'
+import ForgotPassword from './pages/forgot-password'
+import ResetPassword from './pages/reset-password'
+import VerifyEmail from './pages/verify-email'
+import MyLinkTrees from './pages/my-linktrees'
 
 const router = createBrowserRouter([
   {
@@ -201,7 +205,23 @@ const router = createBrowserRouter([
             </RequireAuth>
           </ErrorBoundary>
         )
-      }
+      },
+      {
+        path: '/forgot-password',
+        element: <ForgotPassword />,
+      },
+      {
+        path: '/reset-password',
+        element: <ResetPassword />,
+      },
+      {
+        path: '/verify-email',
+        element: <VerifyEmail />,
+      },
+      {
+        path: '/my-linktrees',
+        element: <MyLinkTrees />,
+      },
     ],
   },
 ])

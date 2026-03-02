@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BeatLoader } from "react-spinners";
 import * as Yup from "yup";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { UrlState } from "@/context";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, AlertCircle, ArrowRight } from "lucide-react";
@@ -158,6 +158,11 @@ const Login = () => {
             {errors.password}
           </motion.p>
         )}
+        <div className="flex justify-end">
+          <Link to="/forgot-password" className="text-xs text-slate-500 hover:text-blue-400 transition-colors">
+            Forgot password?
+          </Link>
+        </div>
       </div>
 
       {/* Submit */}

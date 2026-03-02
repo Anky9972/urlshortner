@@ -1,14 +1,6 @@
 import { motion } from "framer-motion";
 import { Link2Icon, MousePointerClick } from "lucide-react";
 import PropTypes from "prop-types";
-const socialIcons = {
-  instagram: FaInstagram,
-  twitter: FaTwitter,
-  github: FaGithub,
-  youtube: FaYoutube,
-  website: FaGlobe,
-  default: Link2Icon,
-};
 import {
   FaGithub,
   FaGlobe,
@@ -18,8 +10,16 @@ import {
 } from "react-icons/fa";
 import { defaultThemes } from "@/utils/theme";
 import { UrlState } from "@/context";
-// import { Button } from "../ui/button";
 import { trackAndUpdateTreeLinkClick } from "../analytics";
+
+const socialIcons = {
+  instagram: FaInstagram,
+  twitter: FaTwitter,
+  github: FaGithub,
+  youtube: FaYoutube,
+  website: FaGlobe,
+  default: Link2Icon,
+};
 const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
   const { user } = UrlState();
   const theme = defaultThemes[profile.theme];
@@ -76,10 +76,30 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
           <h1 className={`text-xl font-bold ${theme.textColor} mb-2`}>
             {profile.name}
           </h1>
-          {/* <h1 className={`text-3xl font-bold ${theme.textColor} mt-2`}>
-            {profile.treetitle}
-          </h1> */}
           <p className="text-slate-400">{profile.bio}</p>
+
+          {/* Social Icons Bar */}
+          {profile.socialLinks && Object.values(profile.socialLinks).some(Boolean) && (
+            <div className="flex justify-center gap-3 mt-4 flex-wrap">
+              {[
+                { key: 'instagram', Icon: FaInstagram, color: 'hover:text-pink-400' },
+                { key: 'twitter',   Icon: FaTwitter,   color: 'hover:text-sky-400' },
+                { key: 'github',    Icon: FaGithub,    color: 'hover:text-slate-100' },
+                { key: 'youtube',   Icon: FaYoutube,   color: 'hover:text-red-400' },
+                { key: 'website',   Icon: FaGlobe,     color: 'hover:text-emerald-400' },
+              ].filter(({ key }) => profile.socialLinks[key]).map(({ key, Icon, color }) => (
+                <a
+                  key={key}
+                  href={profile.socialLinks[key]}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-slate-300 ${color} transition-colors`}
+                >
+                  <Icon size={16} />
+                </a>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         <motion.div

@@ -111,7 +111,7 @@ router.get('/:id', async (req, res) => {
 // Create linktree
 router.post('/', async (req, res) => {
     try {
-        const { title, description, slug, theme, customCss, avatarUrl, backgroundColor, textColor, buttonStyle, isPublic, links } = req.body;
+        const { title, description, slug, theme, customCss, avatarUrl, backgroundColor, textColor, buttonStyle, isPublic, links, socialLinks } = req.body;
 
         if (!title || !slug) {
             return res.status(400).json({ error: 'title and slug are required' });
@@ -134,6 +134,7 @@ router.post('/', async (req, res) => {
                 buttonStyle: buttonStyle || 'rounded',
                 isPublic: isPublic !== false,
                 userId: req.user.userId,
+                ...(socialLinks !== undefined && { socialLinks }),
                 links: links && links.length > 0 ? {
                     create: links.map((link, index) => ({
                         title: link.title,
@@ -163,7 +164,7 @@ router.patch('/:id', async (req, res) => {
         });
         if (!existing) return res.status(404).json({ error: 'LinkTree not found' });
 
-        const { title, description, slug, theme, customCss, avatarUrl, backgroundColor, textColor, buttonStyle, isPublic } = req.body;
+        const { title, description, slug, theme, customCss, avatarUrl, backgroundColor, textColor, buttonStyle, isPublic, socialLinks } = req.body;
 
         // Check slug uniqueness if changing
         if (slug && slug !== existing.slug) {
@@ -184,6 +185,7 @@ router.patch('/:id', async (req, res) => {
                 ...(textColor !== undefined && { textColor }),
                 ...(buttonStyle !== undefined && { buttonStyle }),
                 ...(isPublic !== undefined && { isPublic }),
+                ...(socialLinks !== undefined && { socialLinks }),
             },
             include: { links: { orderBy: { order: 'asc' } } }
         });

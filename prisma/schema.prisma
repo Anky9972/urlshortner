@@ -24,6 +24,14 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Email verification
+  emailVerified     Boolean   @default(false)
+  emailVerifyToken  String?   @unique
+
+  // Password reset
+  passwordResetToken  String?   @unique
+  passwordResetExpiry DateTime?
+
   urls          Url[]
   linkTrees     LinkTree[]
   rooms         Room[]
@@ -229,6 +237,7 @@ model LinkTree {
   backgroundColor String?
   textColor       String?
   buttonStyle     String?   @default("rounded")
+  socialLinks     Json?     // { instagram: url, twitter: url, github: url, ... }
 
   isPublic        Boolean   @default(true)
   viewCount       Int       @default(0)

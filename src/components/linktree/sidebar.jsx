@@ -1,8 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import PropTypes from "prop-types";
 import {
-  ChevronDown,
-  ChevronUp,
+  GripVertical,
   Link2Icon,
   PlusCircle,
   Trash2,
@@ -19,6 +18,20 @@ import SaveStatus from "./save-status";
 import { IoClose } from "react-icons/io5";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 const socialIcons = {
   instagram: FaInstagram,
   twitter: FaTwitter,
@@ -26,6 +39,78 @@ const socialIcons = {
   youtube: FaYoutube,
   website: FaGlobe,
   default: Link2Icon,
+};
+
+// Sortable item wrapper using dnd-kit
+const SortableLinkItem = ({ link, index, links, setLinks }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: link.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : 'auto',
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="bg-[hsl(230,10%,14%)]/50 border border-[hsl(230,10%,20%)]/50 rounded-xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <button
+          {...attributes}
+          {...listeners}
+          className="p-1.5 touch-none cursor-grab active:cursor-grabbing text-slate-500 hover:text-slate-300 transition-colors"
+          aria-label="Drag to reorder"
+        >
+          <GripVertical size={16} />
+        </button>
+        <button
+          onClick={() => setLinks(links.filter((l) => l.id !== link.id))}
+          className="p-1.5 text-red-400 hover:bg-red-500/10 border border-[hsl(230,10%,25%)] rounded-lg transition-colors"
+        >
+          <Trash2 size={14} />
+        </button>
+      </div>
+      <div className="space-y-2">
+        <input
+          type="text"
+          value={link.title}
+          onChange={(e) => {
+            const newLinks = [...links];
+            newLinks[index].title = e.target.value;
+            setLinks(newLinks);
+          }}
+          className="w-full px-3 py-2 text-white text-sm rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors"
+          placeholder="Link Title"
+        />
+        <input
+          type="url"
+          value={link.url}
+          onChange={(e) => {
+            const newLinks = [...links];
+            newLinks[index].url = e.target.value;
+            setLinks(newLinks);
+          }}
+          className="w-full px-3 py-2 text-white text-sm rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors"
+          placeholder="URL"
+        />
+        <select
+          value={link.icon}
+          onChange={(e) => {
+            const newLinks = [...links];
+            newLinks[index].icon = e.target.value;
+            setLinks(newLinks);
+          }}
+          className="w-full px-3 py-2 text-white text-sm rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors"
+        >
+          {Object.keys(socialIcons).map((icon) => (
+            <option key={icon} value={icon}>
+              {icon.charAt(0).toUpperCase() + icon.slice(1)}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
 };
 const Sidebar = ({
   profile,
@@ -57,6 +142,18 @@ const Sidebar = ({
   };
   const location = useLocation();
   const [createMode, setCreateMode] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
+  const handleDragEnd = ({ active, over }) => {
+    if (over && active.id !== over.id) {
+      const oldIndex = links.findIndex((l) => l.id === active.id);
+      const newIndex = links.findIndex((l) => l.id === over.id);
+      setLinks(arrayMove(links, oldIndex, newIndex));
+    }
+  };
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);  // Use location.search to get the query string
@@ -104,73 +201,15 @@ const Sidebar = ({
           >
             {activeTab === "links" && (
               <div className="space-y-4">
-                {links.map((link, index) => (
-                  <motion.div
-                    key={link.id}
-                    layout
-                    className="bg-[hsl(230,10%,14%)]/50 border border-[hsl(230,10%,20%)]/50 rounded-xl p-4"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-1">
-                        <button className="p-1.5 hover:bg-[hsl(230,10%,20%)] border border-[hsl(230,10%,25%)] rounded-lg text-slate-400 hover:text-white transition-colors">
-                          <ChevronUp size={14} />
-                        </button>
-                        <button className="p-1.5 hover:bg-[hsl(230,10%,20%)] border border-[hsl(230,10%,25%)] rounded-lg text-slate-400 hover:text-white transition-colors">
-                          <ChevronDown size={14} />
-                        </button>
-                      </div>
-                      <button
-                        onClick={() =>
-                          setLinks(links.filter((l) => l.id !== link.id))
-                        }
-                        className="p-1.5 text-red-400 hover:bg-red-500/10 border border-[hsl(230,10%,25%)] rounded-lg transition-colors"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <SortableContext items={links.map((l) => l.id)} strategy={verticalListSortingStrategy}>
+                    <div className="space-y-3">
+                      {links.map((link, index) => (
+                        <SortableLinkItem key={link.id} link={link} index={index} links={links} setLinks={setLinks} />
+                      ))}
                     </div>
-
-                    <div className="space-y-2">
-                      <input
-                        type="text"
-                        value={link.title}
-                        onChange={(e) => {
-                          const newLinks = [...links];
-                          newLinks[index].title = e.target.value;
-                          setLinks(newLinks);
-                        }}
-                        className="w-full px-3 py-2 text-white text-sm rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors"
-                        placeholder="Link Title"
-                      />
-                      <input
-                        type="url"
-                        value={link.url}
-                        onChange={(e) => {
-                          const newLinks = [...links];
-                          newLinks[index].url = e.target.value;
-                          setLinks(newLinks);
-                        }}
-                        className="w-full px-3 py-2 text-white text-sm rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors"
-                        placeholder="URL"
-                      />
-
-                      <select
-                        value={link.icon}
-                        onChange={(e) => {
-                          const newLinks = [...links];
-                          newLinks[index].icon = e.target.value;
-                          setLinks(newLinks);
-                        }}
-                        className="w-full px-3 py-2 text-white text-sm rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors"
-                      >
-                        {Object.keys(socialIcons).map((icon) => (
-                          <option key={icon} value={icon}>
-                            {icon.charAt(0).toUpperCase() + icon.slice(1)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </motion.div>
-                ))}
+                  </SortableContext>
+                </DndContext>
 
                 <button
                   onClick={addLink}
@@ -255,7 +294,7 @@ const Sidebar = ({
             )}
 
             {activeTab === "settings" && (
-              <div className="space-y-4">
+              <div className="space-y-4 overflow-y-auto pb-20">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Profile Name
@@ -292,6 +331,40 @@ const Sidebar = ({
                     className="w-full px-3 py-2 text-white text-sm rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors resize-none"
                     rows={3}
                   />
+                </div>
+
+                {/* Social Icons Bar */}
+                <div className="pt-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Social Icons Bar</label>
+                  <p className="text-xs text-slate-500 mb-3">These appear as icon buttons at the top of your page.</p>
+                  <div className="space-y-2">
+                    {[
+                      { key: 'instagram', Icon: FaInstagram, placeholder: 'https://instagram.com/username', color: 'text-pink-400' },
+                      { key: 'twitter',   Icon: FaTwitter,   placeholder: 'https://twitter.com/username',   color: 'text-sky-400' },
+                      { key: 'github',    Icon: FaGithub,    placeholder: 'https://github.com/username',    color: 'text-slate-300' },
+                      { key: 'youtube',   Icon: FaYoutube,   placeholder: 'https://youtube.com/@channel',   color: 'text-red-400' },
+                      { key: 'website',   Icon: FaGlobe,     placeholder: 'https://yourwebsite.com',        color: 'text-emerald-400' },
+                    ].map(({ key, Icon, placeholder, color }) => (
+                      <div key={key} className="flex items-center gap-2">
+                        <Icon className={`w-4 h-4 shrink-0 ${color}`} />
+                        <input
+                          type="url"
+                          value={(profile.socialLinks || {})[key] || ''}
+                          onChange={(e) =>
+                            setProfile({
+                              ...profile,
+                              socialLinks: {
+                                ...(profile.socialLinks || {}),
+                                [key]: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder={placeholder}
+                          className="flex-1 px-3 py-2 text-white text-xs rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

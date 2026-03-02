@@ -77,6 +77,7 @@ const LinkTreeBuilder = () => {
           name: tree.title || user?.name || "Your Name",
           bio: tree.description || "Your Bio ✨",
           theme: tree.theme || "default",
+          socialLinks: tree.socialLinks || {},
           customColors: {
             background: tree.backgroundColor || "#1a1a1a",
             text: tree.textColor || "#ffffff",
@@ -135,6 +136,7 @@ const LinkTreeBuilder = () => {
           backgroundColor: profile.customColors?.background,
           textColor: profile.customColors?.text,
           isPublic: is_active,
+          socialLinks: profile.socialLinks || {},
         });
         await bulkUpdateLinks(linkTreeId, linksWithUuid.map((l, i) => ({
           id: typeof l.id === 'string' && l.id.includes('-') ? l.id : undefined,
@@ -152,6 +154,7 @@ const LinkTreeBuilder = () => {
           backgroundColor: profile.customColors?.background,
           textColor: profile.customColors?.text,
           isPublic: is_active,
+          socialLinks: profile.socialLinks || {},
         });
         setLinkTreeId(created.id);
         if (linksWithUuid.length > 0) {
