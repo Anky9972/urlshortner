@@ -66,7 +66,7 @@ async function checkExpiringLinks() {
                         <p>Hi ${user.name || 'there'},</p>
                         <p>The following link${urls.length > 1 ? 's are' : ' is'} expiring within 24 hours:</p>
                         <div style="background:#1e2433;padding:16px;border-radius:8px;margin:16px 0;">${urlList}</div>
-                        <p>Log in to <a href="${process.env.FRONTEND_URL || 'https://trimlynk.com'}" style="color:#60a5fa">TrimLink</a> to update or extend your links.</p>
+                        <p>Log in to <a href="${(process.env.FRONTEND_URL || 'https://trimlynk.com').split(',')[0].trim()}" style="color:#60a5fa">TrimLink</a> to update or extend your links.</p>
                     </div>
                 `
             }).catch(err => console.warn('Expiry email failed:', err.message));

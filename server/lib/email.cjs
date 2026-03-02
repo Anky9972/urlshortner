@@ -14,7 +14,7 @@ function getResend() {
 }
 
 const FROM = process.env.RESEND_FROM_EMAIL || 'TrimLink <noreply@trimlynk.com>';
-const APP_URL = process.env.FRONTEND_URL || 'https://trimlynk.com';
+const APP_URL = (process.env.FRONTEND_URL || 'https://trimlynk.com').split(',')[0].trim();
 
 /**
  * Send a password-reset email with a one-click link.
