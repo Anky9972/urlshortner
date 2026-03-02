@@ -78,6 +78,13 @@ const LinkTreeBuilder = () => {
           bio: tree.description || "Your Bio ✨",
           theme: tree.theme || "default",
           socialLinks: tree.socialLinks || {},
+          backgroundImage: tree.backgroundImage || '',
+          fontFamily: tree.fontFamily || 'sans',
+          avatarUrl: tree.avatarUrl || '',
+          buttonStyle: tree.buttonStyle || 'rounded',
+          seoTitle: tree.seoTitle || '',
+          seoDescription: tree.seoDescription || '',
+          seoImage: tree.seoImage || '',
           customColors: {
             background: tree.backgroundColor || "#1a1a1a",
             text: tree.textColor || "#ffffff",
@@ -90,6 +97,9 @@ const LinkTreeBuilder = () => {
             title: l.title,
             url: l.url,
             icon: l.icon || "website",
+            type: l.type || 'link',
+            activatesAt: l.activatesAt || null,
+            deactivatesAt: l.deactivatesAt || null,
           })));
         }
       }
@@ -137,13 +147,23 @@ const LinkTreeBuilder = () => {
           textColor: profile.customColors?.text,
           isPublic: is_active,
           socialLinks: profile.socialLinks || {},
+          backgroundImage: profile.backgroundImage || null,
+          fontFamily: profile.fontFamily || 'sans',
+          avatarUrl: profile.avatarUrl || null,
+          buttonStyle: profile.buttonStyle || 'rounded',
+          seoTitle: profile.seoTitle || null,
+          seoDescription: profile.seoDescription || null,
+          seoImage: profile.seoImage || null,
         });
         await bulkUpdateLinks(linkTreeId, linksWithUuid.map((l, i) => ({
           id: typeof l.id === 'string' && l.id.includes('-') ? l.id : undefined,
           title: l.title,
-          url: l.url,
+          url: l.url || '',
           icon: l.icon,
           order: i,
+          type: l.type || 'link',
+          activatesAt: l.activatesAt || null,
+          deactivatesAt: l.deactivatesAt || null,
         })));
       } else {
         // Create new
@@ -155,14 +175,24 @@ const LinkTreeBuilder = () => {
           textColor: profile.customColors?.text,
           isPublic: is_active,
           socialLinks: profile.socialLinks || {},
+          backgroundImage: profile.backgroundImage || null,
+          fontFamily: profile.fontFamily || 'sans',
+          avatarUrl: profile.avatarUrl || null,
+          buttonStyle: profile.buttonStyle || 'rounded',
+          seoTitle: profile.seoTitle || null,
+          seoDescription: profile.seoDescription || null,
+          seoImage: profile.seoImage || null,
         });
         setLinkTreeId(created.id);
         if (linksWithUuid.length > 0) {
           await bulkUpdateLinks(created.id, linksWithUuid.map((l, i) => ({
             title: l.title,
-            url: l.url,
+            url: l.url || '',
             icon: l.icon,
             order: i,
+            type: l.type || 'link',
+            activatesAt: l.activatesAt || null,
+            deactivatesAt: l.deactivatesAt || null,
           })));
         }
       }

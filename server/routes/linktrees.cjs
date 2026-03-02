@@ -111,7 +111,7 @@ router.get('/:id', async (req, res) => {
 // Create linktree
 router.post('/', async (req, res) => {
     try {
-        const { title, description, slug, theme, customCss, avatarUrl, backgroundColor, textColor, buttonStyle, isPublic, links, socialLinks } = req.body;
+        const { title, description, slug, theme, customCss, avatarUrl, backgroundColor, textColor, buttonStyle, isPublic, links, socialLinks, backgroundImage, fontFamily, seoTitle, seoDescription, seoImage } = req.body;
 
         if (!title || !slug) {
             return res.status(400).json({ error: 'title and slug are required' });
@@ -135,6 +135,11 @@ router.post('/', async (req, res) => {
                 isPublic: isPublic !== false,
                 userId: req.user.userId,
                 ...(socialLinks !== undefined && { socialLinks }),
+                ...(backgroundImage !== undefined && { backgroundImage }),
+                ...(fontFamily !== undefined && { fontFamily }),
+                ...(seoTitle !== undefined && { seoTitle }),
+                ...(seoDescription !== undefined && { seoDescription }),
+                ...(seoImage !== undefined && { seoImage }),
                 links: links && links.length > 0 ? {
                     create: links.map((link, index) => ({
                         title: link.title,
@@ -143,6 +148,9 @@ router.post('/', async (req, res) => {
                         thumbnail: link.thumbnail,
                         isActive: link.isActive !== false,
                         order: link.order ?? index,
+                        type: link.type || 'link',
+                        activatesAt: link.activatesAt ? new Date(link.activatesAt) : null,
+                        deactivatesAt: link.deactivatesAt ? new Date(link.deactivatesAt) : null,
                     }))
                 } : undefined
             },
@@ -164,7 +172,7 @@ router.patch('/:id', async (req, res) => {
         });
         if (!existing) return res.status(404).json({ error: 'LinkTree not found' });
 
-        const { title, description, slug, theme, customCss, avatarUrl, backgroundColor, textColor, buttonStyle, isPublic, socialLinks } = req.body;
+        const { title, description, slug, theme, customCss, avatarUrl, backgroundColor, textColor, buttonStyle, isPublic, socialLinks, backgroundImage, fontFamily, seoTitle, seoDescription, seoImage } = req.body;
 
         // Check slug uniqueness if changing
         if (slug && slug !== existing.slug) {
@@ -186,6 +194,11 @@ router.patch('/:id', async (req, res) => {
                 ...(buttonStyle !== undefined && { buttonStyle }),
                 ...(isPublic !== undefined && { isPublic }),
                 ...(socialLinks !== undefined && { socialLinks }),
+                ...(backgroundImage !== undefined && { backgroundImage }),
+                ...(fontFamily !== undefined && { fontFamily }),
+                ...(seoTitle !== undefined && { seoTitle }),
+                ...(seoDescription !== undefined && { seoDescription }),
+                ...(seoImage !== undefined && { seoImage }),
             },
             include: { links: { orderBy: { order: 'asc' } } }
         });
@@ -260,7 +273,7 @@ router.patch('/:id/links/:linkId', async (req, res) => {
         });
         if (!existing) return res.status(404).json({ error: 'LinkTree not found' });
 
-        const { title, url, icon, thumbnail, isActive, order } = req.body;
+        const { title, url, icon, thumbnail, isActive, order, type, activatesAt, deactivatesAt } = req.body;
         const link = await prisma.linkTreeItem.update({
             where: { id: req.params.linkId },
             data: {
@@ -270,6 +283,9 @@ router.patch('/:id/links/:linkId', async (req, res) => {
                 ...(thumbnail !== undefined && { thumbnail }),
                 ...(isActive !== undefined && { isActive }),
                 ...(order !== undefined && { order }),
+                ...(type !== undefined && { type }),
+                ...(activatesAt !== undefined && { activatesAt: activatesAt ? new Date(activatesAt) : null }),
+                ...(deactivatesAt !== undefined && { deactivatesAt: deactivatesAt ? new Date(deactivatesAt) : null }),
             }
         });
 
@@ -349,12 +365,15 @@ router.put('/:id/links', async (req, res) => {
                     data: {
                         linkTreeId: req.params.id,
                         title: link.title,
-                        url: link.url,
+                        url: link.url || '',
                         icon: link.icon || null,
                         thumbnail: link.thumbnail || null,
                         isActive: link.isActive !== false,
                         order: link.order ?? index,
                         clicks: link.clicks || 0,
+                        type: link.type || 'link',
+                        activatesAt: link.activatesAt ? new Date(link.activatesAt) : null,
+                        deactivatesAt: link.deactivatesAt ? new Date(link.deactivatesAt) : null,
                     }
                 })
             )

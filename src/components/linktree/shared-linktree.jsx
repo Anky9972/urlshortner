@@ -26,6 +26,11 @@ const SharedLinkTree = () => {
               background: tree.backgroundColor || "#1a1a2e",
               text: tree.textColor || "#ffffff",
             },
+            socialLinks: tree.socialLinks || {},
+            backgroundImage: tree.backgroundImage || '',
+            fontFamily: tree.fontFamily || 'sans',
+            avatarUrl: tree.avatarUrl || '',
+            buttonStyle: tree.buttonStyle || 'rounded',
           });
           setLinks(
             (tree.links || []).map((l) => ({
@@ -34,6 +39,9 @@ const SharedLinkTree = () => {
               url: l.url,
               icon: l.icon || "default",
               clicks: l.clicks || 0,
+              type: l.type || 'link',
+              activatesAt: l.activatesAt || null,
+              deactivatesAt: l.deactivatesAt || null,
             }))
           );
         } else {

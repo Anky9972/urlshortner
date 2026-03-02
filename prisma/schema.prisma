@@ -239,6 +239,15 @@ model LinkTree {
   buttonStyle     String?   @default("rounded")
   socialLinks     Json?     // { instagram: url, twitter: url, github: url, ... }
 
+  // Extended appearance
+  backgroundImage String?   // URL for background image
+  fontFamily      String?   @default("sans")  // sans | serif | mono | google-font-name
+
+  // SEO / Open Graph
+  seoTitle        String?
+  seoDescription  String?
+  seoImage        String?
+
   isPublic        Boolean   @default(true)
   viewCount       Int       @default(0)
 
@@ -266,6 +275,9 @@ model LinkTreeItem {
   isActive    Boolean   @default(true)
   order       Int       @default(0)
   clicks      Int       @default(0)
+  type        String?   @default("link")  // "link" | "header" | "divider"
+  activatesAt   DateTime?   // link scheduling: show from
+  deactivatesAt DateTime?   // link scheduling: show until
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

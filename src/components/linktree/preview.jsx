@@ -30,36 +30,65 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
       </div>
     );
   }
-  // const handleClick = () => {
-  //   setProfile({
-  //     name: "Your Name",
-  //     bio: "Your Bio ✨",
-  //     theme: "default",
-  //     customColors: {
-  //       background: "#1a1a1a",
-  //       text: "#ffffff",
-  //       button: "#ffffff20",
-  //     },
-  //   });
-  //   setLinks([
-  //     {
-  //       id: "1",
-  //       title: "Portfolio Website",
-  //       url: "https://example.com",
-  //       icon: "website",
-  //       isActive: true,
-  //     },
-  //   ]);
-  // };
 
   const handleClickCount = async (url, linkId) => {
     await trackAndUpdateTreeLinkClick(url, treeId, linkId);
+  };
+
+  // Font mapping
+  const FONT_MAP = {
+    sans:    'system-ui, -apple-system, sans-serif',
+    serif:   'Georgia, "Times New Roman", serif',
+    mono:    '"Courier New", Courier, monospace',
+    inter:   '"Inter", system-ui, sans-serif',
+    poppins: '"Poppins", system-ui, sans-serif',
+    roboto:  '"Roboto", system-ui, sans-serif',
+  };
+  const fontFamily = FONT_MAP[profile.fontFamily || 'sans'] || FONT_MAP.sans;
+
+  // Button style override
+  const BUTTON_SHAPE_CLASS = {
+    rounded: 'rounded-xl',
+    pill:    'rounded-full',
+    outline: 'rounded-xl bg-transparent border-2',
+    shadow:  'rounded-xl shadow-xl shadow-black/40',
+    hard:    'rounded-none',
+  };
+  const buttonShapeClass = BUTTON_SHAPE_CLASS[profile.buttonStyle || 'rounded'] || 'rounded-xl';
+
+  // Scheduling filter
+  const now = new Date();
+  const visibleLinks = links.filter(link => {
+    if (link.type === 'header' || link.type === 'divider') return true;
+    if (link.activatesAt && new Date(link.activatesAt) > now) return false;
+    if (link.deactivatesAt && new Date(link.deactivatesAt) < now) return false;
+    return true;
+  });
+
+  const containerStyle = {
+    fontFamily,
+    ...(profile.backgroundImage ? {
+      backgroundImage: `url(${profile.backgroundImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+    } : {}),
+  };
+
+  // Load Google Font if needed
+  const googleFonts = { inter: 'Inter', poppins: 'Poppins', roboto: 'Roboto' };
+  if (googleFonts[profile.fontFamily]) {
+    const fontName = googleFonts[profile.fontFamily];
+    if (!document.querySelector(`link[data-font="${fontName}"]`)) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `https://fonts.googleapis.com/css2?family=${fontName}:wght@400;500;600;700&display=swap`;
+      link.dataset.font = fontName;
+      document.head.appendChild(link);
+    }
   }
-  //  console.log("treeId", treeId);
 
   return (
-    <div className={`min-h-screen w-full rounded-lg ${theme.background}`}>
-      {/* <button className="absolute right-5 top-5 " onClick={handleClick}>Add To Gallery</button> */}
+    <div className={`min-h-screen w-full rounded-lg ${theme.background}`} style={containerStyle}>
       <div className="max-w-md mx-auto px-4 py-16">
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
@@ -68,7 +97,7 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
         >
           <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-[hsl(230,10%,14%)] border border-[hsl(230,10%,20%)]">
             <img
-              src={user?.avatarUrl || ""}
+              src={profile.avatarUrl || user?.avatarUrl || ""}
               alt="Profile"
               className="w-full h-full object-cover"
             />
@@ -114,8 +143,31 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
           }}
           className="space-y-4"
         >
-          {links.map((link) => {
+          {visibleLinks.map((link) => {
             const Icon = socialIcons[link.icon] || socialIcons.default;
+
+            // Section Header block
+            if (link.type === 'header') {
+              return (
+                <motion.div key={link.id}
+                  variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+                  className={`text-center pt-4 pb-1 text-sm font-semibold tracking-widest uppercase ${theme.textColor} opacity-70`}>
+                  {link.title}
+                </motion.div>
+              );
+            }
+
+            // Divider block
+            if (link.type === 'divider') {
+              return (
+                <motion.div key={link.id}
+                  variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
+                  className="flex items-center gap-3 py-1">
+                  <div className="flex-1 h-px bg-white/20" />
+                  <div className="flex-1 h-px bg-white/20" />
+                </motion.div>
+              );
+            }
 
             return (
               <motion.a
@@ -127,8 +179,8 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
                 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={`${theme.buttonStyle} ${theme.textColor} ${theme.hoverEffect} 
-                    flex items-center justify-between py-3 px-6 rounded-xl font-medium 
+                className={`${theme.buttonStyle} ${buttonShapeClass} ${theme.textColor} ${theme.hoverEffect} 
+                    flex items-center justify-between py-3 px-6 font-medium 
                     transition-all duration-200 backdrop-blur-sm`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -142,10 +194,6 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
                   <MousePointerClick size={16} />
                   {link.clicks || 0} clicks
                 </span>
-                {/* <Share2
-                  size={18}
-                  className="opacity-0 group-hover:opacity-100"
-                /> */}
               </motion.a>
             );
           })}
