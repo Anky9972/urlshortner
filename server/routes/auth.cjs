@@ -106,6 +106,11 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
 
+        // If 2FA is enabled, return a challenge instead of the full JWT
+        if (user.twoFactorEnabled) {
+            return res.json({ twoFactorRequired: true, userId: user.id });
+        }
+
         // Generate JWT
         const token = jwt.sign(
             { userId: user.id, email: user.email },

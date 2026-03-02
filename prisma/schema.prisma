@@ -32,6 +32,11 @@ model User {
   passwordResetToken  String?   @unique
   passwordResetExpiry DateTime?
 
+  // Two-Factor Authentication (TOTP)
+  twoFactorEnabled    Boolean   @default(false)
+  twoFactorSecret     String?   // Encrypted TOTP secret (set after verification)
+  twoFactorTempSecret String?   // Temporary TOTP secret during setup
+
   urls          Url[]
   linkTrees     LinkTree[]
   rooms         Room[]

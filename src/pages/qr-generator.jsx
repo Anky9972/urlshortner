@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { QRCode } from 'react-qrcode-logo';
 import QRCodeLib from 'qrcode';
+import JSZip from 'jszip';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -8,7 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import {
   Link, Mail, Smartphone, Map, Wifi, Calendar, FileText, Download,
   AlertCircle, QrCode, Copy, Check, User, History, Trash2,
-  Layers, Eye, Palette, FileDown, Sparkles, LayoutTemplate
+  Layers, Eye, Palette, FileDown, Sparkles, LayoutTemplate, Upload, Package
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { SEOMetadata } from '@/components/seo-metadata';
@@ -83,6 +84,13 @@ const QRCodeGenerator = () => {
   // Frame state
   const [frameStyle, setFrameStyle] = useState('none');
   const [frameText, setFrameText] = useState('Scan Me');
+
+  // Bulk QR state
+  const [bulkCsv, setBulkCsv] = useState('');
+  const [bulkItems, setBulkItems] = useState([]);
+  const [bulkGenerating, setBulkGenerating] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState(0);
+  const bulkFileRef = useRef(null);
 
   // UI state
   const [copied, setCopied] = useState(false);
@@ -257,10 +265,69 @@ const QRCodeGenerator = () => {
     setHistory([]); localStorage.removeItem(QR_HISTORY_KEY); toast.success('History cleared');
   };
 
+  const parseBulkCsv = (text) => {
+    const lines = text.trim().split('\n').filter(l => l.trim());
+    return lines.map((line, i) => {
+      const cols = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+      const url = cols[0] || '';
+      const label = cols[1] || `QR_${i + 1}`;
+      return { url, label };
+    }).filter(r => r.url);
+  };
+
+  const handleBulkFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setBulkCsv(ev.target.result);
+      setBulkItems(parseBulkCsv(ev.target.result));
+    };
+    reader.readAsText(file);
+  };
+
+  const handleBulkCsvChange = (text) => {
+    setBulkCsv(text);
+    setBulkItems(parseBulkCsv(text));
+  };
+
+  const generateBulkZip = async () => {
+    if (bulkItems.length === 0) return;
+    setBulkGenerating(true);
+    setBulkProgress(0);
+    try {
+      const zip = new JSZip();
+      for (let i = 0; i < bulkItems.length; i++) {
+        const { url, label } = bulkItems[i];
+        const dataUrl = await QRCodeLib.toDataURL(url, {
+          color: { dark: '#000000', light: '#ffffff' },
+          errorCorrectionLevel: 'Q',
+          width: 300,
+          margin: 1,
+        });
+        const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
+        zip.file(`${label.replace(/[^a-z0-9_-]/gi, '_')}.png`, base64, { base64: true });
+        setBulkProgress(Math.round(((i + 1) / bulkItems.length) * 100));
+      }
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `trimlink-qrcodes-${Date.now()}.zip`;
+      link.click();
+      toast.success(`Generated ${bulkItems.length} QR codes!`);
+    } catch (err) {
+      toast.error('Failed to generate ZIP');
+    } finally {
+      setBulkGenerating(false);
+      setBulkProgress(0);
+    }
+  };
+
   const panels = [
     { id: 'content', icon: FileText, label: 'Content' },
     { id: 'style',   icon: Palette,  label: 'Style' },
     { id: 'history', icon: History,  label: `History${history.length ? ` (${history.length})` : ''}` },
+    { id: 'bulk',    icon: Package,  label: 'Bulk' },
   ];
 
   return (
@@ -512,6 +579,70 @@ const QRCodeGenerator = () => {
                       </div>
                     </>
                   )}
+                </div>
+              )}
+
+              {/* ---- BULK PANEL ---- */}
+              {activePanel === 'bulk' && (
+                <div className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] p-5 space-y-4">
+                  <div>
+                    <h3 className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
+                      <Package className="w-4 h-4 text-violet-400" /> Bulk QR Generation
+                    </h3>
+                    <p className="text-xs text-slate-500">Upload a CSV or paste URLs below. Format: <code className="font-mono text-slate-400">url,label</code> per line. Downloads a ZIP of PNG files.</p>
+                  </div>
+
+                  {/* File Upload */}
+                  <div>
+                    <input type="file" accept=".csv,.txt" ref={bulkFileRef} onChange={handleBulkFileUpload} className="hidden" />
+                    <button
+                      onClick={() => bulkFileRef.current?.click()}
+                      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-[hsl(230,10%,22%)] hover:border-violet-600/40 text-slate-500 hover:text-violet-400 transition-colors text-sm"
+                    >
+                      <Upload className="w-4 h-4" /> Upload CSV file
+                    </button>
+                  </div>
+
+                  {/* Manual paste */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-slate-500 uppercase tracking-wider">Or paste CSV content</label>
+                    <textarea
+                      value={bulkCsv}
+                      onChange={e => handleBulkCsvChange(e.target.value)}
+                      placeholder={"https://example.com,Example\nhttps://google.com,Google\nhttps://github.com,GitHub"}
+                      rows={6}
+                      className="w-full px-3 py-2.5 rounded-xl bg-[hsl(230,10%,12%)] border border-[hsl(230,10%,20%)] text-white text-xs font-mono placeholder:text-slate-600 focus:border-violet-600/50 focus:outline-none transition-colors resize-none"
+                    />
+                  </div>
+
+                  {/* Preview count */}
+                  {bulkItems.length > 0 && (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400">{bulkItems.length} URL{bulkItems.length !== 1 ? 's' : ''} ready</span>
+                      <span className="text-slate-600">{bulkItems.slice(0, 3).map(i => i.label).join(', ')}{bulkItems.length > 3 ? ` +${bulkItems.length - 3} more` : ''}</span>
+                    </div>
+                  )}
+
+                  {/* Progress */}
+                  {bulkGenerating && (
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs text-slate-500">
+                        <span>Generating...</span><span>{bulkProgress}%</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-[hsl(230,10%,14%)] overflow-hidden">
+                        <div className="h-full rounded-full bg-violet-500 transition-all duration-300" style={{ width: `${bulkProgress}%` }} />
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={generateBulkZip}
+                    disabled={bulkItems.length === 0 || bulkGenerating}
+                    className="w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    {bulkGenerating ? `Generating (${bulkProgress}%)...` : `Download ${bulkItems.length > 0 ? bulkItems.length + ' ' : ''}QR Codes as ZIP`}
+                  </button>
                 </div>
               )}
             </div>

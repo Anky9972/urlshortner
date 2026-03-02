@@ -91,6 +91,37 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Get linktree analytics (viewCount + per-link clicks + CTR)
+router.get('/:id/analytics', async (req, res) => {
+    try {
+        const tree = await prisma.linkTree.findFirst({
+            where: { id: req.params.id, userId: req.user.userId },
+            include: {
+                links: { orderBy: { order: 'asc' } }
+            }
+        });
+        if (!tree) return res.status(404).json({ error: 'LinkTree not found' });
+
+        const totalLinkClicks = tree.links.reduce((sum, l) => sum + (l.clicks || 0), 0);
+        const linksWithCtr = tree.links.map(l => ({
+            id: l.id, title: l.title, url: l.url, clicks: l.clicks || 0, type: l.type || 'link',
+            ctr: tree.viewCount > 0 ? ((l.clicks || 0) / tree.viewCount * 100).toFixed(1) : '0.0'
+        }));
+
+        res.json({
+            id: tree.id,
+            title: tree.title,
+            slug: tree.slug,
+            viewCount: tree.viewCount,
+            totalLinkClicks,
+            links: linksWithCtr
+        });
+    } catch (error) {
+        console.error('Error fetching linktree analytics:', error);
+        res.status(500).json({ error: 'Failed to fetch analytics' });
+    }
+});
+
 // Get single linktree by ID
 router.get('/:id', async (req, res) => {
     try {
@@ -105,6 +136,37 @@ router.get('/:id', async (req, res) => {
     } catch (error) {
         console.error('Error fetching linktree:', error);
         res.status(500).json({ error: 'Failed to fetch linktree' });
+    }
+});
+
+// Analytics for a specific linktree
+router.get('/:id/analytics', async (req, res) => {
+    try {
+        const tree = await prisma.linkTree.findFirst({
+            where: { id: req.params.id, userId: req.user.userId },
+            include: {
+                links: { orderBy: { clicks: 'desc' } }
+            }
+        });
+        if (!tree) return res.status(404).json({ error: 'LinkTree not found' });
+
+        const totalLinkClicks = tree.links.reduce((sum, l) => sum + (l.clicks || 0), 0);
+
+        res.json({
+            viewCount: tree.viewCount || 0,
+            totalLinkClicks,
+            links: tree.links.map(l => ({
+                id: l.id,
+                title: l.title,
+                url: l.url,
+                clicks: l.clicks || 0,
+                type: l.type,
+                ctr: tree.viewCount > 0 ? ((l.clicks / tree.viewCount) * 100).toFixed(1) : '0.0'
+            }))
+        });
+    } catch (error) {
+        console.error('Error fetching linktree analytics:', error);
+        res.status(500).json({ error: 'Failed to fetch analytics' });
     }
 });
 

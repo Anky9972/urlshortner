@@ -8,7 +8,9 @@ import {
   Copy,
   Check,
   Code2,
+  BarChart2,
 } from "lucide-react";
+import LinktreeAnalytics from "./linktree-analytics";
 import {
   FaGithub,
   FaGlobe,
@@ -244,7 +246,7 @@ const Sidebar = ({
       <div className="p-5 h-full mt-5 lg:mt-0">
         {/* Tabs */}
         <div className="flex justify-center w-full gap-2 mb-6">
-          {["links", "appearance", "settings"].map((tab) => (
+          {["links", "appearance", "settings", "analytics"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -496,6 +498,20 @@ const Sidebar = ({
                 {/* Embed Widget */}
                 {linkTreeId && (
                   <EmbedWidget linkTreeId={linkTreeId} />
+                )}
+              </div>
+            )}
+
+            {/* Analytics Tab */}
+            {activeTab === "analytics" && (
+              <div className="space-y-4 overflow-y-auto pb-20">
+                {linkTreeId ? (
+                  <LinktreeAnalytics linkTreeId={linkTreeId} slug={profile?.slug} />
+                ) : (
+                  <div className="text-center py-10 text-slate-500">
+                    <BarChart2 className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                    <p className="text-sm">Save your LinkTree first to see analytics</p>
+                  </div>
                 )}
               </div>
             )}

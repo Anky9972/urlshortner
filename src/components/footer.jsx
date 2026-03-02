@@ -23,6 +23,7 @@ const Footer = () => {
   const serviceLinks = [
     { path: "/dashboard", label: "Link Shortener" },
     { path: "/link-tree", label: "Microsite Builder" },
+    { path: "/api-docs", label: "API Docs" },
     { path: "/contact", label: "Subscription" },
   ];
 

@@ -71,4 +71,13 @@ async function sendVerificationEmail(to, token) {
   });
 }
 
-module.exports = { sendPasswordResetEmail, sendVerificationEmail };
+/**
+ * Generic email sender — for custom notifications like expiry alerts.
+ */
+async function sendEmail({ to, subject, html }) {
+  const resend = getResend();
+  if (!resend) return;
+  await resend.emails.send({ from: FROM, to, subject, html });
+}
+
+module.exports = { sendPasswordResetEmail, sendVerificationEmail, sendEmail };

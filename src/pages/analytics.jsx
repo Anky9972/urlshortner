@@ -13,7 +13,9 @@ import {
     Zap,
     Eye,
     Users,
+    Map,
 } from "lucide-react";
+import ClickMap from "@/components/click-map";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 
@@ -327,6 +329,24 @@ const Analytics = () => {
                             </div>
                         </motion.div>
                     </div>
+
+                    {/* Click World Map */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] overflow-hidden"
+                    >
+                        <div className="px-5 py-4 border-b border-[hsl(230,10%,13%)]">
+                            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                                <Map className="w-4 h-4 text-blue-400" />
+                                Click World Map
+                            </h3>
+                        </div>
+                        <div className="p-4">
+                            <ClickMap clicks={clicks || []} />
+                        </div>
+                    </motion.div>
 
                     {/* Top Performing Links */}
                     <motion.div

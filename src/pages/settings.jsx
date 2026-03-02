@@ -12,6 +12,10 @@ import {
     Activity,
     Globe,
     ChevronRight,
+    Lock,
+    Loader2,
+    CheckCircle2,
+    Smartphone,
 } from 'lucide-react';
 import { BarLoader } from 'react-spinners';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,6 +35,21 @@ import {
     getWebhooks, createWebhook, deleteWebhook, updateWebhook,
     updateUser
 } from '@/api';
+import { getToken } from '@/api/token';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+async function twoFAFetch(path, method = 'GET', body = null) {
+    const token = getToken();
+    const res = await fetch(`${API_URL}${path}`, {
+        method,
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+        ...(body ? { body: JSON.stringify(body) } : {}),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+}
 
 const Settings = () => {
     const { user } = UrlState();
@@ -52,7 +71,61 @@ const Settings = () => {
         weeklyReport: true
     });
 
-    useEffect(() => { loadSettings(); }, []);
+    // 2FA state
+    const [twoFAEnabled, setTwoFAEnabled] = useState(false);
+    const [twoFASetup, setTwoFASetup] = useState(null); // { secret, qrDataUrl }
+    const [twoFAToken, setTwoFAToken] = useState('');
+    const [twoFALoading, setTwoFALoading] = useState(false);
+    const [twoFAMessage, setTwoFAMessage] = useState('');
+
+    useEffect(() => { loadSettings(); loadTwoFAStatus(); }, []);
+
+    const loadTwoFAStatus = async () => {
+        try {
+            const data = await twoFAFetch('/api/2fa/status');
+            setTwoFAEnabled(data.enabled);
+        } catch {}
+    };
+
+    const handleSetup2FA = async () => {
+        setTwoFALoading(true);
+        setTwoFAMessage('');
+        try {
+            const data = await twoFAFetch('/api/2fa/setup', 'POST');
+            setTwoFASetup(data);
+        } catch (e) {
+            setTwoFAMessage('Setup failed');
+        } finally { setTwoFALoading(false); }
+    };
+
+    const handleVerify2FA = async () => {
+        if (!twoFAToken) return;
+        setTwoFALoading(true);
+        setTwoFAMessage('');
+        try {
+            await twoFAFetch('/api/2fa/verify', 'POST', { token: twoFAToken });
+            setTwoFAEnabled(true);
+            setTwoFASetup(null);
+            setTwoFAToken('');
+            setTwoFAMessage('2FA enabled successfully!');
+        } catch (e) {
+            setTwoFAMessage('Invalid code. Please try again.');
+        } finally { setTwoFALoading(false); }
+    };
+
+    const handleDisable2FA = async () => {
+        if (!twoFAToken) return;
+        setTwoFALoading(true);
+        setTwoFAMessage('');
+        try {
+            await twoFAFetch('/api/2fa/disable', 'POST', { token: twoFAToken });
+            setTwoFAEnabled(false);
+            setTwoFAToken('');
+            setTwoFAMessage('2FA disabled.');
+        } catch (e) {
+            setTwoFAMessage('Invalid code.');
+        } finally { setTwoFALoading(false); }
+    };
 
     const loadSettings = async () => {
         setLoading(true);
@@ -90,11 +163,13 @@ const Settings = () => {
         { value: 'pixels', label: 'Pixels', icon: Code2, desc: 'Tracking pixels' },
         { value: 'health', label: 'Health', icon: Activity, desc: 'Link monitoring' },
         { value: 'notifications', label: 'Alerts', icon: Bell, desc: 'Notifications' },
+        { value: 'security', label: 'Security', icon: Lock, desc: 'Two-factor auth' },
     ];
 
     const colorMap = {
         profile: 'blue', domains: 'indigo', api: 'amber', webhooks: 'rose',
         audit: 'violet', pixels: 'emerald', health: 'blue', notifications: 'amber',
+        security: 'blue',
     };
 
     return (
@@ -292,6 +367,104 @@ const Settings = () => {
                                                 />
                                             </div>
                                         ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 2FA / Security */}
+                            {activeTab === 'security' && (
+                                <div className="space-y-4">
+                                    <div className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] overflow-hidden">
+                                        <div className="px-6 py-4 border-b border-[hsl(230,10%,13%)]">
+                                            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                                                <Smartphone className="w-4 h-4 text-blue-400" />
+                                                Two-Factor Authentication (TOTP)
+                                            </h3>
+                                            <p className="text-xs text-slate-500 mt-1">Use an authenticator app like Google Authenticator or Authy.</p>
+                                        </div>
+                                        <div className="p-6 space-y-4">
+                                            {/* Status */}
+                                            <div className={`flex items-center gap-3 p-3.5 rounded-xl border ${twoFAEnabled ? 'border-emerald-500/25 bg-emerald-500/5' : 'border-[hsl(230,10%,18%)] bg-[hsl(230,10%,12%)]'}`}>
+                                                <CheckCircle2 className={`w-5 h-5 ${twoFAEnabled ? 'text-emerald-400' : 'text-slate-600'}`} />
+                                                <div>
+                                                    <p className="text-sm font-medium text-white">
+                                                        2FA is {twoFAEnabled ? <span className="text-emerald-400">enabled</span> : <span className="text-slate-400">disabled</span>}
+                                                    </p>
+                                                    <p className="text-xs text-slate-500">{twoFAEnabled ? 'Your account is protected.' : 'Enable for extra login security.'}</p>
+                                                </div>
+                                            </div>
+
+                                            {/* Setup flow */}
+                                            {!twoFAEnabled && !twoFASetup && (
+                                                <button
+                                                    onClick={handleSetup2FA}
+                                                    disabled={twoFALoading}
+                                                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors disabled:opacity-60"
+                                                >
+                                                    {twoFALoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
+                                                    Enable 2FA
+                                                </button>
+                                            )}
+
+                                            {!twoFAEnabled && twoFASetup && (
+                                                <div className="space-y-4">
+                                                    <div className="space-y-2">
+                                                        <p className="text-xs text-slate-400">1. Scan this QR code with your authenticator app:</p>
+                                                        <div className="flex justify-center">
+                                                            <img src={twoFASetup.qrDataUrl} alt="TOTP QR Code" className="w-40 h-40 rounded-xl border border-[hsl(230,10%,20%)]" />
+                                                        </div>
+                                                        <p className="text-xs text-slate-500 text-center font-mono bg-[hsl(230,10%,12%)] border border-[hsl(230,10%,18%)] rounded-lg px-3 py-1.5 break-all">{twoFASetup.secret}</p>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <p className="text-xs text-slate-400">2. Enter the 6-digit code from your app:</p>
+                                                        <div className="flex gap-2">
+                                                            <input
+                                                                value={twoFAToken}
+                                                                onChange={e => setTwoFAToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                                                placeholder="000000"
+                                                                maxLength={6}
+                                                                className="flex-1 px-3 py-2.5 rounded-xl bg-[hsl(230,10%,12%)] border border-[hsl(230,10%,20%)] text-white font-mono text-center text-lg tracking-[0.3em] focus:border-blue-600/50 focus:outline-none transition-colors"
+                                                            />
+                                                            <button
+                                                                onClick={handleVerify2FA}
+                                                                disabled={twoFAToken.length !== 6 || twoFALoading}
+                                                                className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm transition-colors disabled:opacity-40"
+                                                            >
+                                                                {twoFALoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {twoFAEnabled && (
+                                                <div className="space-y-2">
+                                                    <p className="text-xs text-slate-400">Enter a valid TOTP code to disable 2FA:</p>
+                                                    <div className="flex gap-2">
+                                                        <input
+                                                            value={twoFAToken}
+                                                            onChange={e => setTwoFAToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                                            placeholder="000000"
+                                                            maxLength={6}
+                                                            className="flex-1 px-3 py-2.5 rounded-xl bg-[hsl(230,10%,12%)] border border-[hsl(230,10%,20%)] text-white font-mono text-center text-lg tracking-[0.3em] focus:border-red-600/50 focus:outline-none transition-colors"
+                                                        />
+                                                        <button
+                                                            onClick={handleDisable2FA}
+                                                            disabled={twoFAToken.length !== 6 || twoFALoading}
+                                                            className="px-4 py-2.5 rounded-xl bg-red-600/20 hover:bg-red-600/30 border border-red-600/30 text-red-400 font-medium text-sm transition-colors disabled:opacity-40"
+                                                        >
+                                                            {twoFALoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Disable'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {twoFAMessage && (
+                                                <p className={`text-xs px-3 py-2 rounded-lg border ${twoFAMessage.includes('success') || twoFAMessage.includes('enabled') ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : 'text-red-400 bg-red-400/10 border-red-400/20'}`}>
+                                                    {twoFAMessage}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             )}

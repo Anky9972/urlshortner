@@ -31,6 +31,9 @@ import ForgotPassword from './pages/forgot-password'
 import ResetPassword from './pages/reset-password'
 import VerifyEmail from './pages/verify-email'
 import MyLinkTrees from './pages/my-linktrees'
+import SearchPage from './pages/search'
+import ApiDocsPage from './pages/api-docs'
+import OnboardingTour from './components/onboarding-tour'
 
 const router = createBrowserRouter([
   {
@@ -222,6 +225,20 @@ const router = createBrowserRouter([
         path: '/my-linktrees',
         element: <MyLinkTrees />,
       },
+      {
+        path: '/search',
+        element: (
+          <ErrorBoundary>
+            <RequireAuth>
+              <SearchPage />
+            </RequireAuth>
+          </ErrorBoundary>
+        ),
+      },
+      {
+        path: '/api-docs',
+        element: <ApiDocsPage />,
+      },
     ],
   },
 ])
@@ -232,6 +249,7 @@ function App() {
       <ErrorBoundary>
         <UrlProvider>
           <RouterProvider router={router} />
+          <OnboardingTour />
         </UrlProvider>
       </ErrorBoundary>
     </HelmetProvider>

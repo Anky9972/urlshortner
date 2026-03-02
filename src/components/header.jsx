@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Bell, LinkIcon, LogOut, Menu, Network, Settings, X, ChevronDown } from "lucide-react";
+import { Bell, LinkIcon, LogOut, Menu, Network, Settings, X, ChevronDown, Search } from "lucide-react";
 import { UrlState } from "@/context";
 import { BarLoader } from "react-spinners";
 import { motion, AnimatePresence } from "framer-motion";
@@ -104,6 +104,17 @@ const Header = () => {
 
             {/* Right Side */}
             <div className="flex items-center gap-1.5">
+              {/* Search */}
+              {user && (
+                <button
+                  onClick={() => navigate("/search")}
+                  className="p-2.5 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-xl transition-all"
+                  title="Global Search"
+                >
+                  <Search className="w-[18px] h-[18px]" />
+                </button>
+              )}
+
               {/* Notification Bell */}
               {user && (
                 <button

@@ -23,6 +23,9 @@ const auditRoutes = require('./routes/audit.cjs');
 const analyticsAiRoutes = require('./routes/analytics-ai.cjs');
 const linktreeRoutes = require('./routes/linktrees.cjs');
 const roomRoutes = require('./routes/rooms.cjs');
+const searchRoutes = require('./routes/search.cjs');
+const twoFactorRoutes = require('./routes/twoFactor.cjs');
+const { startExpiryNotifier } = require('./lib/expiry-notifier.cjs');
 
 const rateLimitMiddleware = require('./middleware/rateLimit.cjs');
 
@@ -78,6 +81,8 @@ app.use('/api/audit', auditRoutes);
 app.use('/api/analytics-ai', analyticsAiRoutes);
 app.use('/api/linktrees', linktreeRoutes);
 app.use('/api/rooms', roomRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/2fa', twoFactorRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -96,6 +101,7 @@ app.use((req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 TrimLink API server running on http://localhost:${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/health`);
+    startExpiryNotifier();
 });
 
 module.exports = app;
