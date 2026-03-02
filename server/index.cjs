@@ -40,7 +40,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Middleware
-const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173,https://trimlink.netlify.app,https://trimlynk.com')
     .split(',')
     .map(o => o.trim());
 

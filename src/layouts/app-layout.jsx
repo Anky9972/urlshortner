@@ -5,6 +5,7 @@ import useGoogleAnalytics from '@/hooks/use-googleanalytics'
 import { Toaster } from 'sonner'
 import { UrlState } from '@/context'
 import EmailVerificationBanner from '@/components/email-verification-banner'
+import OnboardingTour from '@/components/onboarding-tour'
 
 export const AppLayout = () => {
   useGoogleAnalytics();
@@ -23,6 +24,7 @@ export const AppLayout = () => {
             <Outlet/>
         </main>
         <Toaster position='top-center'/>
+        <OnboardingTour />
         <Footer/>
     </div>
   )

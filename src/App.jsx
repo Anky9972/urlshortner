@@ -34,7 +34,7 @@ import MyLinkTrees from './pages/my-linktrees'
 import SearchPage from './pages/search'
 import ApiDocsPage from './pages/api-docs'
 import OAuthCallback from './pages/oauth-callback'
-import OnboardingTour from './components/onboarding-tour'
+
 
 const router = createBrowserRouter([
   {
@@ -254,7 +254,6 @@ function App() {
       <ErrorBoundary>
         <UrlProvider>
           <RouterProvider router={router} />
-          <OnboardingTour />
         </UrlProvider>
       </ErrorBoundary>
     </HelmetProvider>
