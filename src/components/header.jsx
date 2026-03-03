@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Bell, LinkIcon, LogOut, Menu, Network, Settings, X, ChevronDown, Search, BarChart3, Users, Code2 } from "lucide-react";
+import { Bell, LinkIcon, LogOut, Menu, Network, Settings, X, ChevronDown, Search, BarChart3, Users, Code2, Crown } from "lucide-react";
 import { UrlState } from "@/context";
 import { BarLoader } from "react-spinners";
 import { motion, AnimatePresence } from "framer-motion";
@@ -290,6 +290,7 @@ const UserMenu = ({ user, logout, navigate }) => {
     { label: "Teams", icon: Users, onClick: () => navigate("/teams") },
     { label: "API Docs", icon: Code2, onClick: () => navigate("/api-docs") },
     { label: "Settings", icon: Settings, onClick: () => navigate("/settings") },
+    ...(user?.isAdmin ? [{ label: "Admin Panel", icon: Crown, onClick: () => navigate("/admin"), admin: true }] : []),
   ];
 
   return (
@@ -336,9 +337,13 @@ const UserMenu = ({ user, logout, navigate }) => {
                     item.onClick();
                     setOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-white/[0.05] transition-all"
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                    item.admin
+                      ? 'text-amber-400 hover:text-amber-300 hover:bg-amber-500/[0.08]'
+                      : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
+                  }`}
                 >
-                  <item.icon className="w-4 h-4 text-slate-500" />
+                  <item.icon className={`w-4 h-4 ${item.admin ? 'text-amber-500' : 'text-slate-500'}`} />
                   {item.label}
                 </button>
               ))}

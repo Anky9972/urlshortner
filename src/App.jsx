@@ -36,6 +36,7 @@ import ApiDocsPage from './pages/api-docs'
 import OAuthCallback from './pages/oauth-callback'
 import TermsPage from './pages/terms'
 import PrivacyPage from './pages/privacy'
+import AdminPage from './pages/admin'
 
 
 const router = createBrowserRouter([
@@ -253,6 +254,16 @@ const router = createBrowserRouter([
       {
         path: '/privacy',
         element: <PrivacyPage />,
+      },
+      {
+        path: '/admin',
+        element: (
+          <ErrorBoundary>
+            <RequireAuth>
+              <AdminPage />
+            </RequireAuth>
+          </ErrorBoundary>
+        ),
       },
     ],
   },

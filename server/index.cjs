@@ -27,6 +27,7 @@ const searchRoutes = require('./routes/search.cjs');
 const twoFactorRoutes = require('./routes/twoFactor.cjs');
 const dynamicQrRoutes = require('./routes/dynamicQr.cjs');
 const oauthRoutes = require('./routes/oauth.cjs');
+const adminRoutes = require('./routes/admin.cjs');
 const { startExpiryNotifier } = require('./lib/expiry-notifier.cjs');
 
 const rateLimitMiddleware = require('./middleware/rateLimit.cjs');
@@ -87,6 +88,7 @@ app.use('/api/search', searchRoutes);
 app.use('/api/2fa', twoFactorRoutes);
 app.use('/api/dynamic-qr', dynamicQrRoutes);
 app.use('/api/oauth', oauthRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Public Dynamic QR redirect
 app.get('/qr/:shortCode', async (req, res) => {

@@ -128,7 +128,8 @@ router.post('/login', async (req, res) => {
                 id: user.id,
                 email: user.email,
                 name: user.name,
-                avatarUrl: user.avatarUrl
+                avatarUrl: user.avatarUrl,
+                isAdmin: user.isAdmin
             }
         });
     } catch (error) {
@@ -148,6 +149,7 @@ router.get('/me', authMiddleware, async (req, res) => {
                 name: true,
                 avatarUrl: true,
                 emailVerified: true,
+                isAdmin: true,
                 createdAt: true
             }
         });
