@@ -64,73 +64,19 @@
     <priority>0.3</priority>
   </url>
 
-</urlset>
-
-  <!-- Main Pages -->
+  <!-- ===== LEGAL pages ===== -->
   <url>
-    <loc>https://trimlink.netlify.app/about</loc>
-    <lastmod>2024-11-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Legal Pages -->
-  <url>
-    <loc>https://trimlink.netlify.app/privacy-policy</loc>
-    <lastmod>2024-11-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://trimlynk.com/terms</loc>
+    <lastmod>2026-03-03</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 
   <url>
-    <loc>https://trimlink.netlify.app/terms-of-service</loc>
-    <lastmod>2024-11-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <!-- Contact -->
-  <url>
-    <loc>https://trimlink.netlify.app/contact</loc>
-    <lastmod>2024-11-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-
-  <!-- TrimLynk Domain -->
-  <url>
-    <loc>https://trimlynk.com/</loc>
-    <lastmod>2024-11-17</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-
-  <url>
-    <loc>https://trimlynk.com/about</loc>
-    <lastmod>2024-11-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://trimlynk.com/privacy-policy</loc>
-    <lastmod>2024-11-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <url>
-    <loc>https://trimlynk.com/terms-of-service</loc>
-    <lastmod>2024-11-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <url>
-    <loc>https://trimlynk.com/contact</loc>
-    <lastmod>2024-11-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <loc>https://trimlynk.com/privacy</loc>
+    <lastmod>2026-03-03</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 
 </urlset>

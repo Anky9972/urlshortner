@@ -34,6 +34,8 @@ import MyLinkTrees from './pages/my-linktrees'
 import SearchPage from './pages/search'
 import ApiDocsPage from './pages/api-docs'
 import OAuthCallback from './pages/oauth-callback'
+import TermsPage from './pages/terms'
+import PrivacyPage from './pages/privacy'
 
 
 const router = createBrowserRouter([
@@ -243,6 +245,14 @@ const router = createBrowserRouter([
       {
         path: '/oauth-callback',
         element: <OAuthCallback />,
+      },
+      {
+        path: '/terms',
+        element: <TermsPage />,
+      },
+      {
+        path: '/privacy',
+        element: <PrivacyPage />,
       },
     ],
   },
