@@ -37,7 +37,12 @@ export default function ForgotPassword() {
 
   return (
     <>
-      <SEOMetadata title="Forgot Password | TrimLink" description="Reset your TrimLink password." />
+      <SEOMetadata
+        title="Forgot Password | TrimLink"
+        description="Reset your TrimLink account password. Enter your email to receive a secure reset link."
+        canonical="https://trimlynk.com/forgot-password"
+        noIndex={true}
+      />
       <div className="min-h-screen bg-[hsl(230,15%,5%)] flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] p-8">

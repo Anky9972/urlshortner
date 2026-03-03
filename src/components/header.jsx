@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Bell, LinkIcon, LogOut, Menu, Network, Settings, X, ChevronDown, Search } from "lucide-react";
+import { Bell, LinkIcon, LogOut, Menu, Network, Settings, X, ChevronDown, Search, BarChart3, Users, Code2 } from "lucide-react";
 import { UrlState } from "@/context";
 import { BarLoader } from "react-spinners";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,9 +20,10 @@ const Header = () => {
     ? [
         { path: "/", label: "Home" },
         { path: "/dashboard", label: "Dashboard" },
+        { path: "/analytics", label: "Analytics" },
         { path: "/link-tree?create", label: "LinkTree" },
         { path: "/qr-code-generator", label: "QR Code" },
-        { path: "/rooms", label: "Rooms" },
+        { path: "/teams", label: "Teams" },
       ]
     : [
         { path: "#", label: "My URLs", onClick: () => setIsMyUrlsOpen(true) },
@@ -285,6 +286,9 @@ const UserMenu = ({ user, logout, navigate }) => {
   const menuItems = [
     { label: "My Links", icon: LinkIcon, onClick: () => navigate("/dashboard") },
     { label: "My LinkTrees", icon: Network, onClick: () => navigate("/link-tree-gallery") },
+    { label: "Analytics", icon: BarChart3, onClick: () => navigate("/analytics") },
+    { label: "Teams", icon: Users, onClick: () => navigate("/teams") },
+    { label: "API Docs", icon: Code2, onClick: () => navigate("/api-docs") },
     { label: "Settings", icon: Settings, onClick: () => navigate("/settings") },
   ];
 

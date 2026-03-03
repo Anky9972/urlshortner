@@ -390,9 +390,10 @@ const QRCodeGenerator = () => {
   return (
     <>
       <SEOMetadata
-        title="Free QR Code Generator | TrimLink"
-        description="Create customizable QR codes for URLs, vCards, WiFi, email and more."
+        title="Free QR Code Generator – Custom QR Codes | TrimLink"
+        description="Generate custom QR codes for URLs, vCards, Wi-Fi, email, and more. Download as PNG, SVG or PDF. Add gradients, frames, logos — free, instant, no signup needed."
         canonical={`${import.meta.env.VITE_APP_URL || 'https://trimlynk.com'}/qr-code-generator`}
+        keywords="free qr code generator, custom qr code, qr code maker, qr code download, vcard qr code, wifi qr code, dynamic qr code"
       />
 
       <div className="min-h-screen bg-[hsl(230,15%,5%)] p-4 lg:p-8">

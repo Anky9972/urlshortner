@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Login from "@/components/login";
 import Signup from "@/components/signup";
 import { UrlState } from "@/context";
+import { SEOMetadata } from "@/components/seo-metadata";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart3,
@@ -37,6 +38,14 @@ const Auth = () => {
   }, [isAuthenticated, loading]);
 
   return (
+    <>
+      <SEOMetadata
+        title="Sign In or Create Account | TrimLink"
+        description="Sign in to your TrimLink account or create a free account to start shortening URLs, building QR codes, and tracking link analytics."
+        canonical="https://trimlynk.com/auth"
+        keywords="trimlink login, url shortener sign up, create account, free link shortener"
+        noIndex={true}
+      />
     <div className="min-h-[calc(100vh-4rem)] flex relative overflow-hidden bg-[hsl(230,15%,5%)]">
       {/* ===== Left Panel — Branding ===== */}
       <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] relative flex-col justify-between p-12 overflow-hidden">
@@ -264,6 +273,7 @@ const Auth = () => {
         </motion.div>
       </div>
     </div>
+    </>
   );
 };
 

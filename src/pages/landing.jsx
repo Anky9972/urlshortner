@@ -30,10 +30,12 @@ import {
   LayoutGrid,
   Palette,
   Monitor,
+  Bell,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SEOMetadata } from "@/components/seo-metadata";
+import { SEOMetadata, SEOSchema } from "@/components/seo-metadata";
 import UrlShortener from "@/components/url-shortner";
 import { UrlState } from "@/context";
 
@@ -144,6 +146,8 @@ const faqs = [
   { q: "Can I password protect my links?", a: "Absolutely! You can add password protection to any link. Visitors need to enter the correct password before being redirected." },
   { q: "What is LinkTree and how do I use it?", a: "LinkTree lets you create a single page with multiple links — perfect for social media bios. You can customize the design and track all clicks." },
   { q: "Can I use custom domains?", a: "Yes, you can use your own domain for branded short links. This helps with brand recognition and trust." },
+  { q: "Is my account secure with Two-Factor Authentication?", a: "Yes! TrimLink supports TOTP-based Two-Factor Authentication (2FA). You can enable it in Settings → Security using any authenticator app like Google Authenticator or Authy. Once enabled, every login requires both your password and a 6-digit code." },
+  { q: "Can I install TrimLink as a mobile app?", a: "Yes! TrimLink is a Progressive Web App (PWA). On Android and iOS, tap 'Add to Home Screen' in your browser to install it as a native-feeling app — no app store required. It works offline and loads instantly." },
 ];
 
 const moreFeatures = [
@@ -159,6 +163,9 @@ const moreFeatures = [
   { icon: Fingerprint, text: "Bot Detection" },
   { icon: Palette, text: "Custom Branding" },
   { icon: Monitor, text: "Device Targeting" },
+  { icon: Shield, text: "Two-Factor Auth (2FA)" },
+  { icon: Download, text: "PWA — Installable App" },
+  { icon: Bell, text: "Expiry Notifications" },
 ];
 
 /* ============ FAQ ITEM ============ */
@@ -232,13 +239,29 @@ const LandingPage = () => {
   return (
     <>
       <SEOMetadata
-        title="TrimLink - Modern URL Shortener with Advanced Analytics"
-        description="Create short links, QR Codes, and Link-in-bio pages. Track links with powerful analytics, geo-targeting, and password protection."
+        title="TrimLink – Free URL Shortener, QR Code Generator & LinkTree Builder"
+        description="TrimLink is a free URL shortener with real-time analytics, custom QR code generator, geo-targeting, password protection, and link-in-bio page builder. No signup needed."
         canonical={`${import.meta.env.VITE_APP_URL || "https://trimlynk.com"}`}
-        keywords="url shortener, link management, QR codes, link analytics, link tree, geo targeting, password protection"
+        keywords="url shortener, free url shortener, link shortener, QR code generator, linktree alternative, link in bio, link analytics, geo targeting, custom short links, branded links, link management, trimlynk"
         author="TrimLink"
-        language="en"
       />
+
+      {/* Organization schema */}
+      <SEOSchema type="organization" />
+
+      {/* FAQ rich results schema */}
+      <SEOSchema data={{
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": faqs.map(faq => ({
+          "@type": "Question",
+          "name": faq.q,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": faq.a
+          }
+        }))
+      }} />
 
       {/* ==================== HERO ==================== */}
       <section ref={heroRef} className="relative min-h-[100vh] flex items-center justify-center px-4 overflow-hidden pt-20 pb-12">

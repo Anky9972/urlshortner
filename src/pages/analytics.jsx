@@ -152,9 +152,10 @@ const Analytics = () => {
     return (
         <>
             <SEOMetadata
-                title="Analytics | TrimLink"
-                description="View detailed analytics for your shortened URLs."
-                canonical={`${import.meta.env.VITE_APP_URL || "https://trimlynk.com"}/analytics`}
+                title="Advanced Link Analytics | TrimLink"
+                description="Track click analytics for all your shortened URLs. See clicks by country, device, browser, and time with TrimLink's real-time analytics dashboard."
+                canonical={`${import.meta.env.VITE_APP_URL || 'https://trimlynk.com'}/analytics`}
+                noIndex={true}
             />
 
             <div className="min-h-screen bg-[hsl(230,15%,5%)]">

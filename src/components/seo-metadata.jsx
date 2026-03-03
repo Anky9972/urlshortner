@@ -2,6 +2,10 @@ import { Helmet } from 'react-helmet-async';
 import PropTypes from 'prop-types';
 
 const APP_URL = import.meta.env.VITE_APP_URL || 'https://trimlynk.com';
+const DEFAULT_OG_IMAGE = `${APP_URL}/images/og-banner.png`;
+const SITE_NAME = 'TrimLink';
+const DEFAULT_DESCRIPTION = 'Free URL shortener with analytics, QR code generator, geo-targeting, and link-in-bio page builder.';
+const DEFAULT_KEYWORDS = 'url shortener, free url shortener, QR code generator, link analytics, linktree alternative, custom short links';
 
 export const SEOMetadata = ({
   title,
@@ -9,47 +13,56 @@ export const SEOMetadata = ({
   canonical,
   ogImage,
   keywords,
-  author = "Your Name",
-  twitterHandle = "@yourtwitterhandle"
+  author = 'TrimLink',
+  twitterHandle = '@trimlynk',
+  noIndex = false,
+  language = 'en',
 }) => {
-  const siteName = "TrimLink - URL Shortener";
-  const defaultDescription = "Create short, customized URLs and track their performance with detailed analytics.";
+  const fullTitle = title
+    ? (title.toLowerCase().includes('trimlink') ? title : `${title} | ${SITE_NAME}`)
+    : `${SITE_NAME} – Free URL Shortener, QR Code Generator & LinkTree Builder`;
+
+  const resolvedDescription = description || DEFAULT_DESCRIPTION;
+  const resolvedImage = ogImage || DEFAULT_OG_IMAGE;
+  const resolvedCanonical = canonical || APP_URL;
 
   return (
     <Helmet>
-      {/* Basic metadata */}
-      <title>{title ? `${title} | ${siteName}` : siteName}</title>
-      <meta name="description" content={description || defaultDescription} />
-      <meta name="keywords" content={keywords} />
+      <html lang={language} />
+
+      {/* Basic */}
+      <title>{fullTitle}</title>
+      <meta name="description" content={resolvedDescription} />
+      {keywords && <meta name="keywords" content={keywords || DEFAULT_KEYWORDS} />}
       <meta name="author" content={author} />
+      <meta name="robots" content={noIndex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
+      <meta name="format-detection" content="telephone=no" />
 
-      {/* Canonical URL */}
-      <link rel="canonical" href={canonical} />
+      {/* Canonical */}
+      <link rel="canonical" href={resolvedCanonical} />
 
-      {/* Open Graph metadata */}
+      {/* Open Graph */}
       <meta property="og:type" content="website" />
-      <meta property="og:site_name" content={siteName} />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description || defaultDescription} />
-      <meta property="og:image" content={ogImage} />
-      <meta property="og:url" content={canonical} />
+      <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:title" content={fullTitle} />
+      <meta property="og:description" content={resolvedDescription} />
+      <meta property="og:image" content={resolvedImage} />
+      <meta property="og:image:alt" content={`${SITE_NAME} – ${title || 'URL Shortener'}`} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:url" content={resolvedCanonical} />
+      <meta property="og:locale" content="en_US" />
 
-      {/* Twitter Card metadata */}
+      {/* Twitter Card */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content={twitterHandle} />
-      <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description || defaultDescription} />
-      <meta name="twitter:image" content={ogImage} />
+      <meta name="twitter:creator" content={twitterHandle} />
+      <meta name="twitter:title" content={fullTitle} />
+      <meta name="twitter:description" content={resolvedDescription} />
+      <meta name="twitter:image" content={resolvedImage} />
 
-      {/* Mobile optimization */}
+      {/* Mobile */}
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-      {/* Robots directives */}
-      <meta name="robots" content="index, follow" />
-
-      {/* Additional SEO optimization */}
-      <meta name="format-detection" content="telephone=no" />
-      <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
     </Helmet>
   );
 };
@@ -58,30 +71,29 @@ export const SEOMetadata = ({
 export const SEOSchema = ({ type, data }) => {
   const schemas = {
     website: {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      name: "TrimLink",
-      description: "Professional URL shortener service with analytics",
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: SITE_NAME,
+      description: DEFAULT_DESCRIPTION,
       url: APP_URL,
       potentialAction: {
-        "@type": "SearchAction",
-        target: `${APP_URL}/search?q={search_term_string}`,
-        "query-input": "required name=search_term_string"
-      }
+        '@type': 'SearchAction',
+        target: {
+          '@type': 'EntryPoint',
+          urlTemplate: `${APP_URL}/search?q={search_term_string}`,
+        },
+        'query-input': 'required name=search_term_string',
+      },
     },
     organization: {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      name: "TrimLink",
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: SITE_NAME,
       url: APP_URL,
       logo: `${APP_URL}/images/logo.png`,
-      sameAs: [
-        APP_URL,
-        "https://twitter.com/trimlink",
-        "https://facebook.com/trimlink",
-        "https://linkedin.com/company/trimlink"
-      ]
-    }
+      description: DEFAULT_DESCRIPTION,
+      sameAs: [APP_URL],
+    },
   };
 
   return (
@@ -93,38 +105,23 @@ export const SEOSchema = ({ type, data }) => {
   );
 };
 
-// PropTypes validation
 SEOMetadata.propTypes = {
   title: PropTypes.string,
   description: PropTypes.string,
-  canonical: PropTypes.string.isRequired,
+  canonical: PropTypes.string,
   ogImage: PropTypes.string,
   keywords: PropTypes.string,
   author: PropTypes.string,
-  twitterHandle: PropTypes.string
+  twitterHandle: PropTypes.string,
+  noIndex: PropTypes.bool,
+  language: PropTypes.string,
 };
 
 SEOSchema.propTypes = {
   type: PropTypes.oneOf(['website', 'organization']),
-  data: PropTypes.object
+  data: PropTypes.object,
 };
 
-// Example usage in Dashboard component
-const Dashboard = () => {
-  return (
-    <>
-      <SEOMetadata
-        title="Dashboard"
-        description="Manage your shortened URLs and track their performance with detailed analytics."
-        canonical={`${APP_URL}/dashboard`}
-        keywords="url shortener, link management, analytics, dashboard"
-        ogImage={`${APP_URL}/dashboard-preview.jpg`}
-      />
-      <SEOSchema type="website" />
-
-      {/* Rest of your Dashboard component */}
-    </>
-  );
-};
+export default SEOMetadata;
 
 export default Dashboard;

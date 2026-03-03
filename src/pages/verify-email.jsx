@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { SEOMetadata } from '@/components/seo-metadata';
 
 const API = import.meta.env.VITE_API_URL || 'https://urlshortner-onhm.onrender.com';
 
@@ -23,6 +24,12 @@ export default function VerifyEmail() {
   }, [token]);
 
   return (
+    <>
+      <SEOMetadata
+        title="Verify Email | TrimLink"
+        description="Verify your TrimLink email address."
+        noIndex={true}
+      />
     <div className="min-h-screen bg-[hsl(230,15%,5%)] flex items-center justify-center p-4">
       <div className="w-full max-w-md rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] p-8 text-center space-y-5">
         {status === 'loading' && (
@@ -57,5 +64,6 @@ export default function VerifyEmail() {
         )}
       </div>
     </div>
+    </>
   );
 }

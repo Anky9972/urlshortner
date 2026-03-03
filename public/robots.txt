@@ -1,29 +1,43 @@
 User-agent: *
 
-# Allow access to main pages
+# === PUBLIC PAGES — allow all crawlers ===
 Allow: /$
-Allow: /about
 Allow: /contact
-Allow: /privacy-policy
-Allow: /terms-of-service
+Allow: /qr-code-generator
+Allow: /link-tree
+Allow: /linktree
+Allow: /api-docs
+Allow: /share/
+Allow: /view/
+Allow: /link-tree-gallery
+Allow: /link-expired
+Allow: /auth
+Allow: /forgot-password
+Allow: /reset-password
 
-# Prevent crawling of user-specific pages and sensitive areas
+# === STATIC ASSETS — must be crawlable ===
+Allow: /images/
+Allow: /manifest.json
+Allow: /sitemap.xml
+Allow: /robots.txt
+Allow: /sw.js
+
+# === PRIVATE / USER PAGES — block crawlers ===
 Disallow: /dashboard
-Disallow: /auth
+Disallow: /analytics
+Disallow: /settings
+Disallow: /teams
+Disallow: /rooms
+Disallow: /room/
+Disallow: /search
+Disallow: /notifications
+Disallow: /my-linktrees
+Disallow: /link/
+Disallow: /edit/
+Disallow: /invitation/
+Disallow: /joined-rooms
+Disallow: /oauth-callback
+Disallow: /verify-email
 
-# Prevent crawling of shortened URLs to avoid duplicate content
-Disallow: /l/
-Disallow: /links/
-
-# Prevent crawling of temporary files and development assets
-Disallow: /*.json$
-Disallow: /*.xml$
-Disallow: /temp/
-Disallow: /assets/temp/
-
-# Sitemap location (if you have one)
-Sitemap: https://trimlink.netlify.app/sitemap.xml
+# Primary sitemap (single canonical domain)
 Sitemap: https://trimlynk.com/sitemap.xml
-
-# Crawl delay to prevent server overload
-Crawl-delay: 10

@@ -7,6 +7,7 @@ import { Users, Settings, ArrowRight } from "lucide-react";
 import { motion } from 'framer-motion';
 import CreateTeamModal from '@/components/teams/create-team-modal';
 import { useNavigate } from 'react-router-dom';
+import { SEOMetadata } from '@/components/seo-metadata';
 
 const TeamsPage = () => {
     const { user } = UrlState();
@@ -51,6 +52,13 @@ const TeamsPage = () => {
     }
 
     return (
+        <>
+        <SEOMetadata
+            title="Teams | TrimLink"
+            description="Create and manage teams on TrimLink. Collaborate with your team on shortened links, analytics, and link management."
+            canonical="https://trimlynk.com/teams"
+            noIndex={true}
+        />
         <div className="min-h-screen bg-[hsl(230,15%,5%)] p-4 lg:p-8">
             <div className="max-w-5xl mx-auto space-y-8">
                 <motion.div
@@ -110,6 +118,7 @@ const TeamsPage = () => {
             )}
             </div>
         </div>
+        </>
     );
 };
 

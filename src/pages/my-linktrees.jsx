@@ -41,7 +41,12 @@ function MyLinkTrees() {
 
   return (
     <>
-      <SEOMetadata title="My Link Trees | TrimLink" description="Manage all your TrimLink link trees." />
+      <SEOMetadata
+        title="My Link Trees | TrimLink"
+        description="Manage all your TrimLink link-in-bio pages. Create, edit, and share your link trees."
+        canonical="https://trimlynk.com/my-linktrees"
+        noIndex={true}
+      />
 
       <div className="min-h-screen bg-[hsl(230,15%,5%)] p-4 lg:p-8">
         <div className="max-w-3xl mx-auto space-y-6">

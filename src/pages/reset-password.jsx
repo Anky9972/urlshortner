@@ -56,7 +56,12 @@ export default function ResetPassword() {
 
   return (
     <>
-      <SEOMetadata title="Reset Password | TrimLink" description="Set a new password for your TrimLink account." />
+      <SEOMetadata
+        title="Reset Password | TrimLink"
+        description="Set a new secure password for your TrimLink account."
+        canonical="https://trimlynk.com/reset-password"
+        noIndex={true}
+      />
       <div className="min-h-screen bg-[hsl(230,15%,5%)] flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] p-8">

@@ -9,8 +9,10 @@ const Footer = () => {
   const menuLinks = [
     { path: "/", label: "Home" },
     { path: "/dashboard", label: "Dashboard" },
+    { path: "/analytics", label: "Analytics" },
     { path: "/link-tree", label: "LinkTree" },
     { path: "/qr-code-generator", label: "QR Generator" },
+    { path: "/teams", label: "Teams" },
   ];
 
   const companyLinks = [

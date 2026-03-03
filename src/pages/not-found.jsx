@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { CircleOff, Home, ArrowLeft, AlertCircle } from 'lucide-react';
+import { SEOMetadata } from '@/components/seo-metadata';
 
 const NotFoundPage = ({ isNotFound }) => {
   const containerVariants = {
@@ -20,6 +21,13 @@ const NotFoundPage = ({ isNotFound }) => {
   };
 
   return (
+    <>
+      <SEOMetadata
+        title="404 – Page Not Found | TrimLink"
+        description="The page you're looking for doesn't exist. Go back to TrimLink to shorten URLs and manage your links."
+        canonical="https://trimlynk.com/not-found"
+        noIndex={true}
+      />
     <div className="min-h-screen bg-[hsl(230,15%,5%)] flex items-center justify-center p-4">
       <motion.div
         className="text-center max-w-2xl mx-auto"
@@ -87,6 +95,7 @@ const NotFoundPage = ({ isNotFound }) => {
         </motion.div>
       </motion.div>
     </div>
+    </>
   );
 };
 

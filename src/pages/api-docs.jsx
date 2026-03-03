@@ -180,8 +180,10 @@ const ApiDocsPage = () => {
     return (
         <>
             <SEOMetadata
-                title="API Documentation | TrimLink"
-                description="Public REST API reference for TrimLink — shorten URLs, manage links, and access analytics programmatically."
+                title="Public API Docs – URL Shortener REST API | TrimLink"
+                description="TrimLink REST API reference for developers. Shorten URLs, create QR codes, manage links, and access click analytics programmatically using API keys."
+                canonical="https://trimlynk.com/api-docs"
+                keywords="url shortener api, rest api, link shortener api, trimlink api, developer api, shorten urls programmatically"
             />
             <div className="min-h-screen pt-24 pb-20 px-4">
                 <div className="max-w-3xl mx-auto space-y-8">

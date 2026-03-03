@@ -2,86 +2,137 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- Adding base URL -->
     <base href="/" />
 
-    <!-- Primary Meta Tags -->
-    <title>TrimLink - Shorten Your Links</title>
+    <!-- ===== Primary Meta Tags ===== -->
+    <title>TrimLink – Free URL Shortener, QR Code Generator & LinkTree Builder</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Shorten your long URLs with our URL shortener service. Create custom short links and track their performance."
+      content="TrimLink is a free URL shortener with powerful analytics, custom QR code generator, and link-in-bio page builder. Shorten links, track clicks, geo-target, and install as a PWA."
     />
     <meta
       name="keywords"
-      content="URL shortener, short links, link management, URL redirection, QR code generator"
+      content="url shortener, free url shortener, link shortener, QR code generator, linktree alternative, link in bio, link analytics, geo targeting, custom short links, branded links, link management, trimlynk"
     />
-    <meta name="author" content="Vivek" />
-
-    <!-- Favicon -->
-    <link
-      rel="icon"
-      type="image/png"
-      href="/images/logo.png"
-    />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-
-    <!-- Additional Meta Tags -->
-    <meta name="theme-color" content="#ffffff" />
-    <meta name="robots" content="index, follow" />
+    <meta name="author" content="TrimLink" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-    <!-- Open Graph meta tags -->
-    <meta property="og:title" content="URL Shortener - Shorten Your Links" />
+    <!-- ===== Favicon ===== -->
+    <link rel="icon" type="image/png" href="/images/logo.png" />
+    <link rel="apple-touch-icon" href="/images/logo.png" />
+    <link rel="shortcut icon" href="/images/logo.png" />
+
+    <!-- ===== Theme & PWA ===== -->
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="TrimLink" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- ===== Canonical ===== -->
+    <link rel="canonical" href="https://trimlynk.com/" />
+
+    <!-- ===== Open Graph ===== -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TrimLink" />
+    <meta property="og:title" content="TrimLink – Free URL Shortener, QR Code Generator & LinkTree Builder" />
     <meta
       property="og:description"
-      content="Shorten your long URLs with our URL shortener service. Create custom short links and track their performance."
+      content="Shorten URLs, generate custom QR codes, build link-in-bio pages, and track clicks with real-time analytics. Free to use. No signup required."
     />
-    <meta property="og:url" content="%VITE_APP_URL%" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="/images/logo.png" />
-    <meta property="og:site_name" content="TrimLink" />
+    <meta property="og:url" content="https://trimlynk.com/" />
+    <meta property="og:image" content="https://trimlynk.com/images/og-banner.png" />
+    <meta property="og:image:alt" content="TrimLink – URL Shortener & Analytics" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="en_US" />
 
-    <!-- Twitter Card meta tags -->
+    <!-- ===== Twitter Card ===== -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="URL Shortener - Shorten Your Links" />
+    <meta name="twitter:site" content="@trimlynk" />
+    <meta name="twitter:creator" content="@trimlynk" />
+    <meta name="twitter:title" content="TrimLink – Free URL Shortener, QR Code Generator & LinkTree Builder" />
     <meta
       name="twitter:description"
-      content="Shorten your long URLs with our URL shortener service. Create custom short links and track their performance."
+      content="Shorten URLs, generate custom QR codes, and build link-in-bio pages with real-time analytics. Free & instant."
     />
-    <meta name="twitter:image" content="/images/logo.png" />
+    <meta name="twitter:image" content="https://trimlynk.com/images/og-banner.png" />
 
-    <!-- Preconnect to required origins -->
+    <!-- ===== Preconnect to speed up page load ===== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://www.googletagmanager.com" />
     <link rel="preconnect" href="https://res.cloudinary.com" />
+    <link rel="dns-prefetch" href="https://urlshortner-onhm.onrender.com" />
 
-    <!-- PWA related tags -->
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="TrimLink" />
-
-    <!-- Schema.org markup -->
+    <!-- ===== Structured Data: Organization ===== -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "WebApplication",
+        "@type": "Organization",
         "name": "TrimLink",
-        "url": [
-          "%VITE_APP_URL%"
-        ],
-        "description": "Shorten your long URLs with our URL shortener service. Create custom short links and track their performance.",
+        "url": "https://trimlynk.com",
+        "logo": "https://trimlynk.com/images/logo.png",
+        "description": "TrimLink is a free URL shortener with advanced analytics, QR code generation, and link-in-bio page builder.",
+        "sameAs": [
+          "https://trimlynk.com"
+        ]
+      }
+    </script>
+
+    <!-- ===== Structured Data: SoftwareApplication ===== -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "TrimLink",
+        "url": "https://trimlynk.com",
         "applicationCategory": "UtilityApplication",
-        "image": "%VITE_APP_URL%/images/logo.png",
+        "operatingSystem": "Web, iOS, Android",
+        "description": "Free URL shortener with advanced analytics, QR code generator, geo-targeting, password protection, and link-in-bio page builder.",
+        "image": "https://trimlynk.com/images/og-banner.png",
+        "screenshot": "https://trimlynk.com/images/og-banner.png",
         "offers": {
           "@type": "Offer",
           "price": "0",
           "priceCurrency": "USD"
         },
+        "featureList": [
+          "URL Shortening",
+          "QR Code Generator",
+          "LinkTree / Link-in-Bio Builder",
+          "Click Analytics",
+          "Geo Targeting",
+          "Password Protected Links",
+          "Custom Domains",
+          "API Access",
+          "Two-Factor Authentication",
+          "Progressive Web App"
+        ],
         "potentialAction": {
           "@type": "SearchAction",
-          "target": "%VITE_APP_URL%/?q={search_term_string}",
+          "target": "https://trimlynk.com/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+
+    <!-- ===== Structured Data: WebSite with SearchAction ===== -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "TrimLink",
+        "url": "https://trimlynk.com",
+        "description": "Free URL shortener, QR code generator, and link-in-bio builder with real-time analytics.",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://trimlynk.com/search?q={search_term_string}"
+          },
           "query-input": "required name=search_term_string"
         }
       }

@@ -1,16 +1,50 @@
 {
-  "name": "TrimLink",
+  "name": "TrimLink – URL Shortener & QR Code Generator",
   "short_name": "TrimLink",
-  "description": "A powerful and user-friendly URL shortener.",
+  "description": "Free URL shortener with analytics, QR code generator, geo-targeting, and link-in-bio page builder.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1a73e8",
+  "orientation": "portrait",
+  "background_color": "#0c0d12",
+  "theme_color": "#2563eb",
+  "categories": ["utilities", "productivity", "business"],
+  "lang": "en",
   "icons": [
     {
       "src": "/images/logo.png",
       "type": "image/png",
-      "sizes": "any"
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/logo.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/logo.png",
+      "type": "image/png",
+      "sizes": "any",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "description": "View your links and analytics"
+    },
+    {
+      "name": "QR Generator",
+      "url": "/qr-code-generator",
+      "description": "Generate a custom QR code"
+    },
+    {
+      "name": "LinkTree Builder",
+      "url": "/link-tree",
+      "description": "Build your link-in-bio page"
     }
   ]
 }
