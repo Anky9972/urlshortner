@@ -123,5 +123,3 @@ SEOSchema.propTypes = {
 };
 
 export default SEOMetadata;
-
-export default Dashboard;
