@@ -81,7 +81,7 @@ const LinkCard = ({ url, fetchUrls }) => {
         {/* QR Code */}
         <div className="hidden sm:flex flex-shrink-0">
           <div className="w-[72px] h-[72px] rounded-xl bg-white p-1.5 shadow-sm">
-            <img src={url?.qrCode} className="w-full h-full object-contain rounded-md" alt="QR code" />
+            <img src={url?.qrCode} width="60" height="60" loading="lazy" className="w-full h-full object-contain rounded-md" alt="QR code" />
           </div>
         </div>
 
@@ -129,20 +129,20 @@ const LinkCard = ({ url, fetchUrls }) => {
             <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
               <ShareButtons shortUrl={`${APP_URL}/${shortLink}`} />
 
-              <button onClick={handleCopy} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all" title="Copy">
+              <button onClick={handleCopy} aria-label={copied ? 'Copied' : 'Copy link'} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all">
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
-              <button onClick={downloadImage} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-violet-400 hover:bg-violet-500/10 transition-all" title="Download QR">
+              <button onClick={downloadImage} aria-label="Download QR code" className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-violet-400 hover:bg-violet-500/10 transition-all">
                 <Download className="w-3.5 h-3.5" />
               </button>
-              <button onClick={handleEdit} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all" title="Edit">
+              <button onClick={handleEdit} aria-label="Edit link" className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all">
                 <Edit className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => fnDelete().then(() => fetchUrls())}
                 disabled={loadingDelete}
+                aria-label="Delete link"
                 className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
-                title="Delete"
               >
                 {loadingDelete ? <BeatLoader size={3} color="white" /> : <Trash className="w-3.5 h-3.5" />}
               </button>

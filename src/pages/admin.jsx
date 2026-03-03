@@ -261,7 +261,7 @@ const UsersTab = () => {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       {u.avatarUrl
-                        ? <img src={u.avatarUrl} alt="" className="w-7 h-7 rounded-lg object-cover" />
+                        ? <img src={u.avatarUrl} alt="" width="28" height="28" loading="lazy" className="w-7 h-7 rounded-lg object-cover" />
                         : <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">{(u.name || u.email)[0].toUpperCase()}</div>}
                       <span className="text-white font-medium truncate max-w-[120px]">{u.name || '—'}</span>
                       {u.isAdmin && <Crown className="w-3.5 h-3.5 text-amber-400" />}

@@ -61,9 +61,9 @@ const ShareButtons = ({ shortUrl }) => {
     <div className="flex gap-5">
       <Menubar>
         <MenubarMenu>
-          <MenubarTrigger><IoShareSocial className="text-xl"/></MenubarTrigger>
+          <MenubarTrigger aria-label="Share link"><IoShareSocial className="text-xl" aria-hidden="true" /></MenubarTrigger>
           <MenubarContent>
-            <h1 className="h-10 flex justify-center items-center font-bold text-lg">Share Link</h1>
+            <h2 className="h-10 flex justify-center items-center font-bold text-lg">Share Link</h2>
             <MenubarSeparator />
             <MenubarItem>
               <button onClick={handleFacebookShare} className="flex justify-center gap-2 items-center ">

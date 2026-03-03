@@ -62,10 +62,15 @@
     <meta name="twitter:image" content="https://trimlynk.com/images/og-banner.png" />
 
     <!-- ===== Preconnect to speed up page load ===== -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://www.googletagmanager.com" />
-    <link rel="preconnect" href="https://res.cloudinary.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+    <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    <link rel="preconnect" href="https://urlshortner-onhm.onrender.com" crossorigin />
     <link rel="dns-prefetch" href="https://urlshortner-onhm.onrender.com" />
+
+    <!-- ===== Preload critical assets ===== -->
+    <link rel="preload" as="image" href="/images/logo.png" fetchpriority="high" />
 
     <!-- ===== Structured Data: Organization ===== -->
     <script type="application/ld+json">

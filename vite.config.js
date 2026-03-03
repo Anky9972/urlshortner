@@ -13,17 +13,49 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor': ['react', 'react-dom'],
-          'router': ['react-router-dom'],
-          'ui': ['src/components/ui/index'],
-          'utils': ['src/lib/utils'],
+        manualChunks(id) {
+          // Core React runtime — loaded first, always cached
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+            return 'react-core';
+          }
+          // Router
+          if (id.includes('node_modules/react-router-dom') || id.includes('node_modules/react-router/') || id.includes('node_modules/@remix-run/')) {
+            return 'router';
+          }
+          // Framer Motion — large, split away from main bundle
+          if (id.includes('node_modules/framer-motion')) {
+            return 'framer-motion';
+          }
+          // Recharts — only loaded on analytics/admin pages
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-') || id.includes('node_modules/victory-')) {
+            return 'charts';
+          }
+          // QR code libraries
+          if (id.includes('node_modules/qrcode') || id.includes('node_modules/react-qrcode')) {
+            return 'qr';
+          }
+          // PDF generation — heavy, rarely used
+          if (id.includes('node_modules/jspdf') || id.includes('node_modules/html2canvas')) {
+            return 'pdf';
+          }
+          // Radix UI components
+          if (id.includes('node_modules/@radix-ui')) {
+            return 'radix-ui';
+          }
+          // DnD kit
+          if (id.includes('node_modules/@dnd-kit')) {
+            return 'dnd';
+          }
+          // All other node_modules
+          if (id.includes('node_modules/')) {
+            return 'vendor';
+          }
         },
         // Optimize chunk naming and caching
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
-      }
+      },
     },
     // Optimization settings
     minify: 'terser',

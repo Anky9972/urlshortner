@@ -78,10 +78,10 @@ const Counter = ({ target, suffix = "" }) => {
 const FloatingOrb = ({ className, delay = 0 }) => (
   <motion.div
     className={`absolute rounded-full blur-3xl pointer-events-none ${className}`}
+    style={{ willChange: 'transform' }}
     animate={{
       y: [0, -30, 0, 30, 0],
       x: [0, 20, 0, -20, 0],
-      scale: [1, 1.1, 1, 0.9, 1],
     }}
     transition={{
       duration: 20,
@@ -290,9 +290,9 @@ const LandingPage = () => {
             <div className="text-center lg:text-left">
               {/* Badge */}
               <motion.div
-                initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                transition={{ duration: 0.8 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
                 className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/[0.08] border border-blue-500/20 mb-6 backdrop-blur-sm"
               >
                 <span className="relative flex h-2 w-2">
@@ -304,9 +304,9 @@ const LandingPage = () => {
 
               {/* Heading */}
               <motion.h1
-                initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                transition={{ duration: 0.8, delay: 0.15 }}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.15 }}
                 className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4.25rem] font-bold text-white mb-5 leading-[1.08] tracking-tight"
               >
                 Short Links,{" "}

@@ -66,6 +66,8 @@ const Header = () => {
                 <img
                   src="/images/logo.png"
                   alt="TrimLink"
+                  width="36"
+                  height="36"
                   className="w-9 h-9 rounded-xl object-contain transition-all group-hover:scale-105"
                 />
                 <div className="absolute inset-0 rounded-xl bg-blue-500/0 group-hover:bg-blue-500/10 transition-colors" />
@@ -111,7 +113,7 @@ const Header = () => {
                 <button
                   onClick={() => navigate("/search")}
                   className="p-2.5 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-xl transition-all"
-                  title="Global Search"
+                  aria-label="Search"
                 >
                   <Search className="w-[18px] h-[18px]" />
                 </button>
@@ -122,6 +124,7 @@ const Header = () => {
                 <button
                   onClick={() => navigate("/notifications")}
                   className="relative p-2.5 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-xl transition-all"
+                  aria-label="Notifications"
                 >
                   <Bell className="w-[18px] h-[18px]" />
                   {unreadCount > 0 && (
@@ -164,6 +167,8 @@ const Header = () => {
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="md:hidden p-2.5 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-xl transition-all"
+                aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={isMobileMenuOpen}
               >
                 <AnimatePresence mode="wait" initial={false}>
                   {isMobileMenuOpen ? (

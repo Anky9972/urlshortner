@@ -7,7 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../lib/prisma.cjs');
-const authMiddleware = require('../middleware/auth.cjs');
+const { authMiddleware } = require('../middleware/auth.cjs');
 
 // ─── Require Admin middleware ───────────────────────────────────────────────
 const requireAdmin = async (req, res, next) => {

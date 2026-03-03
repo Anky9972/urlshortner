@@ -411,7 +411,7 @@ const Settings = () => {
                                                     <div className="space-y-2">
                                                         <p className="text-xs text-slate-400">1. Scan this QR code with your authenticator app:</p>
                                                         <div className="flex justify-center">
-                                                            <img src={twoFASetup.qrDataUrl} alt="TOTP QR Code" className="w-40 h-40 rounded-xl border border-[hsl(230,10%,20%)]" />
+                                                            <img src={twoFASetup.qrDataUrl} alt="TOTP QR Code" width="160" height="160" loading="lazy" className="w-40 h-40 rounded-xl border border-[hsl(230,10%,20%)]" />
                                                         </div>
                                                         <p className="text-xs text-slate-500 text-center font-mono bg-[hsl(230,10%,12%)] border border-[hsl(230,10%,18%)] rounded-lg px-3 py-1.5 break-all">{twoFASetup.secret}</p>
                                                     </div>
