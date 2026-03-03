@@ -431,7 +431,7 @@ const QRCodeGenerator = () => {
                   {/* Type grid */}
                   <div className="space-y-1.5">
                     <label className="text-xs text-slate-500 uppercase tracking-wider">QR Type</label>
-                    <div className="grid grid-cols-4 gap-1.5">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
                       {Object.entries(qrTypes).map(([key, { label, icon: Icon }]) => (
                         <button key={key}
                           onClick={() => { setQrType(key); setQrData(''); setError(''); }}

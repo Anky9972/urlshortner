@@ -675,7 +675,7 @@ const LandingPage = () => {
                 <div className="w-3 h-3 rounded-full bg-emerald-500/60" />
                 <span className="text-slate-600 text-xs ml-3 font-mono">trimlynk.com/dashboard</span>
               </div>
-              <div className="grid grid-cols-4 gap-3 mb-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
                 {[
                   { label: "Total Clicks", value: "12,847", change: "+24%", color: "text-emerald-400" },
                   { label: "Active Links", value: "342", change: "+12%", color: "text-blue-400" },
@@ -691,16 +691,16 @@ const LandingPage = () => {
                   </div>
                 ))}
               </div>
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1 p-4 rounded-xl bg-[hsl(230,10%,12%)] border border-[hsl(230,10%,18%)]">
                   <p className="text-xs text-slate-500 mb-4">Click Activity (7 days)</p>
-                  <div className="flex items-end gap-2 h-32">
+                  <div className="flex items-end gap-1 sm:gap-2 h-24 sm:h-32">
                     {[35, 52, 48, 72, 65, 88, 75, 90, 68, 95, 78, 82, 92, 70].map((h, i) => (
                       <motion.div key={i} initial={{ height: 0 }} whileInView={{ height: `${h}%` }} viewport={{ once: true }} transition={{ delay: i * 0.05, duration: 0.5 }} className="flex-1 rounded-t-md bg-gradient-to-t from-blue-600/80 to-blue-400/60" />
                     ))}
                   </div>
                 </div>
-                <div className="w-56 p-4 rounded-xl bg-[hsl(230,10%,12%)] border border-[hsl(230,10%,18%)]">
+                <div className="w-full sm:w-48 md:w-56 p-4 rounded-xl bg-[hsl(230,10%,12%)] border border-[hsl(230,10%,18%)]">
                   <p className="text-xs text-slate-500 mb-4">Top Devices</p>
                   <div className="space-y-3">
                     {[
@@ -782,7 +782,7 @@ const LandingPage = () => {
             <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl" />
             <div className="absolute bottom-0 left-0 w-72 h-72 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/3 blur-3xl" />
 
-            <div className="relative z-10 p-10 sm:p-16 flex flex-col lg:flex-row items-center gap-10">
+            <div className="relative z-10 p-6 sm:p-10 lg:p-16 flex flex-col lg:flex-row items-center gap-8 lg:gap-10">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-4">
                   <Zap className="w-4 h-4 text-blue-200" />
@@ -844,7 +844,7 @@ const LandingPage = () => {
       {/* ==================== FINAL CTA ==================== */}
       <section className="tl-section-alt">
         <motion.div {...fadeUp} className="max-w-4xl mx-auto">
-          <div className="relative p-12 sm:p-16 rounded-3xl bg-[hsl(230,12%,9%)] border border-[hsl(230,10%,15%)] text-center overflow-hidden">
+          <div className="relative p-8 sm:p-12 md:p-16 rounded-3xl bg-[hsl(230,12%,9%)] border border-[hsl(230,10%,15%)] text-center overflow-hidden">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-40 bg-blue-500/10 blur-3xl" />
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-60 h-32 bg-indigo-500/5 blur-3xl" />
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
@@ -877,7 +877,7 @@ const LandingPage = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={scrollToTop}
-            className="fixed bottom-8 right-8 p-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-600/25 transition-all hover:scale-110 z-50"
+            className="fixed bottom-6 right-4 sm:bottom-8 sm:right-8 p-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-600/25 transition-all hover:scale-110 z-50"
           >
             <ChevronUp className="w-5 h-5" />
           </motion.button>

@@ -2,6 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent horizontal overflow / scroll on all screen sizes */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Lenis smooth scroll — disable native scroll-behavior to prevent conflict */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
 /* ===== TRIMLINK - UNIFIED DARK DESIGN SYSTEM ===== */
 
 @layer base {
@@ -47,7 +75,8 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    /* scroll-behavior managed by Lenis — do not set smooth here */
+    scroll-behavior: auto;
   }
 
   body {
@@ -147,7 +176,7 @@
   .tl-label { @apply text-sm font-medium text-slate-300; }
 
   /* --- Sections --- */
-  .tl-section { @apply py-24 px-4; }
+  .tl-section { @apply py-16 sm:py-20 md:py-24 px-4; }
   .tl-section-alt {
     @apply tl-section;
     background: linear-gradient(180deg, hsl(230 15% 5%) 0%, hsl(230 12% 7%) 50%, hsl(230 15% 5%) 100%);
