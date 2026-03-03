@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const prisma = require('../lib/prisma.cjs');
 const { authMiddleware, JWT_SECRET } = require('../middleware/auth.cjs');
-const { sendPasswordResetEmail, sendVerificationEmail } = require('../lib/email.cjs');
+const { sendPasswordResetEmail, sendVerificationEmail, sendWelcomeEmail } = require('../lib/email.cjs');
 
 const router = Router();
 
@@ -301,6 +301,11 @@ router.get('/verify-email', async (req, res) => {
             where: { id: user.id },
             data: { emailVerified: true, emailVerifyToken: null }
         });
+
+        // Fire-and-forget welcome email
+        sendWelcomeEmail(user.email, user.name).catch(err =>
+            console.warn('[auth] Welcome email failed:', err.message)
+        );
 
         res.json({ message: 'Email verified successfully!' });
     } catch (error) {
