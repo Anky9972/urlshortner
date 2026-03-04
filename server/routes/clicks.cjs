@@ -7,20 +7,66 @@ const router = Router();
 
 const botDetector = require('../middleware/botDetector.cjs');
 
+// ─── IP Geolocation (ip-api.com free tier, no key needed) ───────────────────
+const geoCache = new Map();
+async function getGeo(rawIp) {
+    if (!rawIp) return {};
+    const ip = rawIp.startsWith('::ffff:') ? rawIp.slice(7) : rawIp;
+    // Skip private / loopback addresses
+    if (ip === '::1' || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.')) return {};
+    if (geoCache.has(ip)) return geoCache.get(ip);
+    try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 3000);
+        const r = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,city,regionName,countryCode`, { signal: controller.signal });
+        clearTimeout(timer);
+        const d = await r.json();
+        const result = d.status === 'success'
+            ? { country: d.country, city: d.city, region: d.regionName, countryCode: d.countryCode }
+            : {};
+        if (geoCache.size >= 5000) geoCache.delete(geoCache.keys().next().value);
+        geoCache.set(ip, result);
+        return result;
+    } catch {
+        return {};
+    }
+}
+
 // Record a click
 router.post('/', botDetector, async (req, res) => {
     try {
         const { urlId, ip, userAgent, referrer, country, city, device, browser, os } = req.body;
         if (!urlId) return res.status(400).json({ error: 'urlId is required' });
 
-        const ipHash = ip ? crypto.createHash('sha256').update(ip).digest('hex').substring(0, 16) : null;
+        // Get real client IP from proxy headers
+        const clientIp = (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
+            || req.headers['x-real-ip']
+            || req.socket.remoteAddress
+            || ip
+            || '';
+        const ipHash = clientIp ? crypto.createHash('sha256').update(clientIp).digest('hex').substring(0, 16) : null;
+
+        // Resolve geolocation if country/city not provided by client
+        let geoCountry = country || null;
+        let geoCity = city || null;
+        let geoRegion = null;
+        let geoCountryCode = null;
+        if (!geoCountry || !geoCity) {
+            const geo = await getGeo(clientIp);
+            geoCountry = geoCountry || geo.country || null;
+            geoCity = geoCity || geo.city || null;
+            geoRegion = geo.region || null;
+            geoCountryCode = geo.countryCode || null;
+        }
 
         // Use bot detection result
         const isBot = req.isBot || false;
 
         const click = await prisma.click.create({
             data: {
-                urlId, ipHash, userAgent, referrer, country, city, device, browser, os,
+                urlId, ipHash, userAgent, referrer,
+                country: geoCountry, city: geoCity, region: geoRegion, countryCode: geoCountryCode,
+                device, browser, os,
                 isBot
             }
         });
@@ -74,25 +120,36 @@ router.get('/analytics/:urlId', authMiddleware, async (req, res) => {
         const totalClicks = clicks.length;
         const uniqueVisitors = new Set(clicks.map(c => c.ipHash)).size;
 
-        const clicksByDay = {}, deviceStats = {}, browserStats = {}, countryStats = {}, referrerStats = {}, hourStats = {};
+        const clicksByDay = {}, deviceStats = {}, browserStats = {}, osStats = {}, countryStats = {}, countryCodeMap = {}, referrerStats = {}, hourStats = {};
 
         clicks.forEach(click => {
             const day = click.createdAt.toISOString().split('T')[0];
             clicksByDay[day] = (clicksByDay[day] || 0) + 1;
             deviceStats[click.device || 'unknown'] = (deviceStats[click.device || 'unknown'] || 0) + 1;
             browserStats[click.browser || 'unknown'] = (browserStats[click.browser || 'unknown'] || 0) + 1;
-            countryStats[click.country || 'unknown'] = (countryStats[click.country || 'unknown'] || 0) + 1;
-            referrerStats[click.referrer || 'direct'] = (referrerStats[click.referrer || 'direct'] || 0) + 1;
+            osStats[click.os || 'unknown'] = (osStats[click.os || 'unknown'] || 0) + 1;
+            const cName = click.country || 'Unknown';
+            countryStats[cName] = (countryStats[cName] || 0) + 1;
+            if (click.countryCode) countryCodeMap[cName] = click.countryCode;
+            // Normalise referrer to domain only
+            let ref = 'direct';
+            if (click.referrer && click.referrer !== 'null' && click.referrer !== 'undefined') {
+                try { ref = new URL(click.referrer).hostname || click.referrer; } catch { ref = click.referrer; }
+            }
+            referrerStats[ref] = (referrerStats[ref] || 0) + 1;
             hourStats[click.createdAt.getHours()] = (hourStats[click.createdAt.getHours()] || 0) + 1;
         });
 
         res.json({
             totalClicks, uniqueVisitors,
-            clicksByDay: Object.entries(clicksByDay).map(([date, count]) => ({ date, count })),
-            deviceStats: Object.entries(deviceStats).map(([device, count]) => ({ device, count })),
-            browserStats: Object.entries(browserStats).map(([browser, count]) => ({ browser, count })),
-            countryStats: Object.entries(countryStats).map(([country, count]) => ({ country, count })),
-            referrerStats: Object.entries(referrerStats).map(([referrer, count]) => ({ referrer, count })),
+            clicksByDay: Object.entries(clicksByDay).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)),
+            deviceStats: Object.entries(deviceStats).map(([device, count]) => ({ device, count })).sort((a, b) => b.count - a.count),
+            browserStats: Object.entries(browserStats).map(([browser, count]) => ({ browser, count })).sort((a, b) => b.count - a.count),
+            osStats: Object.entries(osStats).map(([os, count]) => ({ os, count })).sort((a, b) => b.count - a.count),
+            countryStats: Object.entries(countryStats)
+                .map(([country, count]) => ({ country, count, countryCode: countryCodeMap[country] || null }))
+                .sort((a, b) => b.count - a.count),
+            referrerStats: Object.entries(referrerStats).map(([domain, count]) => ({ domain, count })).sort((a, b) => b.count - a.count),
             hourStats: Object.entries(hourStats).map(([hour, count]) => ({ hour: parseInt(hour), count }))
         });
     } catch (error) {

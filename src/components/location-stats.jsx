@@ -166,7 +166,7 @@ const ChartContent = ({ data, type }) => {
 
 ChartContent.propTypes = {
   data: PropTypes.arrayOf(PropTypes.shape({
-    city: PropTypes.string.isRequired,
+    city: PropTypes.string,
     count: PropTypes.number.isRequired,
     total: PropTypes.number.isRequired
   })).isRequired,
@@ -176,32 +176,30 @@ ChartContent.propTypes = {
 const LocationStats = ({ stats = [] }) => {
   const [chartType, setChartType] = useState('line');
 
-  // Process data
+  // Process data – use city name, fall back to country, then 'Unknown'
   const cityCount = stats.reduce((acc, item) => {
-    if (acc[item.city]) {
-      acc[item.city] += 1;
-    } else {
-      acc[item.city] = 1;
-    }
+    const loc = item.city || item.country || 'Unknown';
+    acc[loc] = (acc[loc] || 0) + 1;
     return acc;
   }, {});
 
-  // Convert to array and sort by count
-  const cities = Object.entries(cityCount)
-    .map(([city, count]) => ({
-      city,
-      count,
-      total: stats.length
-    }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
+  // Filter out 'Unknown' if there is real data, otherwise keep it
+  const entries = Object.entries(cityCount).sort((a, b) => b[1] - a[1]);
+  const hasRealData = entries.some(([key]) => key !== 'Unknown');
+  const filteredEntries = hasRealData ? entries.filter(([key]) => key !== 'Unknown') : entries;
+
+  const cities = filteredEntries.slice(0, 5).map(([city, count]) => ({
+    city,
+    count,
+    total: stats.length
+  }));
 
   return (
     <Card className="w-full bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)]">
       <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <span className='hidden lg:flex'>Location Distribution</span>
-          <Tabs defaultValue="line" className="w-[400px]">
+        <CardTitle className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <span className="text-base font-semibold">Location Distribution</span>
+          <Tabs defaultValue="line" className="w-full sm:w-auto">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger
                 value="line"
@@ -234,7 +232,8 @@ const LocationStats = ({ stats = [] }) => {
 
 LocationStats.propTypes = {
   stats: PropTypes.arrayOf(PropTypes.shape({
-    city: PropTypes.string.isRequired
+    city: PropTypes.string,
+    country: PropTypes.string
   }))
 };
 

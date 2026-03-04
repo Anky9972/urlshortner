@@ -30,12 +30,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UrlState } from "@/context";
-import { getClicksForUrl } from "@/api/clicks";
+import { getClicksForUrl, getClickAnalytics } from "@/api/clicks";
 import { deleteUrl, getUrl, updateUrl } from "@/api/urls";
 import { getPixels, getUrlPixels, attachPixelToUrl, detachPixelFromUrl } from "@/api/pixels";
 import useFetch from "@/hooks/use-fetch";
 import DeviceStats from "@/components/device-stats";
 import Location from "@/components/location-stats";
+import { ClicksTimeChart, BrowserChart, CountryChart, ReferrerChart, PeakHoursChart, OSChart } from "@/components/analytics-charts";
 import { SEOMetadata } from "@/components/seo-metadata";
 import TargetingRules from "@/components/targeting-rules";
 import UTMBuilder from "@/components/utm-builder";
@@ -82,6 +83,11 @@ const LinkPage = () => {
         data: stats,
         fn: fnStats,
     } = useFetch(getClicksForUrl, id);
+    const {
+        loading: loadingAnalytics,
+        data: analytics,
+        fn: fnAnalytics,
+    } = useFetch(getClickAnalytics, id);
     const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, id);
 
     useEffect(() => {
@@ -91,7 +97,10 @@ const LinkPage = () => {
     }, []);
 
     useEffect(() => {
-        if (!error && loading === false) fnStats();
+        if (!error && loading === false) {
+            fnStats();
+            fnAnalytics();
+        }
     }, [loading, error]);
 
     // Populate settings form when URL data loads
@@ -211,7 +220,7 @@ const LinkPage = () => {
             />
 
             <div className="min-h-screen bg-[hsl(230,15%,5%)] p-4 lg:p-8">
-                {(loading || loadingStats) && (
+                {(loading || loadingStats || loadingAnalytics) && (
                     <div className="fixed top-0 left-0 right-0 z-50">
                         <BarLoader width="100%" color="#2563eb" />
                     </div>
@@ -395,86 +404,86 @@ const LinkPage = () => {
                                         {stats && stats.length > 0 ? (
                                             <>
                                                 {/* Stats Summary */}
-                                                <div className="grid grid-cols-3 gap-4">
+                                                <div className="grid grid-cols-3 gap-2 sm:gap-4">
                                                     {[
-                                                        {
-                                                            label: "Total Clicks",
-                                                            value: stats.length,
-                                                            icon: MousePointerClick,
-                                                            color: "text-blue-400",
-                                                            bg: "bg-blue-500/10",
-                                                        },
-                                                        {
-                                                            label: "Unique Visitors",
-                                                            value: uniqueVisitors,
-                                                            icon: Users,
-                                                            color: "text-violet-400",
-                                                            bg: "bg-violet-500/10",
-                                                        },
-                                                        {
-                                                            label: "Daily Avg",
-                                                            value: Math.round(stats.length / 7),
-                                                            icon: TrendingUp,
-                                                            color: "text-emerald-400",
-                                                            bg: "bg-emerald-500/10",
-                                                        },
+                                                        { label: "Total Clicks", value: stats.length, icon: MousePointerClick, color: "text-blue-400", bg: "bg-blue-500/10" },
+                                                        { label: "Unique Visitors", value: uniqueVisitors, icon: Users, color: "text-violet-400", bg: "bg-violet-500/10" },
+                                                        { label: "Daily Avg", value: Math.round(stats.length / 7), icon: TrendingUp, color: "text-emerald-400", bg: "bg-emerald-500/10" },
                                                     ].map((stat, i) => (
                                                         <motion.div
                                                             key={stat.label}
                                                             initial={{ opacity: 0, y: 10 }}
                                                             animate={{ opacity: 1, y: 0 }}
                                                             transition={{ delay: i * 0.05 }}
-                                                            className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] p-4 text-center group hover:border-[hsl(230,10%,20%)] transition-colors"
+                                                            className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] p-3 sm:p-4 text-center group hover:border-[hsl(230,10%,20%)] transition-colors"
                                                         >
-                                                            <div className={`w-9 h-9 mx-auto rounded-xl ${stat.bg} flex items-center justify-center mb-2`}>
+                                                            <div className={`w-8 h-8 sm:w-9 sm:h-9 mx-auto rounded-xl ${stat.bg} flex items-center justify-center mb-1.5`}>
                                                                 <stat.icon className={`w-4 h-4 ${stat.color}`} />
                                                             </div>
-                                                            <p className="text-2xl font-bold text-white">
-                                                                {stat.value}
-                                                            </p>
-                                                            <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">
-                                                                {stat.label}
-                                                            </p>
+                                                            <p className="text-xl sm:text-2xl font-bold text-white">{stat.value}</p>
+                                                            <p className="text-[9px] sm:text-[10px] text-slate-500 uppercase tracking-wider mt-0.5 leading-tight">{stat.label}</p>
                                                         </motion.div>
                                                     ))}
                                                 </div>
 
-                                                {/* Location & Device Stats */}
+                                                {/* Clicks Over Time */}
+                                                {analytics?.clicksByDay?.length > 0 && (
+                                                    <ClicksTimeChart data={analytics.clicksByDay} />
+                                                )}
+
+                                                {/* Device + Browser */}
                                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                                     <div className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] overflow-hidden">
-                                                        <div className="px-5 py-4 border-b border-[hsl(230,10%,13%)]">
-                                                            <h3 className="text-sm font-semibold text-white">
-                                                                Location Data
-                                                            </h3>
+                                                        <div className="px-5 py-3 border-b border-[hsl(230,10%,13%)]">
+                                                            <h3 className="text-sm font-semibold text-white">Device Info</h3>
                                                         </div>
-                                                        <div className="p-5">
-                                                            <Location stats={stats} />
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] overflow-hidden">
-                                                        <div className="px-5 py-4 border-b border-[hsl(230,10%,13%)]">
-                                                            <h3 className="text-sm font-semibold text-white">
-                                                                Device Info
-                                                            </h3>
-                                                        </div>
-                                                        <div className="p-5">
+                                                        <div className="p-4">
                                                             <DeviceStats stats={stats} />
                                                         </div>
                                                     </div>
+                                                    {analytics?.browserStats?.length > 0
+                                                        ? <BrowserChart data={analytics.browserStats} />
+                                                        : <div className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] overflow-hidden">
+                                                            <div className="px-5 py-3 border-b border-[hsl(230,10%,13%)]">
+                                                                <h3 className="text-sm font-semibold text-white">Location Data</h3>
+                                                            </div>
+                                                            <div className="p-4"><Location stats={stats} /></div>
+                                                          </div>
+                                                    }
                                                 </div>
+
+                                                {/* Countries + OS */}
+                                                {(analytics?.countryStats?.length > 0 || analytics?.osStats?.length > 0) && (
+                                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                                        {analytics?.countryStats?.length > 0 && (
+                                                            <CountryChart data={analytics.countryStats} />
+                                                        )}
+                                                        {analytics?.osStats?.length > 0 && (
+                                                            <OSChart data={analytics.osStats} />
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {/* Peak Hours + Referrers */}
+                                                {(analytics?.hourStats?.length > 0 || analytics?.referrerStats?.length > 0) && (
+                                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                                        {analytics?.hourStats?.length > 0 && (
+                                                            <PeakHoursChart data={analytics.hourStats} />
+                                                        )}
+                                                        {analytics?.referrerStats?.length > 0 && (
+                                                            <ReferrerChart data={analytics.referrerStats} />
+                                                        )}
+                                                    </div>
+                                                )}
                                             </>
                                         ) : (
                                             <div className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] py-20 text-center">
                                                 <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[hsl(230,10%,14%)] flex items-center justify-center">
                                                     <BarChart3 className="w-8 h-8 text-slate-600" />
                                                 </div>
-                                                <p className="text-slate-400 font-medium">
-                                                    No analytics data yet
-                                                </p>
+                                                <p className="text-slate-400 font-medium">No analytics data yet</p>
                                                 <p className="text-slate-600 text-sm mt-1 max-w-xs mx-auto">
-                                                    Data will appear when people start clicking
-                                                    your link
+                                                    Data will appear when people start clicking your link
                                                 </p>
                                             </div>
                                         )}

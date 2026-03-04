@@ -177,7 +177,7 @@ export const CountryChart = ({ data }) => {
                         <BarChart data={chartData} layout="vertical">
                             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                             <XAxis type="number" stroke="#9CA3AF" fontSize={12} />
-                            <YAxis dataKey="country" type="category" stroke="#9CA3AF" fontSize={12} width={80} />
+                            <YAxis dataKey="country" type="category" stroke="#9CA3AF" fontSize={11} width={110} />
                             <Tooltip content={<CustomTooltip />} />
                             <Bar dataKey="clicks" name="Clicks" radius={[0, 4, 4, 0]}>
                                 {chartData.map((entry, index) => (
@@ -215,6 +215,61 @@ export const BrowserChart = ({ data }) => {
                     {chartData.map((item, index) => {
                         const max = Math.max(...chartData.map(d => d.value));
                         const percentage = (item.value / max) * 100;
+                        return (
+                            <motion.div
+                                key={item.name}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                                className="space-y-1"
+                            >
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-slate-300 capitalize">{item.name}</span>
+                                    <span className="text-slate-500">{item.value.toLocaleString()}</span>
+                                </div>
+                                <div className="h-2 bg-[hsl(230,10%,20%)] rounded-full overflow-hidden">
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${percentage}%` }}
+                                        transition={{ duration: 0.5, delay: index * 0.05 }}
+                                        className="h-full rounded-full"
+                                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                                    />
+                                </div>
+                            </motion.div>
+                        );
+                    })}
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
+// OS Distribution Chart
+export const OSChart = ({ data }) => {
+    const chartData = useMemo(() => {
+        if (!data || !Array.isArray(data)) return [];
+        return data.slice(0, 6).map(item => ({
+            name: item.os || 'Unknown',
+            value: item.count
+        }));
+    }, [data]);
+
+    if (!chartData.length) return null;
+
+    return (
+        <Card className="bg-[hsl(230,10%,14%)]/50 backdrop-blur-sm border-[hsl(230,10%,20%)]/50">
+            <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                    <Monitor className="w-5 h-5 text-cyan-400" />
+                    Operating Systems
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-3">
+                    {chartData.map((item, index) => {
+                        const max = Math.max(...chartData.map(d => d.value));
+                        const percentage = max > 0 ? (item.value / max) * 100 : 0;
                         return (
                             <motion.div
                                 key={item.name}
@@ -362,6 +417,7 @@ export default {
     DeviceChart,
     CountryChart,
     BrowserChart,
+    OSChart,
     ReferrerChart,
     PeakHoursChart,
     StatsSummary
