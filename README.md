@@ -61,7 +61,7 @@ npm install
    FRONTEND_URL=http://localhost:5173
 
    # Database
-   DATABASE_URL="postgresql://user:password@host:5432/dbname?sslmode=require"
+   DATABASE_URL="postgresql://<DB_USER>:<DB_PASS>@<DB_HOST>:5432/<DB_NAME>?sslmode=require"
    ```
 ### Running the Application
 ```bash
