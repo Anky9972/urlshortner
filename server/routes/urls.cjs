@@ -56,7 +56,10 @@ router.get('/redirect/:shortUrl', async (req, res) => {
 
         const url = await prisma.url.findFirst({
             where: { OR: [{ shortUrl }, { customUrl: shortUrl }] },
-            include: { targetingRules: true }
+            include: {
+                targetingRules: true,
+                _count: { select: { clicks: true } }
+            }
         });
 
         if (!url) return res.status(404).json({ error: 'URL not found' });

@@ -29,9 +29,13 @@ const RedirectLink = () => {
   }, []);
 
   useEffect(() => {
-    if (!loading && data) {
+    // loading starts as null (before fn() runs), true (running), false (done).
+    // Only act when the fetch has explicitly completed (loading === false),
+    // never when it is still in the initial null state — otherwise checkFreeUrl()
+    // fires immediately before fn() has even started, causing a race condition.
+    if (loading === false && data) {
       handleRedirectLogic(data);
-    } else if (!loading && !data) {
+    } else if (loading === false && !data) {
       // Primary URL not found - check free URLs
       checkFreeUrl();
     }
@@ -56,8 +60,8 @@ const RedirectLink = () => {
     const now = new Date();
 
     // Check expiration
-    if (urlInfo.expiration_date) {
-      const expirationDate = new Date(urlInfo.expiration_date);
+    if (urlInfo.expiresAt || urlInfo.expiration_date) {
+      const expirationDate = new Date(urlInfo.expiresAt || urlInfo.expiration_date);
       if (expirationDate < now) {
         navigate("/link-expired");
         return;
@@ -82,10 +86,14 @@ const RedirectLink = () => {
       }
     }
 
-    // Check click limit
+    // Check click limit — server returns _count.clicks for the click count
     if (urlInfo.click_limit || urlInfo.clickLimit) {
       const limit = urlInfo.click_limit || urlInfo.clickLimit;
-      const current = urlInfo.current_clicks || urlInfo.currentClicks || 0;
+      const current =
+        urlInfo._count?.clicks ??
+        urlInfo.current_clicks ??
+        urlInfo.currentClicks ??
+        0;
       if (current >= limit) {
         navigate("/link-expired");
         return;
