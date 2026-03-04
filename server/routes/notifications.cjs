@@ -43,6 +43,43 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 });
 
+// Broadcast notification to all users (admin only)
+router.post('/broadcast', authMiddleware, async (req, res) => {
+    try {
+        // Verify admin status
+        const admin = await prisma.user.findUnique({
+            where: { id: req.user.userId },
+            select: { isAdmin: true },
+        });
+        if (!admin?.isAdmin) {
+            return res.status(403).json({ error: 'Admin access required' });
+        }
+
+        const { type, title, message, data } = req.body;
+        if (!title || !message) {
+            return res.status(400).json({ error: 'title and message are required' });
+        }
+
+        // Fetch all user IDs
+        const users = await prisma.user.findMany({ select: { id: true } });
+
+        await prisma.notification.createMany({
+            data: users.map(u => ({
+                userId: u.id,
+                type: type || 'announcement',
+                title,
+                message,
+                data: data || null,
+            })),
+        });
+
+        res.json({ success: true, recipients: users.length });
+    } catch (error) {
+        console.error('Broadcast notification error:', error);
+        res.status(500).json({ error: 'Failed to broadcast notification' });
+    }
+});
+
 // Mark notification as read
 router.patch('/:id/read', authMiddleware, async (req, res) => {
     try {

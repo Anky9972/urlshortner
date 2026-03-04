@@ -17,6 +17,13 @@ import {
     Eye,
     QrCode,
     Share2,
+    Lock,
+    EyeOff,
+    Clock,
+    Code2,
+    Save,
+    Loader2,
+    AlertCircle,
 } from "lucide-react";
 import { BarLoader, BeatLoader } from "react-spinners";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,7 +31,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UrlState } from "@/context";
 import { getClicksForUrl } from "@/api/clicks";
-import { deleteUrl, getUrl } from "@/api/urls";
+import { deleteUrl, getUrl, updateUrl } from "@/api/urls";
+import { getPixels, getUrlPixels, attachPixelToUrl, detachPixelFromUrl } from "@/api/pixels";
 import useFetch from "@/hooks/use-fetch";
 import DeviceStats from "@/components/device-stats";
 import Location from "@/components/location-stats";
@@ -38,6 +46,26 @@ const LinkPage = () => {
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [targetingRules, setTargetingRules] = useState([]);
     const [activeTab, setActiveTab] = useState("analytics");
+
+    // Settings form state
+    const [settingsForm, setSettingsForm] = useState({
+        title: "",
+        password: "",
+        clickLimit: "",
+        expirationDate: "",
+        activatesAt: "",
+        deactivatesAt: "",
+        isCloaked: false,
+    });
+    const [showSettingsPassword, setShowSettingsPassword] = useState(false);
+    const [settingsSaving, setSettingsSaving] = useState(false);
+    const [settingsSaved, setSettingsSaved] = useState(false);
+    const [settingsError, setSettingsError] = useState("");
+
+    // Pixels state
+    const [allPixels, setAllPixels] = useState([]);
+    const [urlPixelIds, setUrlPixelIds] = useState([]);
+    const [pixelsLoading, setPixelsLoading] = useState(false);
 
     const navigate = useNavigate();
     const { user } = UrlState();
@@ -65,6 +93,74 @@ const LinkPage = () => {
     useEffect(() => {
         if (!error && loading === false) fnStats();
     }, [loading, error]);
+
+    // Populate settings form when URL data loads
+    useEffect(() => {
+        if (url) {
+            const toLocalDT = (iso) => iso ? new Date(iso).toISOString().slice(0, 16) : "";
+            setSettingsForm({
+                title: url.title || "",
+                password: url.password || "",
+                clickLimit: url.clickLimit ?? url.click_limit ?? "",
+                expirationDate: toLocalDT(url.expiresAt || url.expires_at),
+                activatesAt: toLocalDT(url.activatesAt || url.activates_at),
+                deactivatesAt: toLocalDT(url.deactivatesAt || url.deactivates_at),
+                isCloaked: url.isCloaked || url.is_cloaked || false,
+            });
+        }
+    }, [url]);
+
+    // Load pixels when settings tab is opened
+    useEffect(() => {
+        if (activeTab === "settings" && id && user) {
+            setPixelsLoading(true);
+            Promise.all([
+                getPixels(user.id).catch(() => []),
+                getUrlPixels(id).catch(() => []),
+            ]).then(([all, attached]) => {
+                setAllPixels(all || []);
+                setUrlPixelIds((attached || []).map((p) => p.id));
+            }).finally(() => setPixelsLoading(false));
+        }
+    }, [activeTab, id, user]);
+
+    const saveSettings = async () => {
+        setSettingsSaving(true);
+        setSettingsError("");
+        try {
+            await updateUrl(id, {
+                title: settingsForm.title || undefined,
+                password: settingsForm.password || null,
+                clickLimit: settingsForm.clickLimit !== "" ? parseInt(settingsForm.clickLimit) : null,
+                expiresAt: settingsForm.expirationDate || null,
+                activatesAt: settingsForm.activatesAt || null,
+                deactivatesAt: settingsForm.deactivatesAt || null,
+                isCloaked: settingsForm.isCloaked,
+            });
+            setSettingsSaved(true);
+            setTimeout(() => setSettingsSaved(false), 2500);
+            fn(); // refresh URL data
+        } catch (err) {
+            setSettingsError(err.message || "Failed to save settings");
+        } finally {
+            setSettingsSaving(false);
+        }
+    };
+
+    const togglePixel = async (pixelId) => {
+        const isAttached = urlPixelIds.includes(pixelId);
+        try {
+            if (isAttached) {
+                await detachPixelFromUrl(id, pixelId);
+                setUrlPixelIds((prev) => prev.filter((pid) => pid !== pixelId));
+            } else {
+                await attachPixelToUrl(id, pixelId);
+                setUrlPixelIds((prev) => [...prev, pixelId]);
+            }
+        } catch (err) {
+            console.error("Pixel toggle error:", err);
+        }
+    };
 
     const handleScroll = () => setShowScrollTop(window.scrollY > 200);
     const scrollToTop = () =>
@@ -393,12 +489,207 @@ const LinkPage = () => {
                                         exit={{ opacity: 0, y: -10 }}
                                         className="space-y-6"
                                     >
+                                        {/* ── Link Settings Card ── */}
+                                        <div className="rounded-2xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] overflow-hidden">
+                                            <div className="px-5 py-4 border-b border-[hsl(230,10%,13%)] flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                                    <Settings className="w-4 h-4 text-blue-400" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-sm font-semibold text-white">Link Settings</h3>
+                                                    <p className="text-[11px] text-slate-500">Edit protection, scheduling and behaviour</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="p-5 space-y-5">
+                                                {/* Title */}
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Title</label>
+                                                    <input
+                                                        value={settingsForm.title}
+                                                        onChange={(e) => setSettingsForm((f) => ({ ...f, title: e.target.value }))}
+                                                        placeholder="Link title"
+                                                        className="w-full h-10 px-3 rounded-xl bg-[hsl(230,10%,10%)] border border-[hsl(230,10%,18%)] text-white placeholder:text-slate-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all"
+                                                    />
+                                                </div>
+
+                                                {/* Password */}
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                        <Lock className="w-3 h-3 text-amber-400" /> Password Protection
+                                                    </label>
+                                                    <div className="flex items-center h-10 rounded-xl bg-[hsl(230,10%,10%)] border border-[hsl(230,10%,18%)] hover:border-[hsl(230,10%,25%)] transition-all focus-within:border-amber-500/50 focus-within:ring-2 focus-within:ring-amber-500/20">
+                                                        <Lock className="w-3.5 h-3.5 ml-3 text-slate-500 shrink-0" />
+                                                        <input
+                                                            type={showSettingsPassword ? "text" : "password"}
+                                                            value={settingsForm.password}
+                                                            onChange={(e) => setSettingsForm((f) => ({ ...f, password: e.target.value }))}
+                                                            placeholder="Leave blank to remove password"
+                                                            className="flex-1 h-full px-2.5 bg-transparent text-white placeholder:text-slate-600 text-sm focus:outline-none"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setShowSettingsPassword((v) => !v)}
+                                                            className="px-3 text-slate-500 hover:text-slate-300 transition-colors"
+                                                        >
+                                                            {showSettingsPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Click Limit + Expiration */}
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                            <MousePointerClick className="w-3 h-3 text-blue-400" /> Click Limit
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            min="1"
+                                                            value={settingsForm.clickLimit}
+                                                            onChange={(e) => setSettingsForm((f) => ({ ...f, clickLimit: e.target.value }))}
+                                                            placeholder="Unlimited"
+                                                            className="w-full h-10 px-3 rounded-xl bg-[hsl(230,10%,10%)] border border-[hsl(230,10%,18%)] text-white placeholder:text-slate-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                            <Calendar className="w-3 h-3 text-pink-400" /> Expiration
+                                                        </label>
+                                                        <input
+                                                            type="datetime-local"
+                                                            value={settingsForm.expirationDate}
+                                                            onChange={(e) => setSettingsForm((f) => ({ ...f, expirationDate: e.target.value }))}
+                                                            className="w-full h-10 px-3 rounded-xl bg-[hsl(230,10%,10%)] border border-[hsl(230,10%,18%)] text-white text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500/50 transition-all [color-scheme:dark]"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {/* Scheduling */}
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                            <Clock className="w-3 h-3 text-emerald-400" /> Activates At
+                                                        </label>
+                                                        <input
+                                                            type="datetime-local"
+                                                            value={settingsForm.activatesAt}
+                                                            onChange={(e) => setSettingsForm((f) => ({ ...f, activatesAt: e.target.value }))}
+                                                            className="w-full h-10 px-3 rounded-xl bg-[hsl(230,10%,10%)] border border-[hsl(230,10%,18%)] text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all [color-scheme:dark]"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                            <Clock className="w-3 h-3 text-rose-400" /> Deactivates At
+                                                        </label>
+                                                        <input
+                                                            type="datetime-local"
+                                                            value={settingsForm.deactivatesAt}
+                                                            onChange={(e) => setSettingsForm((f) => ({ ...f, deactivatesAt: e.target.value }))}
+                                                            className="w-full h-10 px-3 rounded-xl bg-[hsl(230,10%,10%)] border border-[hsl(230,10%,18%)] text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500/50 transition-all [color-scheme:dark]"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {/* URL Cloaking */}
+                                                <div
+                                                    className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.02] border border-[hsl(230,10%,15%)] cursor-pointer"
+                                                    onClick={() => setSettingsForm((f) => ({ ...f, isCloaked: !f.isCloaked }))}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                                                            <EyeOff className="w-4 h-4 text-violet-400" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-medium text-slate-200">URL Cloaking</p>
+                                                            <p className="text-[11px] text-slate-500">Hide destination from the address bar</p>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        className={`relative w-10 rounded-full transition-colors duration-200 ${settingsForm.isCloaked ? "bg-violet-600" : "bg-[hsl(230,10%,18%)]"}`}
+                                                        style={{ minWidth: 40, height: 22 }}
+                                                    >
+                                                        <span
+                                                            className={`absolute top-0.5 left-0.5 w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-transform duration-200 ${settingsForm.isCloaked ? "translate-x-[18px]" : ""}`}
+                                                        />
+                                                    </button>
+                                                </div>
+
+                                                {/* Retargeting Pixels */}
+                                                {(allPixels.length > 0 || pixelsLoading) && (
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                            <Code2 className="w-3 h-3 text-pink-400" /> Retargeting Pixels
+                                                        </label>
+                                                        {pixelsLoading ? (
+                                                            <div className="flex items-center gap-2 text-slate-500 text-xs">
+                                                                <Loader2 className="w-3 h-3 animate-spin" /> Loading pixels…
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {allPixels.filter((p) => p.isActive).map((pixel) => {
+                                                                    const attached = urlPixelIds.includes(pixel.id);
+                                                                    return (
+                                                                        <button
+                                                                            key={pixel.id}
+                                                                            type="button"
+                                                                            onClick={() => togglePixel(pixel.id)}
+                                                                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                                                                                attached
+                                                                                    ? "bg-pink-500/15 text-pink-400 border border-pink-500/30"
+                                                                                    : "bg-white/[0.03] text-slate-400 border border-[hsl(230,10%,18%)] hover:border-[hsl(230,10%,25%)]"
+                                                                            }`}
+                                                                        >
+                                                                            {attached && <Check className="w-3 h-3" />}
+                                                                            {pixel.name}
+                                                                            <span className="text-[10px] opacity-60">{pixel.type}</span>
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {/* Error */}
+                                                {settingsError && (
+                                                    <div className="flex items-start gap-2.5 px-3.5 py-3 rounded-xl bg-red-500/[0.08] border border-red-500/20">
+                                                        <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
+                                                        <p className="text-sm text-red-300">{settingsError}</p>
+                                                    </div>
+                                                )}
+
+                                                {/* Save Button */}
+                                                <button
+                                                    onClick={saveSettings}
+                                                    disabled={settingsSaving}
+                                                    className={`w-full h-10 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
+                                                        settingsSaved
+                                                            ? "bg-emerald-600 text-white"
+                                                            : "bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    }`}
+                                                >
+                                                    {settingsSaving ? (
+                                                        <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
+                                                    ) : settingsSaved ? (
+                                                        <><Check className="w-4 h-4" /> Saved!</>
+                                                    ) : (
+                                                        <><Save className="w-4 h-4" /> Save Settings</>
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* A/B Testing */}
                                         {url?.id && (
                                             <ABTestingPanel
                                                 urlId={url.id}
                                                 urlTitle={url.title}
                                             />
                                         )}
+
+                                        {/* Targeting Rules */}
                                         <TargetingRules
                                             rules={targetingRules}
                                             onAdd={(rule) =>
@@ -420,6 +711,8 @@ const LinkPage = () => {
                                                 )
                                             }
                                         />
+
+                                        {/* UTM Builder */}
                                         <UTMBuilder url={originalUrl} />
                                     </motion.div>
                                 )}

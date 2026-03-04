@@ -24,26 +24,30 @@ const Modal = ({ isOpen, onClose, children }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
+        /* Outer: full-screen scroll container — captures all wheel/touch events so the page never scrolls */
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          {/* Backdrop — sits behind content, closes modal on click */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
           />
-          {/* Content */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="relative z-10 w-full"
-          >
-            {children}
-          </motion.div>
+          {/* Centering wrapper — min-h-full stretches to at least viewport so short modals are centred */}
+          <div className="flex min-h-full items-center justify-center p-4">
+            {/* Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+              className="relative z-10 w-full"
+            >
+              {children}
+            </motion.div>
+          </div>
         </div>
       )}
     </AnimatePresence>

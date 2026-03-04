@@ -57,6 +57,41 @@ router.post('/', async (req, res) => {
     }
 });
 
+// Attach pixel to URL — must be before DELETE /:id to avoid "detach" matching /:id
+router.post('/attach', async (req, res) => {
+    try {
+        const { urlId, pixelId } = req.body;
+        if (!urlId || !pixelId) return res.status(400).json({ error: 'urlId and pixelId are required' });
+
+        const existing = await prisma.pixelOnUrl.findUnique({
+            where: { urlId_pixelId: { urlId, pixelId } }
+        });
+        if (existing) return res.json({ message: 'Pixel already attached' });
+
+        const relation = await prisma.pixelOnUrl.create({ data: { urlId, pixelId } });
+        res.status(201).json(relation);
+    } catch (error) {
+        console.error('Error attaching pixel:', error);
+        res.status(500).json({ error: 'Failed to attach pixel' });
+    }
+});
+
+// Detach pixel from URL — must be before DELETE /:id to avoid "detach" matching /:id
+router.delete('/detach', async (req, res) => {
+    try {
+        const { urlId, pixelId } = req.body;
+        if (!urlId || !pixelId) return res.status(400).json({ error: 'urlId and pixelId are required' });
+
+        await prisma.pixelOnUrl.delete({
+            where: { urlId_pixelId: { urlId, pixelId } }
+        });
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error detaching pixel:', error);
+        res.status(500).json({ error: 'Failed to detach pixel' });
+    }
+});
+
 // Update pixel
 router.patch('/:id', async (req, res) => {
     try {
@@ -81,41 +116,6 @@ router.delete('/:id', async (req, res) => {
     } catch (error) {
         console.error('Error deleting pixel:', error);
         res.status(500).json({ error: 'Failed to delete pixel' });
-    }
-});
-
-// Attach pixel to URL
-router.post('/attach', async (req, res) => {
-    try {
-        const { urlId, pixelId } = req.body;
-        if (!urlId || !pixelId) return res.status(400).json({ error: 'urlId and pixelId are required' });
-
-        const existing = await prisma.pixelOnUrl.findUnique({
-            where: { urlId_pixelId: { urlId, pixelId } }
-        });
-        if (existing) return res.json({ message: 'Pixel already attached' });
-
-        const relation = await prisma.pixelOnUrl.create({ data: { urlId, pixelId } });
-        res.status(201).json(relation);
-    } catch (error) {
-        console.error('Error attaching pixel:', error);
-        res.status(500).json({ error: 'Failed to attach pixel' });
-    }
-});
-
-// Detach pixel from URL
-router.delete('/detach', async (req, res) => {
-    try {
-        const { urlId, pixelId } = req.body;
-        if (!urlId || !pixelId) return res.status(400).json({ error: 'urlId and pixelId are required' });
-
-        await prisma.pixelOnUrl.delete({
-            where: { urlId_pixelId: { urlId, pixelId } }
-        });
-        res.json({ success: true });
-    } catch (error) {
-        console.error('Error detaching pixel:', error);
-        res.status(500).json({ error: 'Failed to detach pixel' });
     }
 });
 

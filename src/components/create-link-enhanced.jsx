@@ -192,7 +192,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
 
             {/* Modal */}
             <Modal isOpen={isOpen} onClose={closeModal}>
-                <div className="max-w-2xl w-full mx-auto max-h-[90vh] overflow-y-auto rounded-2xl bg-[hsl(230,12%,9%)] border border-[hsl(230,10%,15%)] shadow-[0_25px_80px_-15px_rgba(0,0,0,0.6)] custom-scrollbar">
+                <div className="max-w-2xl w-full mx-auto rounded-2xl bg-[hsl(230,12%,9%)] border border-[hsl(230,10%,15%)] shadow-[0_25px_80px_-15px_rgba(0,0,0,0.6)]">
                     {/* Header */}
                     <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-[hsl(230,10%,14%)] bg-[hsl(230,12%,9%)]/95 backdrop-blur-xl">
                         <div className="flex items-center gap-3">
