@@ -110,7 +110,7 @@ const Preview = ({ profile, links, setProfile, setLinks, treeId }) => {
   }
 
   return (
-    <div className="relative w-full min-h-screen">
+    <div className="relative w-full min-h-screen overflow-x-hidden">
       {/* Phone frame toggle — only visible in builder mode */}
       {setProfile && (
         <button
@@ -248,24 +248,24 @@ const LinkContent = ({ profile, theme, buttonShapeClass, visibleLinks, user, han
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`${theme.buttonStyle} ${buttonShapeClass} ${theme.textColor} ${theme.hoverEffect}
-                flex items-center justify-between py-3 px-6 font-medium
-                transition-all duration-200 backdrop-blur-sm`}
+                flex items-center justify-between py-3 px-4 font-medium w-full
+                transition-all duration-200 backdrop-blur-sm overflow-hidden`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => handleClickCount(link.url, link.id)}
           >
-            <span className="flex items-center gap-3">
+            <span className="flex items-center gap-2 min-w-0 flex-1">
               {/* Thumbnail image takes priority over icon */}
               {link.thumbnail ? (
                 <img src={link.thumbnail} alt="" width={20} height={20} className="rounded shrink-0 object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
               ) : useFavicon ? (
-                <FaviconImg url={link.url} />
+                <span className="shrink-0"><FaviconImg url={link.url} /></span>
               ) : (
-                <Icon size={18} />
+                <span className="shrink-0"><Icon size={18} /></span>
               )}
-              {link.title}
+              <span className="truncate">{link.title}</span>
             </span>
-            <span className="border rounded-full px-2 py-1 text-xs font-bold flex gap-1">
+            <span className="border rounded-full px-2 py-1 text-xs font-bold flex gap-1 shrink-0 ml-2">
               <MousePointerClick size={16} />
               {link.clicks || 0}
             </span>

@@ -354,13 +354,15 @@ const LinkTreeBuilder = () => {
             teamId={teamId}
             setTeamId={setTeamId}
           />
-          <Preview
-            profile={profile}
-            links={links}
-            linkTree={linkTree}
-            setProfile={setProfile}
-            setLinks={setLinks}
-          />
+          <div className="flex-1 min-w-0 overflow-x-hidden">
+            <Preview
+              profile={profile}
+              links={links}
+              linkTree={linkTree}
+              setProfile={setProfile}
+              setLinks={setLinks}
+            />
+          </div>
         </main>
       </div>
     </>

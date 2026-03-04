@@ -316,23 +316,25 @@ const Sidebar = ({
 
   return (
     <motion.div
-
-      className={`lg:w-80 fixed lg:relative left-0 right-0 ${sidebarOpen ? "visible" : "hidden"} z-10 bg-[hsl(230,12%,9%)] top h-screen shadow-xl lg:relative lg:rounded-xl border border-[hsl(230,10%,15%)]`}
+      className={`lg:w-80 shrink-0 fixed lg:relative left-0 right-0 ${
+        sidebarOpen ? "visible" : "hidden"
+      } z-10 bg-[hsl(230,12%,9%)] top-0 h-screen shadow-xl lg:rounded-xl border border-[hsl(230,10%,15%)] flex flex-col overflow-hidden`}
     >
       <span className="p-1.5 lg:hidden border border-[hsl(230,10%,20%)] absolute right-2 top-2 rounded-lg hover:bg-[hsl(230,10%,14%)] cursor-pointer text-slate-400 hover:text-white transition-colors" onClick={() => setSidebarOpen(!sidebarOpen)}>
         <IoClose />
       </span>
-      <div className="p-5 h-full mt-5 lg:mt-0">
+      <div className="flex flex-col h-full overflow-hidden pt-5">
         {/* Tabs */}
-        <div className="flex justify-center w-full gap-2 mb-6">
+        <div className="flex justify-center w-full gap-1 mb-4 px-4 shrink-0">
           {["links", "appearance", "settings", "analytics"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${activeTab === tab
-                ? "bg-[hsl(230,10%,14%)] text-white"
-                : "text-slate-500 hover:text-slate-300 hover:bg-[hsl(230,10%,14%)]/50"
-                }`}
+              className={`flex-1 px-1 py-2 rounded-lg text-xs font-medium capitalize transition-colors ${
+                activeTab === tab
+                  ? "bg-[hsl(230,10%,14%)] text-white"
+                  : "text-slate-500 hover:text-slate-300 hover:bg-[hsl(230,10%,14%)]/50"
+              }`}
             >
               {tab}
             </button>
@@ -344,10 +346,10 @@ const Sidebar = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="space-y-6 h-full"
+            className="flex-1 overflow-y-auto min-h-0 px-4 pb-36"
           >
             {activeTab === "links" && (
-              <div className="space-y-4">
+              <div className="space-y-4 pt-1">
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <SortableContext items={links.map((l) => l.id)} strategy={verticalListSortingStrategy}>
                     <div className="space-y-3">
@@ -369,7 +371,7 @@ const Sidebar = ({
             )}
 
             {activeTab === "appearance" && (
-              <div className="space-y-5 overflow-y-auto pb-20">
+              <div className="space-y-5 pt-1 pb-4">
                 {/* Theme Gallery */}
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -500,7 +502,7 @@ const Sidebar = ({
             )}
 
             {activeTab === "settings" && (
-              <div className="space-y-4 overflow-y-auto pb-20">
+              <div className="space-y-4 pt-1 pb-4">
                 {/* Profile fields */}
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Profile Name</label>
@@ -650,7 +652,7 @@ const Sidebar = ({
 
             {/* Analytics Tab */}
             {activeTab === "analytics" && (
-              <div className="space-y-4 overflow-y-auto pb-20">
+              <div className="space-y-4 pt-1 pb-4">
                 {linkTreeId ? (
                   <LinktreeAnalytics linkTreeId={linkTreeId} slug={profile?.slug} />
                 ) : (

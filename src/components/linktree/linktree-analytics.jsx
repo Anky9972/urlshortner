@@ -246,7 +246,7 @@ export default function LinktreeAnalytics({ linkTreeId, slug }) {
             )}
 
             {/* Devices + Referrers */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
                 <div className="rounded-xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] p-4">
                     <h3 className="text-xs text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mb-3">
                         <Smartphone className="w-3.5 h-3.5" /> Devices

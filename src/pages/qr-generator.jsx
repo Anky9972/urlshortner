@@ -884,6 +884,23 @@ const QRCodeGenerator = () => {
                   <div key={k} className="flex justify-between"><span>{k}</span><span className="text-slate-300">{v}</span></div>
                 ))}
               </div>
+
+              {/* More features CTA */}
+              <a
+                href="https://qrstudio.live/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 rounded-xl border border-violet-500/20 bg-gradient-to-br from-violet-600/10 to-fuchsia-600/5 hover:border-violet-500/40 hover:from-violet-600/15 hover:to-fuchsia-600/10 p-3.5 transition-all"
+              >
+                <div className="shrink-0 w-8 h-8 rounded-lg bg-violet-600/20 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-violet-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-violet-300 leading-tight">Want more QR features?</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5 truncate">qrstudio.live — advanced QR studio</p>
+                </div>
+                <ExternalLink className="w-3.5 h-3.5 text-slate-600 group-hover:text-violet-400 transition-colors shrink-0" />
+              </a>
             </div>
 
           </div>
