@@ -953,8 +953,8 @@ const AuditLogTab = () => {
                     <span className={`text-xs px-2.5 py-1 rounded-lg border font-medium ${actionColor(l.action)}`}>{l.action}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-white text-xs font-medium">{l.resource}</span>
-                    {l.resourceId && <span className="text-slate-600 text-xs ml-1">#{l.resourceId.slice(0, 8)}</span>}
+                    <span className="text-white text-xs font-medium">{l.entityType}</span>
+                    {l.entityId && <span className="text-slate-600 text-xs ml-1">#{l.entityId.slice(0, 8)}</span>}
                   </td>
                   <td className="px-4 py-3 text-slate-400 text-xs truncate max-w-[160px]">
                     {l.user?.email || '—'}
@@ -1074,8 +1074,8 @@ export default function AdminPage() {
               { key: 'title',       label: 'Title',     render: i => <span className="text-white font-medium">{i.title}</span> },
               { key: 'slug',        label: 'Slug',      render: i => <span className="text-blue-400">{i.slug}</span> },
               { key: 'owner',       label: 'Owner',     render: i => i.user?.email },
-              { key: 'items',       label: 'Links',     render: i => i._count?.items ?? 0 },
-              { key: 'isPublished', label: 'Published', render: i => i.isPublished ? <CheckCircle className="w-4 h-4 text-green-400" /> : <XCircle className="w-4 h-4 text-red-400" /> },
+              { key: 'links',       label: 'Links',     render: i => i._count?.links ?? 0 },
+              { key: 'isPublic', label: 'Published', render: i => i.isPublic ? <CheckCircle className="w-4 h-4 text-green-400" /> : <XCircle className="w-4 h-4 text-red-400" /> },
               { key: 'createdAt',   label: 'Created',   render: i => new Date(i.createdAt).toLocaleDateString() },
             ]}
           />
@@ -1104,7 +1104,7 @@ export default function AdminPage() {
               { key: 'slug',      label: 'Slug',    render: i => <span className="text-blue-400">{i.slug}</span> },
               { key: 'owner',     label: 'Owner',   render: i => i.owner?.email },
               { key: 'members',   label: 'Members', render: i => i._count?.members ?? 0 },
-              { key: 'isPrivate', label: 'Private', render: i => i.isPrivate ? <CheckCircle className="w-4 h-4 text-amber-400" /> : <XCircle className="w-4 h-4 text-slate-500" /> },
+              { key: 'isPublic', label: 'Private', render: i => !i.isPublic ? <CheckCircle className="w-4 h-4 text-amber-400" /> : <XCircle className="w-4 h-4 text-slate-500" /> },
               { key: 'createdAt', label: 'Created', render: i => new Date(i.createdAt).toLocaleDateString() },
             ]}
           />
@@ -1117,7 +1117,7 @@ export default function AdminPage() {
             columns={[
               { key: 'domain',     label: 'Domain',   render: i => <span className="text-white font-medium">{i.domain}</span> },
               { key: 'owner',      label: 'Owner',    render: i => i.user?.email },
-              { key: 'isVerified', label: 'Verified', render: i => i.isVerified ? <CheckCircle className="w-4 h-4 text-green-400" /> : <XCircle className="w-4 h-4 text-red-400" /> },
+              { key: 'verified', label: 'Verified', render: i => i.verified ? <CheckCircle className="w-4 h-4 text-green-400" /> : <XCircle className="w-4 h-4 text-red-400" /> },
               { key: 'createdAt',  label: 'Created',  render: i => new Date(i.createdAt).toLocaleDateString() },
             ]}
           />

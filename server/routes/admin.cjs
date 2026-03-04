@@ -121,7 +121,7 @@ router.get('/users', async (req, res) => {
           id: true, email: true, name: true, avatarUrl: true,
           createdAt: true, emailVerified: true, isAdmin: true, isSuspended: true,
           twoFactorEnabled: true,
-          _count: { select: { urls: true, clicks: true } },
+          _count: { select: { urls: true } },
         },
       }),
       prisma.user.count({ where }),
@@ -148,7 +148,7 @@ router.get('/users/:id', async (req, res) => {
             currentClicks: true, createdAt: true, isActive: true,
           },
         },
-        _count: { select: { urls: true, clicks: true, apiKeys: true } },
+        _count: { select: { urls: true, apiKeys: true } },
       },
     });
     if (!user) return res.status(404).json({ error: 'User not found' });
@@ -273,9 +273,9 @@ router.get('/linktrees', async (req, res) => {
         where, skip, take: Number(limit),
         orderBy: { createdAt: 'desc' },
         select: {
-          id: true, title: true, slug: true, isPublished: true, createdAt: true,
+          id: true, title: true, slug: true, isPublic: true, createdAt: true,
           user: { select: { id: true, email: true, name: true } },
-          _count: { select: { items: true } },
+          _count: { select: { links: true } },
         },
       }),
       prisma.linkTree.count({ where }),
@@ -344,7 +344,7 @@ router.get('/rooms', async (req, res) => {
         where, skip, take: Number(limit),
         orderBy: { createdAt: 'desc' },
         select: {
-          id: true, name: true, slug: true, isPrivate: true, createdAt: true,
+          id: true, name: true, slug: true, isPublic: true, createdAt: true,
           owner: { select: { id: true, email: true, name: true } },
           _count: { select: { members: true } },
         },
@@ -379,7 +379,7 @@ router.get('/domains', async (req, res) => {
         where, skip, take: Number(limit),
         orderBy: { createdAt: 'desc' },
         select: {
-          id: true, domain: true, isVerified: true, createdAt: true,
+          id: true, domain: true, verified: true, isActive: true, createdAt: true,
           user: { select: { id: true, email: true, name: true } },
         },
       }),
@@ -413,8 +413,8 @@ router.get('/audit-logs', async (req, res) => {
         take: Number(limit),
         orderBy: { createdAt: 'desc' },
         select: {
-          id: true, action: true, resource: true, resourceId: true,
-          metadata: true, createdAt: true,
+          id: true, action: true, entityType: true, entityId: true,
+          details: true, ipAddress: true, createdAt: true,
           user: { select: { id: true, email: true, name: true } },
         },
       }),
@@ -461,14 +461,14 @@ router.get('/export/users', async (req, res) => {
       select: {
         id: true, email: true, name: true,
         emailVerified: true, isAdmin: true, isSuspended: true, createdAt: true,
-        _count: { select: { urls: true, clicks: true } },
+        _count: { select: { urls: true } },
       },
     });
-    const header = 'id,email,name,emailVerified,isAdmin,isSuspended,urls,clicks,createdAt';
+    const header = 'id,email,name,emailVerified,isAdmin,isSuspended,urls,createdAt';
     const rows = users.map(u =>
       [u.id, csvEscape(u.email), csvEscape(u.name || ''),
        u.emailVerified, u.isAdmin, u.isSuspended,
-       u._count.urls, u._count.clicks, u.createdAt.toISOString()].join(',')
+       u._count.urls, u.createdAt.toISOString()].join(',')
     );
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename="users.csv"');
