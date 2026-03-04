@@ -106,6 +106,11 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
 
+        // Check suspension
+        if (user.isSuspended) {
+            return res.status(403).json({ error: 'Your account has been suspended. Please contact support.' });
+        }
+
         // If 2FA is enabled, return a challenge instead of the full JWT
         if (user.twoFactorEnabled) {
             return res.json({ twoFactorRequired: true, userId: user.id });
