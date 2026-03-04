@@ -5,8 +5,83 @@ const { authMiddleware, optionalAuth } = require('../middleware/auth.cjs');
 const router = Router();
 
 // ==============================
+// HELPERS
+// ==============================
+
+// Rate-limit click recording: 1 unique click per IP+linkId per 5 minutes
+const clickTracker = new Map();
+const CLICK_WINDOW_MS = 5 * 60 * 1000;
+setInterval(() => {
+    const now = Date.now();
+    for (const [k, exp] of clickTracker.entries()) {
+        if (exp < now) clickTracker.delete(k);
+    }
+}, 10 * 60 * 1000);
+
+// Detect device type from User-Agent string
+function detectDevice(ua = '') {
+    if (!ua) return 'unknown';
+    const s = ua.toLowerCase();
+    if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(s)) return 'tablet';
+    if (/mobile|android|iphone|ipod|blackberry|opera mini|iemobile|wpdesktop/i.test(s)) return 'mobile';
+    return 'desktop';
+}
+
+// Extract referrer domain (or null)
+function extractReferrer(refHeader) {
+    if (!refHeader) return null;
+    try {
+        const host = new URL(refHeader).hostname.replace(/^www\./, '').slice(0, 100);
+        return host || null;
+    } catch {
+        return null;
+    }
+}
+
+// Extract country from CDN headers
+function extractCountry(req) {
+    return req.headers['cf-ipcountry'] ||
+        req.headers['x-vercel-ip-country'] ||
+        req.headers['x-country'] ||
+        null;
+}
+
+// Build slug from a title string + optional suffix
+function slugify(title, suffix = '') {
+    const base = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 50);
+    return suffix ? `${base}-${suffix}` : base;
+}
+
+// Scheduling filter for public link items
+function linkSchedulingFilter() {
+    const now = new Date();
+    return {
+        isActive: true,
+        OR: [
+            { type: { not: 'link' } },
+            {
+                AND: [
+                    { OR: [{ activatesAt: null }, { activatesAt: { lte: now } }] },
+                    { OR: [{ deactivatesAt: null }, { deactivatesAt: { gte: now } }] },
+                ]
+            }
+        ]
+    };
+}
+
+// ==============================
 // PUBLIC ROUTES (no auth needed)
 // ==============================
+
+// Check slug availability (no auth required)
+router.get('/check-slug/:slug', async (req, res) => {
+    try {
+        const existing = await prisma.linkTree.findUnique({ where: { slug: req.params.slug } });
+        res.json({ available: !existing });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to check slug' });
+    }
+});
 
 // Get a linktree by slug (public view)
 router.get('/public/:slug', async (req, res) => {
@@ -14,7 +89,10 @@ router.get('/public/:slug', async (req, res) => {
         const tree = await prisma.linkTree.findUnique({
             where: { slug: req.params.slug },
             include: {
-                links: { where: { isActive: true }, orderBy: { order: 'asc' } },
+                links: {
+                    where: linkSchedulingFilter(),
+                    orderBy: { order: 'asc' }
+                },
                 user: { select: { name: true, avatarUrl: true } }
             }
         });
@@ -22,11 +100,22 @@ router.get('/public/:slug', async (req, res) => {
         if (!tree) return res.status(404).json({ error: 'LinkTree not found' });
         if (!tree.isPublic) return res.status(404).json({ error: 'LinkTree not found' });
 
-        // Increment view count
-        await prisma.linkTree.update({
+        // Increment view count (fire-and-forget)
+        prisma.linkTree.update({
             where: { id: tree.id },
             data: { viewCount: { increment: 1 } }
-        });
+        }).catch(() => {});
+
+        // Store view event for time-series analytics (fire-and-forget)
+        prisma.linkTreeEvent.create({
+            data: {
+                linkTreeId: tree.id,
+                eventType: 'view',
+                device: detectDevice(req.headers['user-agent']),
+                referrer: extractReferrer(req.headers['referer'] || req.headers['referrer']),
+                country: extractCountry(req),
+            }
+        }).catch(() => {});
 
         res.json(tree);
     } catch (error) {
@@ -35,32 +124,76 @@ router.get('/public/:slug', async (req, res) => {
     }
 });
 
-// Increment link click count (public)
+// Increment link click count (public) — rate-limited per IP+linkId
 router.post('/public/:slug/click/:linkId', async (req, res) => {
+    const ip = req.ip || 'unknown';
+    const key = `${ip}:${req.params.linkId}`;
+    const now = Date.now();
+
+    if (clickTracker.has(key) && clickTracker.get(key) > now) {
+        // Throttled — return success silently so UI doesn't break
+        return res.json({ success: true, throttled: true });
+    }
+    clickTracker.set(key, now + CLICK_WINDOW_MS);
+
     try {
         await prisma.linkTreeItem.update({
             where: { id: req.params.linkId },
             data: { clicks: { increment: 1 } }
         });
+
+        // Store click event for rich analytics (fire-and-forget)
+        // First resolve linkTreeId from the item
+        prisma.linkTreeItem.findUnique({ where: { id: req.params.linkId }, select: { linkTreeId: true } })
+            .then(item => {
+                if (!item) return;
+                return prisma.linkTreeEvent.create({
+                    data: {
+                        linkTreeId: item.linkTreeId,
+                        linkItemId: req.params.linkId,
+                        eventType: 'click',
+                        device: detectDevice(req.headers['user-agent']),
+                        referrer: extractReferrer(req.headers['referer'] || req.headers['referrer']),
+                        country: extractCountry(req),
+                    }
+                });
+            })
+            .catch(() => {});
+
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: 'Failed to record click' });
     }
 });
 
-// Get all public linktrees (gallery)
+// Get public linktrees gallery (paginated)
 router.get('/gallery', async (req, res) => {
     try {
+        const limit = Math.min(parseInt(req.query.limit || '24', 10), 100);
+        const cursor = req.query.cursor || undefined;
+
         const trees = await prisma.linkTree.findMany({
             where: { isPublic: true },
             include: {
-                links: { where: { isActive: true }, orderBy: { order: 'asc' }, take: 5 },
+                links: {
+                    where: { isActive: true },
+                    orderBy: { order: 'asc' },
+                    take: 5
+                },
                 user: { select: { name: true, avatarUrl: true } }
             },
             orderBy: { viewCount: 'desc' },
-            take: 50
+            take: limit + 1,
+            ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
         });
-        res.json(trees);
+
+        const hasMore = trees.length > limit;
+        const results = hasMore ? trees.slice(0, limit) : trees;
+        res.json({
+            trees: results,
+            nextCursor: hasMore ? results[results.length - 1].id : null,
+            hasMore,
+        });
     } catch (error) {
         console.error('Error fetching gallery:', error);
         res.status(500).json({ error: 'Failed to fetch gallery' });
@@ -91,14 +224,12 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Get linktree analytics (viewCount + per-link clicks + CTR)
+// Get linktree analytics (viewCount + per-link clicks + CTR + time-series + device + referrer)
 router.get('/:id/analytics', async (req, res) => {
     try {
         const tree = await prisma.linkTree.findFirst({
             where: { id: req.params.id, userId: req.user.userId },
-            include: {
-                links: { orderBy: { order: 'asc' } }
-            }
+            include: { links: { orderBy: { order: 'asc' } } }
         });
         if (!tree) return res.status(404).json({ error: 'LinkTree not found' });
 
@@ -108,13 +239,56 @@ router.get('/:id/analytics', async (req, res) => {
             ctr: tree.viewCount > 0 ? ((l.clicks || 0) / tree.viewCount * 100).toFixed(1) : '0.0'
         }));
 
+        // --- Rich analytics from events (last 30 days) ---
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        const events = await prisma.linkTreeEvent.findMany({
+            where: { linkTreeId: tree.id, createdAt: { gte: thirtyDaysAgo } },
+            select: { eventType: true, createdAt: true, device: true, referrer: true }
+        });
+
+        // Build per-day time-series filling in all 30 days
+        const dayMap = {};
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+            const key = d.toISOString().slice(0, 10);
+            dayMap[key] = { date: key, views: 0, clicks: 0 };
+        }
+        for (const e of events) {
+            const key = e.createdAt.toISOString().slice(0, 10);
+            if (dayMap[key]) {
+                if (e.eventType === 'view') dayMap[key].views++;
+                else if (e.eventType === 'click') dayMap[key].clicks++;
+            }
+        }
+        const timeSeries = Object.values(dayMap);
+
+        // Device breakdown
+        const deviceMap = {};
+        for (const e of events) {
+            const d = e.device || 'unknown';
+            deviceMap[d] = (deviceMap[d] || 0) + 1;
+        }
+        const deviceBreakdown = Object.entries(deviceMap).map(([device, count]) => ({ device, count }));
+
+        // Referrer breakdown (top 10)
+        const refMap = {};
+        for (const e of events) {
+            if (e.referrer) refMap[e.referrer] = (refMap[e.referrer] || 0) + 1;
+        }
+        const referrerBreakdown = Object.entries(refMap)
+            .sort((a, b) => b[1] - a[1]).slice(0, 10)
+            .map(([referrer, count]) => ({ referrer, count }));
+
         res.json({
             id: tree.id,
             title: tree.title,
             slug: tree.slug,
             viewCount: tree.viewCount,
             totalLinkClicks,
-            links: linksWithCtr
+            links: linksWithCtr,
+            timeSeries,
+            deviceBreakdown,
+            referrerBreakdown,
         });
     } catch (error) {
         console.error('Error fetching linktree analytics:', error);
@@ -142,13 +316,28 @@ router.get('/:id', async (req, res) => {
 // Create linktree
 router.post('/', async (req, res) => {
     try {
-        const { title, description, slug, theme, customCss, avatarUrl, backgroundColor, textColor, buttonStyle, isPublic, links, socialLinks, backgroundImage, fontFamily, seoTitle, seoDescription, seoImage } = req.body;
+        const { title, description, slug: rawSlug, theme, customCss, avatarUrl, backgroundColor, textColor, buttonStyle, isPublic, links, socialLinks, backgroundImage, fontFamily, seoTitle, seoDescription, seoImage } = req.body;
 
-        if (!title || !slug) {
-            return res.status(400).json({ error: 'title and slug are required' });
+        if (!title) {
+            return res.status(400).json({ error: 'title is required' });
         }
 
-        // Check slug uniqueness
+        // Auto-generate slug from title if not provided
+        let slug = rawSlug ? rawSlug.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/(^-|-$)/g, '') : null;
+        if (!slug) {
+            slug = slugify(title, Date.now().toString(36));
+        }
+
+        // Ensure uniqueness — append random suffix if taken
+        let finalSlug = slug;
+        let attempt = 0;
+        while (await prisma.linkTree.findUnique({ where: { slug: finalSlug } })) {
+            attempt++;
+            finalSlug = `${slug}-${attempt}`;
+        }
+        slug = finalSlug;
+
+        // (legacy check kept for backward compat)
         const existing = await prisma.linkTree.findUnique({ where: { slug } });
         if (existing) return res.status(400).json({ error: 'Slug already taken' });
 
@@ -270,7 +459,9 @@ router.post('/:id/links', async (req, res) => {
         if (!existing) return res.status(404).json({ error: 'LinkTree not found' });
 
         const { title, url, icon, thumbnail } = req.body;
-        if (!title || !url) return res.status(400).json({ error: 'title and url are required' });
+        if (!title) return res.status(400).json({ error: 'title is required' });
+        const linkType = req.body.type || 'link';
+        if (linkType === 'link' && !url) return res.status(400).json({ error: 'url is required for link type' });
 
         // Get max order
         const maxOrder = await prisma.linkTreeItem.aggregate({
@@ -282,10 +473,11 @@ router.post('/:id/links', async (req, res) => {
             data: {
                 linkTreeId: req.params.id,
                 title,
-                url,
+                url: url || '',
                 icon,
                 thumbnail,
-                order: (maxOrder._max.order ?? -1) + 1
+                order: (maxOrder._max.order ?? -1) + 1,
+                type: linkType,
             }
         });
 

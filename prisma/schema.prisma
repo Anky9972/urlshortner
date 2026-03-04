@@ -264,6 +264,7 @@ model LinkTree {
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   links           LinkTreeItem[]
+  events          LinkTreeEvent[]
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -292,6 +293,21 @@ model LinkTreeItem {
   updatedAt   DateTime  @updatedAt
 
   @@index([linkTreeId])
+}
+
+model LinkTreeEvent {
+  id          String   @id @default(cuid())
+  linkTreeId  String
+  linkTree    LinkTree @relation(fields: [linkTreeId], references: [id], onDelete: Cascade)
+  linkItemId  String?                    // null for view events
+  eventType   String                     // 'view' | 'click'
+  referrer    String?                    // HTTP Referer header
+  device      String?                    // 'mobile' | 'tablet' | 'desktop' | 'unknown'
+  country     String?                    // From CF-IPCountry / X-Vercel-IP-Country headers
+  createdAt   DateTime @default(now())
+
+  @@index([linkTreeId, createdAt])
+  @@index([linkItemId])
 }
 
 // ============================================

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getLinkTree } from "../../api/linktrees";
+import { getPublicLinkTree } from "../../api/linktrees";
 import Preview from "./preview";
 import { Loader2, Link2 } from "lucide-react";
 
@@ -10,14 +10,17 @@ const SharedLinkTree = () => {
   const [error, setError] = useState(null);
   const [profile, setProfile] = useState(null);
   const [links, setLinks] = useState(null);
+  const [treeId, setTreeId] = useState(null);
 
   useEffect(() => {
     const loadSharedLinkTree = async () => {
       try {
         setIsLoading(true);
-        const tree = await getLinkTree(id);
+        // `id` param is now the slug for public access (no auth needed)
+        const tree = await getPublicLinkTree(id);
 
         if (tree) {
+          setTreeId(tree.id);
           setProfile({
             name: tree.title,
             bio: tree.description || "",
@@ -29,7 +32,7 @@ const SharedLinkTree = () => {
             socialLinks: tree.socialLinks || {},
             backgroundImage: tree.backgroundImage || '',
             fontFamily: tree.fontFamily || 'sans',
-            avatarUrl: tree.avatarUrl || '',
+            avatarUrl: tree.avatarUrl || (tree.user?.avatarUrl || ''),
             buttonStyle: tree.buttonStyle || 'rounded',
           });
           setLinks(
@@ -100,7 +103,7 @@ const SharedLinkTree = () => {
   return (
     <div className="min-h-screen bg-[hsl(230,15%,5%)] flex justify-center p-4">
       <div className="w-full max-w-md">
-        <Preview profile={profile} links={links} />
+        <Preview profile={profile} links={links} treeId={treeId} />
       </div>
     </div>
   );

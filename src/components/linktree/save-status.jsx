@@ -9,10 +9,10 @@ const SaveStatus = ({
   isSaving,
   linkTreeId,
   setLinkTreeId,
+  slug,
   isCreate,
 }) => (
   <div className="w-full absolute bottom-0 p-5 bg-[hsl(230,12%,9%)] border-t border-[hsl(230,10%,15%)]">
-    {/* {isCreate && "Create your LinkTree and share it with the world!"} */}
     {saveError && (
       <Alert variant="destructive" className="mb-2 bg-red-500/10 border-red-500/20 text-red-400">
         <AlertDescription>{saveError}</AlertDescription>
@@ -44,7 +44,7 @@ const SaveStatus = ({
         </button>
       )}
       {linkTreeId && (
-        <ShareDialog linkTreeId={linkTreeId} setLinkTreeId={setLinkTreeId} />
+        <ShareDialog linkTreeId={linkTreeId} slug={slug} setLinkTreeId={setLinkTreeId} />
       )}
     </div>
   </div>
@@ -56,6 +56,7 @@ SaveStatus.propTypes = {
   isSaving: PropTypes.bool.isRequired,
   linkTreeId: PropTypes.string,
   setLinkTreeId: PropTypes.func.isRequired,
+  slug: PropTypes.string,
   isCreate: PropTypes.bool.isRequired,
 };
 export default SaveStatus;

@@ -22,7 +22,7 @@ import { defaultThemes } from "../../utils/theme";
 import SaveStatus from "./save-status";
 import { IoClose } from "react-icons/io5";
 import { useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   DndContext,
   closestCenter,
@@ -37,6 +37,8 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 const socialIcons = {
   instagram: FaInstagram,
   twitter: FaTwitter,
@@ -88,6 +90,7 @@ const SortableLinkItem = ({ link, index, links, setLinks }) => {
     const n = [...links]; n[index] = { ...n[index], [field]: value }; setLinks(n);
   };
   const linkType = link.type || 'link';
+  const isActive = link.isActive !== false;
 
   return (
     <div ref={setNodeRef} style={style} className="bg-[hsl(230,10%,14%)]/50 border border-[hsl(230,10%,20%)]/50 rounded-xl p-4">
@@ -109,6 +112,18 @@ const SortableLinkItem = ({ link, index, links, setLinks }) => {
               }`}>{t}</button>
           ))}
         </div>
+        {/* Active toggle */}
+        <button
+          onClick={() => updateLink('isActive', !isActive)}
+          title={isActive ? 'Visible — click to hide' : 'Hidden — click to show'}
+          className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${
+            isActive ? 'bg-blue-600' : 'bg-[hsl(230,10%,22%)]'
+          }`}
+        >
+          <span className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${
+            isActive ? 'translate-x-4' : 'translate-x-0.5'
+          }`} />
+        </button>
         <button
           onClick={() => setLinks(links.filter((l) => l.id !== link.id))}
           className="p-1.5 text-red-400 hover:bg-red-500/10 border border-[hsl(230,10%,25%)] rounded-lg transition-colors"
@@ -152,6 +167,14 @@ const SortableLinkItem = ({ link, index, links, setLinks }) => {
                   </option>
                 ))}
               </select>
+              {/* Thumbnail URL */}
+              <input
+                type="url"
+                value={link.thumbnail || ''}
+                onChange={(e) => updateLink('thumbnail', e.target.value || null)}
+                className="w-full px-3 py-2 text-white text-xs rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors"
+                placeholder="Thumbnail image URL (optional)"
+              />
               {/* Scheduling */}
               <button onClick={() => setShowSchedule(s => !s)}
                 className="text-xs text-slate-500 hover:text-slate-300 flex items-center gap-1 transition-colors">
@@ -193,11 +216,26 @@ const Sidebar = ({
   isSaving,
   linkTreeId,
   setLinkTreeId,
+  slug,
+  setSlug,
   sidebarOpen,
   setSidebarOpen,
   title,
   setTitle
 }) => {
+  const [slugStatus, setSlugStatus] = useState(null); // null | 'checking' | 'available' | 'taken'
+
+  const checkSlug = useCallback(async (value) => {
+    if (!value || value.length < 2) { setSlugStatus(null); return; }
+    setSlugStatus('checking');
+    try {
+      const res = await fetch(`${API_URL}/api/linktrees/check-slug/${encodeURIComponent(value)}`);
+      const data = await res.json();
+      setSlugStatus(data.available ? 'available' : 'taken');
+    } catch {
+      setSlugStatus(null);
+    }
+  }, []);
   // const [sidebarOpen, setSidebarOpen] = useState(false);
   const addLink = () => {
     const newLink = {
@@ -474,6 +512,33 @@ const Sidebar = ({
                   </div>
                 </div>
 
+                {/* Slug Editor */}
+                <div className="pt-1 border-t border-[hsl(230,10%,18%)]">
+                  <label className="block text-sm font-medium text-slate-300 mb-1 mt-3">Public URL Slug</label>
+                  <p className="text-xs text-slate-500 mb-2">Customize the URL for your public link tree page.</p>
+                  <div className="flex items-center gap-1 mb-1">
+                    <span className="text-xs text-slate-600 whitespace-nowrap">…/share/</span>
+                    <input
+                      type="text"
+                      value={slug || ''}
+                      onChange={(e) => {
+                        const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, '-');
+                        setSlug(val);
+                        checkSlug(val);
+                      }}
+                      placeholder="your-slug"
+                      className={`flex-1 px-3 py-2 text-white text-xs rounded-lg border bg-[hsl(230,10%,14%)] focus:outline-none transition-colors ${
+                        slugStatus === 'available' ? 'border-emerald-500/60' :
+                        slugStatus === 'taken' ? 'border-red-500/60' :
+                        'border-[hsl(230,10%,20%)] focus:border-blue-600/50'
+                      }`}
+                    />
+                  </div>
+                  {slugStatus === 'available' && <p className="text-xs text-emerald-400">✓ Available</p>}
+                  {slugStatus === 'taken' && <p className="text-xs text-red-400">✗ Already taken</p>}
+                  {slugStatus === 'checking' && <p className="text-xs text-slate-500">Checking…</p>}
+                </div>
+
                 {/* SEO Controls */}
                 <div className="pt-1 border-t border-[hsl(230,10%,18%)]">
                   <label className="block text-sm font-medium text-slate-300 mb-1 mt-3">SEO / Open Graph</label>
@@ -525,6 +590,7 @@ const Sidebar = ({
         isSaving={isSaving}
         linkTreeId={linkTreeId}
         setLinkTreeId={setLinkTreeId}
+        slug={slug}
         isCreate={createMode}
       />
     </motion.div>
@@ -533,14 +599,7 @@ const Sidebar = ({
 Sidebar.propTypes = {
   profile: PropTypes.object.isRequired,
   setProfile: PropTypes.func.isRequired,
-  links: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      url: PropTypes.string.isRequired,
-      icon: PropTypes.string.isRequired,
-    })
-  ).isRequired,
+  links: PropTypes.array.isRequired,
   setLinks: PropTypes.func.isRequired,
   activeTab: PropTypes.string.isRequired,
   setActiveTab: PropTypes.func.isRequired,
@@ -550,6 +609,8 @@ Sidebar.propTypes = {
   isSaving: PropTypes.bool.isRequired,
   linkTreeId: PropTypes.string,
   setLinkTreeId: PropTypes.func.isRequired,
+  slug: PropTypes.string,
+  setSlug: PropTypes.func.isRequired,
   sidebarOpen: PropTypes.bool.isRequired,
   setSidebarOpen: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,

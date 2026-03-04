@@ -48,9 +48,14 @@ const TreeEdit = () => {
           links: (tree.links || []).map((l) => ({
             id: l.id,
             title: l.title,
-            url: l.url,
+            url: l.url || '',
             icon: l.icon || "default",
+            type: l.type || 'link',
+            isActive: l.isActive !== false,
+            thumbnail: l.thumbnail || null,
             clicks: l.clicks || 0,
+            activatesAt: l.activatesAt || null,
+            deactivatesAt: l.deactivatesAt || null,
           })),
         });
       } catch (error) {
@@ -99,8 +104,12 @@ const TreeEdit = () => {
       title: "",
       url: "",
       icon: "default",
+      type: "link",
+      isActive: true,
+      thumbnail: null,
       clicks: 0,
-      //   isActive: true,
+      activatesAt: null,
+      deactivatesAt: null,
     };
     setTreeData((prev) => ({
       ...prev,
@@ -145,15 +154,21 @@ const TreeEdit = () => {
         textColor: treeData.profile.customColors?.text,
       });
 
-      // Bulk update links
+      // Bulk update links (preserve clicks, isActive, thumbnail, type and scheduling)
       await bulkUpdateLinks(
         treeId,
         treeData.links.map((link, index) => ({
           id: link.id?.startsWith("temp-") ? undefined : link.id,
           title: link.title,
-          url: link.url,
+          url: link.url || '',
           icon: link.icon,
+          type: link.type || 'link',
+          isActive: link.isActive !== false,
+          thumbnail: link.thumbnail || null,
+          clicks: link.clicks || 0,
           order: index,
+          activatesAt: link.activatesAt || null,
+          deactivatesAt: link.deactivatesAt || null,
         }))
       );
 
