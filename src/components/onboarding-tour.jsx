@@ -90,13 +90,13 @@ export default function OnboardingTour() {
                     {/* Modal */}
                     <motion.div
                         key="modal"
-                        initial={{ opacity: 0, scale: 0.92, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.92, y: 20 }}
-                        transition={{ type: 'spring', bounce: 0.35, duration: 0.4 }}
-                        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[1000] w-full max-w-md px-4"
+                        initial={{ opacity: 0, y: 40 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 40 }}
+                        transition={{ type: 'spring', bounce: 0.3, duration: 0.4 }}
+                        className="fixed inset-x-0 bottom-0 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-[1000] w-full sm:max-w-md sm:px-4"
                     >
-                        <div className="rounded-2xl border border-[hsl(230,10%,18%)] bg-[hsl(230,15%,8%)] shadow-2xl overflow-hidden">
+                        <div className="rounded-t-2xl sm:rounded-2xl border border-[hsl(230,10%,18%)] bg-[hsl(230,15%,8%)] shadow-2xl max-h-[85dvh] overflow-y-auto">
                             {/* Close */}
                             <div className="flex justify-between items-center px-5 pt-4">
                                 <div className="flex gap-1">
@@ -118,7 +118,7 @@ export default function OnboardingTour() {
                                 </button>
                             </div>
 
-                            <div className="p-6 space-y-4">
+                            <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
                                 {/* Icon */}
                                 <AnimatePresence mode="wait">
                                     <motion.div
@@ -138,7 +138,7 @@ export default function OnboardingTour() {
                                 </AnimatePresence>
 
                                 {/* Actions */}
-                                <div className="flex items-center gap-2 pt-1">
+                                <div className="flex flex-wrap items-center gap-2 pt-1">
                                     {current.action && (
                                         <Link
                                             to={current.action.to}
