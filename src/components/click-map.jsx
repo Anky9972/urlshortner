@@ -30,7 +30,42 @@ const COUNTRY_CENTROIDS = {
     EG: { lat: 26.82, lon: 30.80, name: 'Egypt', flag: '🇪🇬' },
     PH: { lat: 12.87, lon: 121.77, name: 'Philippines', flag: '🇵🇭' },
     MY: { lat: 4.21, lon: 101.97, name: 'Malaysia', flag: '🇲🇾' },
+    BD: { lat: 23.68, lon: 90.35, name: 'Bangladesh', flag: '🇧🇩' },
+    TH: { lat: 15.87, lon: 100.99, name: 'Thailand', flag: '🇹🇭' },
+    VN: { lat: 14.06, lon: 108.27, name: 'Vietnam', flag: '🇻🇳' },
+    IR: { lat: 32.42, lon: 53.68, name: 'Iran', flag: '🇮🇷' },
+    IQ: { lat: 33.22, lon: 43.67, name: 'Iraq', flag: '🇮🇶' },
+    AE: { lat: 23.42, lon: 53.84, name: 'United Arab Emirates', flag: '🇦🇪' },
+    PT: { lat: 39.39, lon: -8.22, name: 'Portugal', flag: '🇵🇹' },
+    BE: { lat: 50.50, lon: 4.46, name: 'Belgium', flag: '🇧🇪' },
+    CH: { lat: 46.81, lon: 8.22, name: 'Switzerland', flag: '🇨🇭' },
+    AT: { lat: 47.51, lon: 14.55, name: 'Austria', flag: '🇦🇹' },
+    GR: { lat: 39.07, lon: 21.82, name: 'Greece', flag: '🇬🇷' },
+    CZ: { lat: 49.81, lon: 15.47, name: 'Czech Republic', flag: '🇨🇿' },
+    RO: { lat: 45.94, lon: 24.96, name: 'Romania', flag: '🇷🇴' },
+    HU: { lat: 47.16, lon: 19.50, name: 'Hungary', flag: '🇭🇺' },
+    DK: { lat: 56.26, lon: 9.50, name: 'Denmark', flag: '🇩🇰' },
+    FI: { lat: 61.92, lon: 25.74, name: 'Finland', flag: '🇫🇮' },
+    NO: { lat: 60.47, lon: 8.47, name: 'Norway', flag: '🇳🇴' },
+    IL: { lat: 31.04, lon: 34.85, name: 'Israel', flag: '🇮🇱' },
+    NZ: { lat: -40.90, lon: 174.88, name: 'New Zealand', flag: '🇳🇿' },
+    CL: { lat: -35.67, lon: -71.54, name: 'Chile', flag: '🇨🇱' },
+    CO: { lat: 4.57, lon: -74.29, name: 'Colombia', flag: '🇨🇴' },
+    PE: { lat: -9.18, lon: -75.01, name: 'Peru', flag: '🇵🇪' },
 };
+
+// Build a reverse lookup: full country name (lowercased) → 2-letter code
+const NAME_TO_CODE = Object.fromEntries(
+    Object.entries(COUNTRY_CENTROIDS).map(([code, info]) => [info.name.toLowerCase(), code])
+);
+
+// Resolve whatever string we have to a 2-letter code, or null
+function resolveCode(raw) {
+    if (!raw) return null;
+    const s = raw.trim();
+    if (s.length === 2) return s.toUpperCase();
+    return NAME_TO_CODE[s.toLowerCase()] || null;
+}
 
 function latLonToSvg(lat, lon, w, h) {
     const x = ((lon + 180) / 360) * w;
@@ -41,13 +76,12 @@ function latLonToSvg(lat, lon, w, h) {
 export default function ClickMap({ clicks = [] }) {
     const W = 700, H = 350;
 
-    // Aggregate by country code
+    // Aggregate by resolved 2-letter country code
     const byCountry = {};
     for (const click of clicks) {
-        const code = click.countryCode || click.country;
+        const code = resolveCode(click.countryCode) || resolveCode(click.country);
         if (!code) continue;
-        const upper = code.toUpperCase();
-        byCountry[upper] = (byCountry[upper] || 0) + 1;
+        byCountry[code] = (byCountry[code] || 0) + 1;
     }
 
     const sorted = Object.entries(byCountry)

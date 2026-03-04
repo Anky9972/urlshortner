@@ -124,8 +124,38 @@ router.patch('/:id', authMiddleware, async (req, res) => {
         // Verify ownership
         const existing = await prisma.url.findFirst({ where: { id, userId: req.user.userId } });
         if (!existing) return res.status(404).json({ error: 'URL not found' });
-        const { qrCode: rawQr, ...rest } = req.body;
-        const updateData = { ...rest, ...(rawQr !== undefined && { qrCode: (rawQr && typeof rawQr === 'string') ? rawQr : null }) };
+
+        const {
+            qrCode: rawQr,
+            expiresAt, activatesAt, deactivatesAt,
+            clickLimit,
+            isCloaked,
+            password,
+            title,
+            folderId,
+            ...rest
+        } = req.body;
+
+        // Helper: safely parse an ISO/datetime-local string → Date or null
+        const toDate = (v) => {
+            if (!v) return null;
+            const d = new Date(v);
+            return isNaN(d.getTime()) ? null : d;
+        };
+
+        const updateData = {
+            ...rest,
+            ...(title !== undefined && { title }),
+            ...(password !== undefined && { password: password || null }),
+            ...(folderId !== undefined && { folderId: folderId || null }),
+            ...(isCloaked !== undefined && { isCloaked: Boolean(isCloaked) }),
+            ...(clickLimit !== undefined && { clickLimit: (clickLimit !== null && clickLimit !== '') ? parseInt(clickLimit, 10) : null }),
+            ...(expiresAt !== undefined && { expiresAt: toDate(expiresAt) }),
+            ...(activatesAt !== undefined && { activatesAt: toDate(activatesAt) }),
+            ...(deactivatesAt !== undefined && { deactivatesAt: toDate(deactivatesAt) }),
+            ...(rawQr !== undefined && { qrCode: (rawQr && typeof rawQr === 'string') ? rawQr : null }),
+        };
+
         const url = await prisma.url.update({ where: { id }, data: updateData });
         res.json(url);
     } catch (error) {
