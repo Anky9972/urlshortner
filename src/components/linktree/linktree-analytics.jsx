@@ -106,6 +106,43 @@ function ReferrerBreakdown({ data }) {
     );
 }
 
+// ─── Click Heatmap (positional) ─────────────────────────────────────────────
+function ClickHeatmap({ links }) {
+    const linkLinks = (links || []).filter(l => l.type === 'link');
+    if (linkLinks.length === 0) return <p className="text-xs text-slate-600 py-1">No link data yet</p>;
+    const maxClicks = Math.max(...linkLinks.map(l => l.clicks), 1);
+    return (
+        <div className="space-y-1.5">
+            {linkLinks.map((link, i) => {
+                const heat = link.clicks / maxClicks; // 0-1
+                // interpolate blue(cold) → amber → red(hot)
+                const r = Math.round(heat < 0.5 ? 59 + (229 - 59) * (heat * 2) : 229);
+                const g = Math.round(heat < 0.5 ? 130 * heat * 2 : 130 * (1 - (heat - 0.5) * 2));
+                const b = Math.round(heat < 0.5 ? 246 * (1 - heat * 2) : 0);
+                const color = `rgb(${r},${g},${b})`;
+                return (
+                    <div key={link.id} className="flex items-center gap-2 text-xs">
+                        <span className="text-slate-600 w-4 text-right shrink-0 font-mono">{i + 1}</span>
+                        <div className="flex-1 rounded-md overflow-hidden h-6 bg-[hsl(230,10%,14%)] relative">
+                            <motion.div
+                                className="h-full rounded-md"
+                                style={{ backgroundColor: color, opacity: 0.7 + heat * 0.3 }}
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.max(heat * 100, link.clicks > 0 ? 4 : 0)}%` }}
+                                transition={{ duration: 0.6, ease: 'easeOut' }}
+                            />
+                            <span className="absolute inset-0 flex items-center px-2 text-white/90 font-medium truncate" style={{ fontSize: '10px' }}>
+                                {link.title}
+                            </span>
+                        </div>
+                        <span className="text-slate-400 w-8 text-right shrink-0 font-mono">{link.clicks}</span>
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
+
 export default function LinktreeAnalytics({ linkTreeId, slug }) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -208,7 +245,7 @@ export default function LinktreeAnalytics({ linkTreeId, slug }) {
                 </div>
             )}
 
-            {/* Device + Referrer */}
+            {/* Devices + Referrers */}
             <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] p-4">
                     <h3 className="text-xs text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mb-3">
@@ -223,6 +260,17 @@ export default function LinktreeAnalytics({ linkTreeId, slug }) {
                     <ReferrerBreakdown data={data.referrerBreakdown} />
                 </div>
             </div>
+
+            {/* Click Heatmap */}
+            {data.links?.filter(l => l.type === 'link').length > 0 && (
+                <div className="rounded-xl border border-[hsl(230,10%,15%)] bg-[hsl(230,12%,9%)] p-4 space-y-3">
+                    <h3 className="text-xs text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <MousePointerClick className="w-3.5 h-3.5" /> Click Heatmap
+                    </h3>
+                    <p className="text-[10px] text-slate-600">Color intensity shows relative click heat per position.</p>
+                    <ClickHeatmap links={data.links} />
+                </div>
+            )}
 
             {data.viewCount === 0 && (
                 <p className="text-xs text-center text-slate-600 py-2">

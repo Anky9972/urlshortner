@@ -150,3 +150,33 @@ export async function bulkUpdateLinks(treeId, links) {
         body: JSON.stringify({ links }),
     });
 }
+
+/**
+ * Authenticate a password-protected linktree
+ */
+export async function authLinktree(slug, password) {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    const response = await fetch(`${API_URL}/api/linktrees/public/${slug}/auth`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Authentication failed');
+    return data;
+}
+
+/**
+ * Get a linktree by custom domain (public)
+ */
+export async function getLinkTreeByDomain(domain) {
+    return apiRequest(`/api/linktrees/by-domain/${encodeURIComponent(domain)}`);
+}
+
+/**
+ * Get linktrees for a team
+ */
+export async function getTeamLinkTrees(teamId) {
+    return apiRequest(`/api/linktrees/team/${teamId}`);
+}

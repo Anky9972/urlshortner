@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const prisma = require('../lib/prisma.cjs');
 const { authMiddleware, optionalAuth } = require('../middleware/auth.cjs');
+const bcrypt = require('bcryptjs');
 
 const router = Router();
 
@@ -52,6 +53,27 @@ function slugify(title, suffix = '') {
     return suffix ? `${base}-${suffix}` : base;
 }
 
+// Check if a tree's scheduled activation window is currently active
+function isTreeScheduleActive(tree) {
+    const now = new Date();
+    if (tree.publishAt && new Date(tree.publishAt) > now) return false;   // Not yet published
+    if (tree.unpublishAt && new Date(tree.unpublishAt) < now) return false; // Already unpublished
+    return true;
+}
+
+// Apply A/B rotation to a list of links (server-side random pick per link)
+function applyABRotation(links) {
+    return links.map(link => {
+        if (link.abVariantUrl && link.type === 'link') {
+            const showVariant = Math.random() * 100 < (link.abWeight ?? 50);
+            if (showVariant) {
+                return { ...link, url: link.abVariantUrl, title: link.abVariantTitle || link.title, _ab: 'b' };
+            }
+        }
+        return { ...link, _ab: 'a' };
+    });
+}
+
 // Scheduling filter for public link items
 function linkSchedulingFilter() {
     const now = new Date();
@@ -93,12 +115,33 @@ router.get('/public/:slug', async (req, res) => {
                     where: linkSchedulingFilter(),
                     orderBy: { order: 'asc' }
                 },
-                user: { select: { name: true, avatarUrl: true } }
+                user: { select: { name: true, avatarUrl: true, isVerified: true } }
             }
         });
 
         if (!tree) return res.status(404).json({ error: 'LinkTree not found' });
         if (!tree.isPublic) return res.status(404).json({ error: 'LinkTree not found' });
+
+        // Scheduled activation check
+        if (!isTreeScheduleActive(tree)) {
+            return res.status(410).json({
+                error: 'This LinkTree is not currently active',
+                publishAt: tree.publishAt,
+                unpublishAt: tree.unpublishAt,
+            });
+        }
+
+        // Password protection — return gate info without full tree data
+        if (tree.password) {
+            return res.status(403).json({
+                passwordRequired: true,
+                id: tree.id,
+                slug: tree.slug,
+                title: tree.title,
+                avatarUrl: tree.avatarUrl,
+                user: tree.user,
+            });
+        }
 
         // Increment view count (fire-and-forget)
         prisma.linkTree.update({
@@ -117,9 +160,88 @@ router.get('/public/:slug', async (req, res) => {
             }
         }).catch(() => {});
 
-        res.json(tree);
+        // Strip password hash and apply A/B rotation before sending
+        const { password: _pw, ...safeTree } = tree;
+        safeTree.links = applyABRotation(safeTree.links);
+        res.json(safeTree);
     } catch (error) {
         console.error('Error fetching public linktree:', error);
+        res.status(500).json({ error: 'Failed to fetch linktree' });
+    }
+});
+
+// Verify password for a password-protected linktree
+router.post('/public/:slug/auth', async (req, res) => {
+    try {
+        const { password } = req.body;
+        if (!password) return res.status(400).json({ error: 'password is required' });
+
+        const tree = await prisma.linkTree.findUnique({
+            where: { slug: req.params.slug },
+            include: {
+                links: { where: linkSchedulingFilter(), orderBy: { order: 'asc' } },
+                user: { select: { name: true, avatarUrl: true, isVerified: true } }
+            }
+        });
+
+        if (!tree || !tree.isPublic) return res.status(404).json({ error: 'LinkTree not found' });
+        if (!tree.password) {
+            const { password: _pw, ...safe } = tree;
+            safe.links = applyABRotation(safe.links);
+            return res.json(safe);
+        }
+
+        const valid = await bcrypt.compare(password, tree.password);
+        if (!valid) return res.status(401).json({ error: 'Incorrect password' });
+
+        // Track view event
+        prisma.linkTree.update({ where: { id: tree.id }, data: { viewCount: { increment: 1 } } }).catch(() => {});
+        prisma.linkTreeEvent.create({
+            data: {
+                linkTreeId: tree.id, eventType: 'view',
+                device: detectDevice(req.headers['user-agent']),
+                referrer: extractReferrer(req.headers['referer'] || req.headers['referrer']),
+                country: extractCountry(req),
+            }
+        }).catch(() => {});
+
+        const { password: _pw2, ...safeTree } = tree;
+        safeTree.links = applyABRotation(safeTree.links);
+        res.json(safeTree);
+    } catch (error) {
+        console.error('Error in linktree auth:', error);
+        res.status(500).json({ error: 'Failed to authenticate' });
+    }
+});
+
+// Get a linktree by custom domain host
+router.get('/by-domain/:domain', async (req, res) => {
+    try {
+        const domainRecord = await prisma.customDomain.findUnique({
+            where: { domain: req.params.domain }
+        });
+        if (!domainRecord || !domainRecord.verified)
+            return res.status(404).json({ error: 'Domain not found or not verified' });
+
+        const tree = await prisma.linkTree.findFirst({
+            where: { customDomainId: domainRecord.id, isPublic: true },
+            include: {
+                links: { where: linkSchedulingFilter(), orderBy: { order: 'asc' } },
+                user: { select: { name: true, avatarUrl: true, isVerified: true } }
+            }
+        });
+        if (!tree) return res.status(404).json({ error: 'No active LinkTree for this domain' });
+        if (!isTreeScheduleActive(tree)) return res.status(410).json({ error: 'Not currently active' });
+        if (tree.password) {
+            return res.status(403).json({ passwordRequired: true, id: tree.id, slug: tree.slug, title: tree.title });
+        }
+
+        prisma.linkTree.update({ where: { id: tree.id }, data: { viewCount: { increment: 1 } } }).catch(() => {});
+        const { password: _pw, ...safeTree } = tree;
+        safeTree.links = applyABRotation(safeTree.links);
+        res.json(safeTree);
+    } catch (error) {
+        console.error('Error fetching by domain:', error);
         res.status(500).json({ error: 'Failed to fetch linktree' });
     }
 });
@@ -166,21 +288,22 @@ router.post('/public/:slug/click/:linkId', async (req, res) => {
     }
 });
 
-// Get public linktrees gallery (paginated)
+// Get public linktrees gallery (paginated, schedule-aware)
 router.get('/gallery', async (req, res) => {
     try {
         const limit = Math.min(parseInt(req.query.limit || '24', 10), 100);
         const cursor = req.query.cursor || undefined;
+        const now = new Date();
 
         const trees = await prisma.linkTree.findMany({
-            where: { isPublic: true },
+            where: {
+                isPublic: true,
+                OR: [{ publishAt: null }, { publishAt: { lte: now } }],
+                AND: [{ OR: [{ unpublishAt: null }, { unpublishAt: { gte: now } }] }],
+            },
             include: {
-                links: {
-                    where: { isActive: true },
-                    orderBy: { order: 'asc' },
-                    take: 5
-                },
-                user: { select: { name: true, avatarUrl: true } }
+                links: { where: { isActive: true }, orderBy: { order: 'asc' }, take: 5 },
+                user: { select: { name: true, avatarUrl: true, isVerified: true } }
             },
             orderBy: { viewCount: 'desc' },
             take: limit + 1,
@@ -189,8 +312,9 @@ router.get('/gallery', async (req, res) => {
 
         const hasMore = trees.length > limit;
         const results = hasMore ? trees.slice(0, limit) : trees;
+        // Don't expose password hash
         res.json({
-            trees: results,
+            trees: results.map(({ password: _p, ...t }) => t),
             nextCursor: hasMore ? results[results.length - 1].id : null,
             hasMore,
         });
@@ -206,11 +330,23 @@ router.get('/gallery', async (req, res) => {
 
 router.use(authMiddleware);
 
-// Get all linktrees for current user
+// Get all linktrees for current user (including team linktrees the user is a member of)
 router.get('/', async (req, res) => {
     try {
-        const trees = await prisma.linkTree.findMany({
+        // Find team IDs this user belongs to
+        const memberships = await prisma.teamMember.findMany({
             where: { userId: req.user.userId },
+            select: { teamId: true }
+        });
+        const teamIds = memberships.map(m => m.teamId);
+
+        const trees = await prisma.linkTree.findMany({
+            where: {
+                OR: [
+                    { userId: req.user.userId },
+                    ...(teamIds.length ? [{ teamId: { in: teamIds } }] : [])
+                ]
+            },
             include: {
                 links: { orderBy: { order: 'asc' } },
                 _count: { select: { links: true } }
@@ -221,6 +357,26 @@ router.get('/', async (req, res) => {
     } catch (error) {
         console.error('Error fetching linktrees:', error);
         res.status(500).json({ error: 'Failed to fetch linktrees' });
+    }
+});
+
+// Get team linktrees
+router.get('/team/:teamId', async (req, res) => {
+    try {
+        const isMember = await prisma.teamMember.findUnique({
+            where: { teamId_userId: { teamId: req.params.teamId, userId: req.user.userId } }
+        });
+        if (!isMember) return res.status(403).json({ error: 'Not a team member' });
+
+        const trees = await prisma.linkTree.findMany({
+            where: { teamId: req.params.teamId },
+            include: { links: { orderBy: { order: 'asc' } }, _count: { select: { links: true } } },
+            orderBy: { updatedAt: 'desc' }
+        });
+        res.json(trees);
+    } catch (error) {
+        console.error('Error fetching team linktrees:', error);
+        res.status(500).json({ error: 'Failed to fetch team linktrees' });
     }
 });
 
@@ -296,16 +452,24 @@ router.get('/:id/analytics', async (req, res) => {
     }
 });
 
-// Get single linktree by ID
+// Get single linktree by ID (owner or team member)
 router.get('/:id', async (req, res) => {
     try {
-        const tree = await prisma.linkTree.findFirst({
-            where: { id: req.params.id, userId: req.user.userId },
-            include: {
-                links: { orderBy: { order: 'asc' } }
-            }
+        const tree = await prisma.linkTree.findUnique({
+            where: { id: req.params.id },
+            include: { links: { orderBy: { order: 'asc' } } }
         });
         if (!tree) return res.status(404).json({ error: 'LinkTree not found' });
+
+        // Access: owner OR team member
+        if (tree.userId !== req.user.userId && tree.teamId) {
+            const isMember = await prisma.teamMember.findUnique({
+                where: { teamId_userId: { teamId: tree.teamId, userId: req.user.userId } }
+            });
+            if (!isMember) return res.status(404).json({ error: 'LinkTree not found' });
+        } else if (tree.userId !== req.user.userId) {
+            return res.status(404).json({ error: 'LinkTree not found' });
+        }
         res.json(tree);
     } catch (error) {
         console.error('Error fetching linktree:', error);
@@ -316,44 +480,41 @@ router.get('/:id', async (req, res) => {
 // Create linktree
 router.post('/', async (req, res) => {
     try {
-        const { title, description, slug: rawSlug, theme, customCss, avatarUrl, backgroundColor, textColor, buttonStyle, isPublic, links, socialLinks, backgroundImage, fontFamily, seoTitle, seoDescription, seoImage } = req.body;
+        const {
+            title, description, slug: rawSlug, theme, customCss, avatarUrl,
+            backgroundColor, textColor, buttonStyle, isPublic, links,
+            socialLinks, backgroundImage, fontFamily, seoTitle, seoDescription, seoImage,
+            password: rawPassword, publishAt, unpublishAt, customDomainId, teamId
+        } = req.body;
 
-        if (!title) {
-            return res.status(400).json({ error: 'title is required' });
-        }
+        if (!title) return res.status(400).json({ error: 'title is required' });
 
         // Auto-generate slug from title if not provided
         let slug = rawSlug ? rawSlug.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/(^-|-$)/g, '') : null;
-        if (!slug) {
-            slug = slugify(title, Date.now().toString(36));
-        }
+        if (!slug) slug = slugify(title, Date.now().toString(36));
 
-        // Ensure uniqueness — append random suffix if taken
-        let finalSlug = slug;
-        let attempt = 0;
+        // Ensure uniqueness
+        let finalSlug = slug, attempt = 0;
         while (await prisma.linkTree.findUnique({ where: { slug: finalSlug } })) {
-            attempt++;
-            finalSlug = `${slug}-${attempt}`;
+            finalSlug = `${slug}-${++attempt}`;
         }
         slug = finalSlug;
 
-        // (legacy check kept for backward compat)
-        const existing = await prisma.linkTree.findUnique({ where: { slug } });
-        if (existing) return res.status(400).json({ error: 'Slug already taken' });
+        // Hash password if provided
+        const passwordHash = rawPassword ? await bcrypt.hash(rawPassword, 10) : undefined;
 
         const tree = await prisma.linkTree.create({
             data: {
-                title,
-                description,
-                slug,
-                theme: theme || 'default',
-                customCss,
-                avatarUrl,
-                backgroundColor,
-                textColor,
+                title, description, slug,
+                theme: theme || 'default', customCss, avatarUrl, backgroundColor, textColor,
                 buttonStyle: buttonStyle || 'rounded',
                 isPublic: isPublic !== false,
                 userId: req.user.userId,
+                ...(passwordHash !== undefined && { password: passwordHash }),
+                ...(publishAt !== undefined && { publishAt: publishAt ? new Date(publishAt) : null }),
+                ...(unpublishAt !== undefined && { unpublishAt: unpublishAt ? new Date(unpublishAt) : null }),
+                ...(customDomainId !== undefined && { customDomainId }),
+                ...(teamId !== undefined && { teamId }),
                 ...(socialLinks !== undefined && { socialLinks }),
                 ...(backgroundImage !== undefined && { backgroundImage }),
                 ...(fontFamily !== undefined && { fontFamily }),
@@ -363,12 +524,15 @@ router.post('/', async (req, res) => {
                 links: links && links.length > 0 ? {
                     create: links.map((link, index) => ({
                         title: link.title,
-                        url: link.url,
+                        url: link.url || '',
                         icon: link.icon,
                         thumbnail: link.thumbnail,
                         isActive: link.isActive !== false,
                         order: link.order ?? index,
                         type: link.type || 'link',
+                        abVariantUrl: link.abVariantUrl || null,
+                        abVariantTitle: link.abVariantTitle || null,
+                        abWeight: link.abWeight ?? 50,
                         activatesAt: link.activatesAt ? new Date(link.activatesAt) : null,
                         deactivatesAt: link.deactivatesAt ? new Date(link.deactivatesAt) : null,
                     }))
@@ -377,7 +541,8 @@ router.post('/', async (req, res) => {
             include: { links: { orderBy: { order: 'asc' } } }
         });
 
-        res.status(201).json(tree);
+        const { password: _pw, ...safe } = tree;
+        res.status(201).json(safe);
     } catch (error) {
         console.error('Error creating linktree:', error);
         res.status(500).json({ error: 'Failed to create linktree' });
@@ -392,12 +557,22 @@ router.patch('/:id', async (req, res) => {
         });
         if (!existing) return res.status(404).json({ error: 'LinkTree not found' });
 
-        const { title, description, slug, theme, customCss, avatarUrl, backgroundColor, textColor, buttonStyle, isPublic, socialLinks, backgroundImage, fontFamily, seoTitle, seoDescription, seoImage } = req.body;
+        const {
+            title, description, slug, theme, customCss, avatarUrl,
+            backgroundColor, textColor, buttonStyle, isPublic,
+            socialLinks, backgroundImage, fontFamily, seoTitle, seoDescription, seoImage,
+            password: rawPassword, publishAt, unpublishAt, customDomainId, teamId
+        } = req.body;
 
-        // Check slug uniqueness if changing
         if (slug && slug !== existing.slug) {
             const slugExists = await prisma.linkTree.findUnique({ where: { slug } });
             if (slugExists) return res.status(400).json({ error: 'Slug already taken' });
+        }
+
+        // Hash new password, or null out if empty string passed, or keep existing if not provided
+        let passwordUpdate = {};
+        if (rawPassword !== undefined) {
+            passwordUpdate = { password: rawPassword ? await bcrypt.hash(rawPassword, 10) : null };
         }
 
         const tree = await prisma.linkTree.update({
@@ -419,11 +594,17 @@ router.patch('/:id', async (req, res) => {
                 ...(seoTitle !== undefined && { seoTitle }),
                 ...(seoDescription !== undefined && { seoDescription }),
                 ...(seoImage !== undefined && { seoImage }),
+                ...(publishAt !== undefined && { publishAt: publishAt ? new Date(publishAt) : null }),
+                ...(unpublishAt !== undefined && { unpublishAt: unpublishAt ? new Date(unpublishAt) : null }),
+                ...(customDomainId !== undefined && { customDomainId }),
+                ...(teamId !== undefined && { teamId }),
+                ...passwordUpdate,
             },
             include: { links: { orderBy: { order: 'asc' } } }
         });
 
-        res.json(tree);
+        const { password: _pw, ...safe } = tree;
+        res.json(safe);
     } catch (error) {
         console.error('Error updating linktree:', error);
         res.status(500).json({ error: 'Failed to update linktree' });
@@ -595,6 +776,9 @@ router.put('/:id/links', async (req, res) => {
                         order: link.order ?? index,
                         clicks: link.clicks || 0,
                         type: link.type || 'link',
+                        abVariantUrl: link.abVariantUrl || null,
+                        abVariantTitle: link.abVariantTitle || null,
+                        abWeight: link.abWeight ?? 50,
                         activatesAt: link.activatesAt ? new Date(link.activatesAt) : null,
                         deactivatesAt: link.deactivatesAt ? new Date(link.deactivatesAt) : null,
                     }

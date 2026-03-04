@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link2Icon, MousePointerClick, Smartphone, Monitor } from "lucide-react";
+import { Link2Icon, MousePointerClick, Smartphone, Monitor, BadgeCheck } from "lucide-react";
 import PropTypes from "prop-types";
 import {
   FaGithub,
@@ -174,8 +174,11 @@ const LinkContent = ({ profile, theme, buttonShapeClass, visibleLinks, user, han
           className="w-full h-full object-cover"
         />
       </div>
-      <h1 className={`text-xl font-bold ${theme.textColor} mb-2`}>
+      <h1 className={`text-xl font-bold ${theme.textColor} mb-2 flex items-center justify-center gap-1.5`}>
         {profile.name}
+        {profile.isVerified && (
+          <BadgeCheck className="w-5 h-5 text-blue-400 shrink-0" title="Verified" />
+        )}
       </h1>
       <p className="text-slate-400">{profile.bio}</p>
 

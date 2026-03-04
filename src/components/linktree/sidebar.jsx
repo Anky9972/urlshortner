@@ -78,6 +78,7 @@ const EmbedWidget = ({ linkTreeId }) => {
 const SortableLinkItem = ({ link, index, links, setLinks }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: link.id });
   const [showSchedule, setShowSchedule] = useState(false);
+  const [showAB, setShowAB] = useState(false);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -196,6 +197,40 @@ const SortableLinkItem = ({ link, index, links, setLinks }) => {
                   </div>
                 </div>
               )}
+              {/* A/B Variant */}
+              <button onClick={() => setShowAB(s => !s)}
+                className="text-xs text-slate-500 hover:text-slate-300 flex items-center gap-1 transition-colors">
+                <span>{showAB ? '▾' : '▸'}</span> A/B Variant (optional)
+              </button>
+              {showAB && (
+                <div className="space-y-2 pt-1 border-t border-[hsl(230,10%,18%)] mt-1">
+                  <input
+                    type="url"
+                    value={link.abVariantUrl || ''}
+                    onChange={(e) => updateLink('abVariantUrl', e.target.value || null)}
+                    className="w-full px-3 py-2 text-white text-xs rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-violet-600/50 focus:outline-none transition-colors"
+                    placeholder="Variant URL (leave blank to disable A/B)"
+                  />
+                  <input
+                    type="text"
+                    value={link.abVariantTitle || ''}
+                    onChange={(e) => updateLink('abVariantTitle', e.target.value || null)}
+                    className="w-full px-3 py-2 text-white text-xs rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-violet-600/50 focus:outline-none transition-colors"
+                    placeholder="Variant Title (optional)"
+                  />
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-slate-500 shrink-0">Original %</label>
+                    <input
+                      type="range" min="0" max="100"
+                      value={link.abWeight ?? 50}
+                      onChange={(e) => updateLink('abWeight', parseInt(e.target.value))}
+                      className="flex-1 accent-violet-500"
+                    />
+                    <span className="text-xs text-slate-400 w-8 text-right shrink-0">{link.abWeight ?? 50}%</span>
+                  </div>
+                  <p className="text-[10px] text-slate-600">Variant receives {100 - (link.abWeight ?? 50)}% of clicks</p>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -221,7 +256,13 @@ const Sidebar = ({
   sidebarOpen,
   setSidebarOpen,
   title,
-  setTitle
+  setTitle,
+  treePassword,
+  setTreePassword,
+  publishAt,
+  setPublishAt,
+  unpublishAt,
+  setUnpublishAt,
 }) => {
   const [slugStatus, setSlugStatus] = useState(null); // null | 'checking' | 'available' | 'taken'
 
@@ -564,6 +605,46 @@ const Sidebar = ({
                 {linkTreeId && (
                   <EmbedWidget linkTreeId={linkTreeId} />
                 )}
+
+                {/* Password Protection */}
+                <div className="pt-1 border-t border-[hsl(230,10%,18%)]">
+                  <label className="block text-sm font-medium text-slate-300 mb-1 mt-3">Password Protection</label>
+                  <p className="text-xs text-slate-500 mb-2">Leave blank to keep public. Set a password to restrict access.</p>
+                  <input
+                    type="password"
+                    value={treePassword || ''}
+                    onChange={(e) => setTreePassword(e.target.value)}
+                    placeholder="Set password (leave blank = public)"
+                    className="w-full px-3 py-2 text-white text-sm rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:border-blue-600/50 focus:outline-none transition-colors"
+                  />
+                  {treePassword && <p className="text-xs text-amber-400 mt-1">A password will be set on save.</p>}
+                </div>
+
+                {/* Scheduled Activation */}
+                <div className="pt-1 border-t border-[hsl(230,10%,18%)]">
+                  <label className="block text-sm font-medium text-slate-300 mb-1 mt-3">Scheduled Activation</label>
+                  <p className="text-xs text-slate-500 mb-3">Optionally restrict when your LinkTree is publicly accessible.</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs text-slate-600 mb-1 block">Publish at</label>
+                      <input
+                        type="datetime-local"
+                        value={publishAt || ''}
+                        onChange={(e) => setPublishAt(e.target.value || null)}
+                        className="w-full px-2 py-1.5 text-xs text-slate-300 rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-600 mb-1 block">Unpublish at</label>
+                      <input
+                        type="datetime-local"
+                        value={unpublishAt || ''}
+                        onChange={(e) => setUnpublishAt(e.target.value || null)}
+                        className="w-full px-2 py-1.5 text-xs text-slate-300 rounded-lg border border-[hsl(230,10%,20%)] bg-[hsl(230,10%,14%)] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -614,7 +695,13 @@ Sidebar.propTypes = {
   sidebarOpen: PropTypes.bool.isRequired,
   setSidebarOpen: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
-  setTitle: PropTypes.func.isRequired
+  setTitle: PropTypes.func.isRequired,
+  treePassword: PropTypes.string,
+  setTreePassword: PropTypes.func,
+  publishAt: PropTypes.string,
+  setPublishAt: PropTypes.func,
+  unpublishAt: PropTypes.string,
+  setUnpublishAt: PropTypes.func,
 };
 
 export default Sidebar;
