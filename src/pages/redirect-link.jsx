@@ -19,10 +19,6 @@ const RedirectLink = () => {
   const [isFreeUrl, setIsFreeUrl] = useState(false);
 
   const { loading, data, fn } = useFetch(getLongUrl, id);
-  const { fn: fnStats } = useFetch(recordClick, {
-    id: data?.id,
-    originalUrl: data?.original_url,
-  });
 
   useEffect(() => {
     fn();
@@ -113,7 +109,12 @@ const RedirectLink = () => {
     const deviceInfo = getDeviceInfo();
 
     try {
-      await fnStats();
+      await recordClick(urlInfo.id, {
+        device: deviceInfo.device,
+        browser: deviceInfo.browser,
+        os: deviceInfo.os,
+        referrer: document.referrer || null,
+      });
     } catch (error) {
       console.error("Error recording click:", error);
     }
