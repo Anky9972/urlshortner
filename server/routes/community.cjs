@@ -13,7 +13,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { prisma } = require('../lib/prisma.cjs');
+const prisma = require('../lib/prisma.cjs');
 const { authMiddleware } = require('../middleware/auth.cjs');
 
 // ──────────── helpers ────────────
