@@ -319,7 +319,7 @@ export default function CommunityPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 relative">
           {/* ═══════ HERO ═══════ */}
           <motion.div
-            className="text-center mb-20"
+            className="text-center mb-12"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -337,9 +337,44 @@ export default function CommunityPage() {
               Community
             </h1>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-              TrimLink is open source and built by developers like you. Join our growing community to contribute, connect, and shape the future of link management.
+              Ask questions, share ideas, and get help from the TrimLink community. Or scroll down to explore how you can contribute to the project.
             </p>
+          </motion.div>
 
+          {/* ═══════ DISCUSSION BOARD (TOP) ═══════ */}
+          <motion.section
+            className="mb-20"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            id="discussions"
+          >
+            <DiscussionBoard user={user} />
+          </motion.section>
+
+          {/* ═══════ SEPARATOR ═══════ */}
+          <div className="relative mb-20">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[hsl(230,10%,15%)]" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-[hsl(230,15%,5%)] px-6 text-sm text-slate-500 uppercase tracking-wider font-medium">
+                Open Source & Contribute
+              </span>
+            </div>
+          </div>
+
+          {/* ═══════ HERO BUTTONS + STATS ═══════ */}
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+          >
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Shape the Future of TrimLink</h2>
+            <p className="text-slate-400 max-w-lg mx-auto mb-8">
+              TrimLink is open source and built by developers like you. Contribute code, report bugs, or suggest features.
+            </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
               <a
                 href={GITHUB_REPO}
@@ -367,7 +402,7 @@ export default function CommunityPage() {
             className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
+            transition={{ delay: 0.2 }}
           >
             {[
               { label: 'GitHub Stars', icon: Star, value: ghStats.stars, color: 'text-yellow-400', border: 'border-yellow-500/20', link: GITHUB_REPO },
@@ -437,7 +472,7 @@ export default function CommunityPage() {
             className="mb-20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
+            transition={{ delay: 0.3 }}
           >
             <div className="text-center mb-10">
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Connect With Us</h2>
@@ -463,25 +498,12 @@ export default function CommunityPage() {
             </div>
           </motion.section>
 
-          {/* ═══════ DISCUSSION BOARD ═══════ */}
-          <motion.section
-            className="mb-20"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.38 }}
-            id="discussions"
-          >
-            <div className="bg-[hsl(230,10%,7%)] border border-[hsl(230,10%,13%)] rounded-2xl p-6 md:p-8">
-              <DiscussionBoard user={user} />
-            </div>
-          </motion.section>
-
           {/* ═══════ COMMUNITY GUIDELINES ═══════ */}
           <motion.section
             className="mb-20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.35 }}
           >
             <div className="bg-[hsl(230,10%,9%)] border border-[hsl(230,10%,15%)] rounded-2xl p-8 md:p-10">
               <div className="text-center mb-8">
@@ -511,7 +533,7 @@ export default function CommunityPage() {
             className="mb-20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
+            transition={{ delay: 0.4 }}
           >
             <div className="text-center mb-10">
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Getting Started</h2>
@@ -549,7 +571,7 @@ export default function CommunityPage() {
             className="mb-20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.45 }}
           >
             <div className="text-center mb-10">
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Tech Stack</h2>
@@ -585,7 +607,7 @@ export default function CommunityPage() {
             className="mb-20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.55 }}
+            transition={{ delay: 0.5 }}
           >
             <div className="text-center mb-10">
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">FAQ</h2>
@@ -610,7 +632,7 @@ export default function CommunityPage() {
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.55 }}
           >
             <div className="relative bg-gradient-to-br from-blue-600/10 via-violet-600/10 to-emerald-600/5 border border-[hsl(230,10%,15%)] rounded-2xl p-10 md:p-14 text-center overflow-hidden">
               <div className="absolute top-0 left-1/4 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
