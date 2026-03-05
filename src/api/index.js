@@ -135,3 +135,15 @@ export {
     addRoomUrl,
     removeRoomUrl
 } from './rooms';
+
+// Community Discussion Board
+export {
+    getCommunityPosts,
+    getCommunityPost,
+    createCommunityPost,
+    addCommunityReply,
+    toggleCommunityLike,
+    resolveCommunityPost,
+    deleteCommunityPost,
+    deleteCommunityReply
+} from './community';

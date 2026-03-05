@@ -61,6 +61,11 @@ model User {
   auditLogs     AuditLog[]
   domains       CustomDomain[]
   dynamicQrs    DynamicQr[]
+
+  // Community
+  communityPosts    CommunityPost[]
+  communityReplies  CommunityReply[]
+  communityLikes    CommunityLike[]
 }
 
 // ============================================
@@ -660,5 +665,66 @@ model LinkHealthCheck {
 
   @@index([urlId])
   @@index([checkedAt])
+}
+
+// ============================================
+// COMMUNITY DISCUSSION BOARD
+// ============================================
+
+model CommunityPost {
+  id          String    @id @default(cuid())
+  title       String
+  content     String
+  category    String    @default("general") // general, help, feature, showcase, bug
+  isPinned    Boolean   @default(false)
+  isResolved  Boolean   @default(false)
+
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  replies     CommunityReply[]
+  likes       CommunityLike[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([category])
+  @@index([createdAt])
+  @@index([isPinned])
+}
+
+model CommunityReply {
+  id        String    @id @default(cuid())
+  content   String
+
+  postId    String
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([postId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model CommunityLike {
+  id      String    @id @default(cuid())
+
+  postId  String
+  post    CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  userId  String
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId]) // one like per user per post
+  @@index([postId])
+  @@index([userId])
 }
 

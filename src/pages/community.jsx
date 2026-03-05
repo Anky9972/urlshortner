@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
@@ -13,7 +13,6 @@ import {
   Lightbulb,
   BookOpen,
   Code2,
-  ArrowRight,
   ExternalLink,
   Sparkles,
   Globe,
@@ -24,23 +23,19 @@ import {
   ChevronUp,
   Check,
   Copy,
+  Loader2,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { SEOMetadata } from '@/components/seo-metadata';
+import { UrlState } from '@/context';
+import DiscussionBoard from '@/components/discussion-board';
 
 /* ═══════════════ CONFIG ═══════════════ */
-const GITHUB_REPO = 'https://github.com/Anky9972/urlshortner';
-const GITHUB_PROFILE = 'https://github.com/Anky9972';
+const GITHUB_OWNER = 'Anky9972';
+const GITHUB_REPO_NAME = 'urlshortner';
+const GITHUB_REPO = `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO_NAME}`;
+const GITHUB_PROFILE = `https://github.com/${GITHUB_OWNER}`;
 const TWITTER_URL = 'https://x.com/anky_vivek';
 const CONTACT_EMAIL = 'ankygaur9972@gmail.com';
-
-/* ═══════════════ STATS ═══════════════ */
-const communityStats = [
-  { label: 'GitHub Stars', value: '⭐', metric: 'Star us!', link: GITHUB_REPO },
-  { label: 'Contributors', value: '🤝', metric: 'Join us', link: `${GITHUB_REPO}/graphs/contributors` },
-  { label: 'Open Issues', value: '🐛', metric: 'Help fix', link: `${GITHUB_REPO}/issues` },
-  { label: 'Pull Requests', value: '🔀', metric: 'Contribute', link: `${GITHUB_REPO}/pulls` },
-];
 
 /* ═══════════════ CONTRIBUTION WAYS ═══════════════ */
 const contributionWays = [
@@ -48,7 +43,7 @@ const contributionWays = [
     icon: Bug,
     title: 'Report Bugs',
     description: 'Found a bug? Help us improve by reporting it on GitHub Issues with detailed steps to reproduce.',
-    link: `${GITHUB_REPO}/issues/new?template=bug_report.md`,
+    link: `${GITHUB_REPO}/issues/new?labels=bug&title=Bug%3A+`,
     linkText: 'Report a Bug',
     color: 'text-red-400',
     bg: 'bg-red-500/10',
@@ -58,7 +53,7 @@ const contributionWays = [
     icon: Lightbulb,
     title: 'Request Features',
     description: 'Have an idea for a new feature? Share it with us and the community will discuss and vote.',
-    link: `${GITHUB_REPO}/issues/new?template=feature_request.md`,
+    link: `${GITHUB_REPO}/issues/new?labels=enhancement&title=Feature%3A+`,
     linkText: 'Suggest Feature',
     color: 'text-amber-400',
     bg: 'bg-amber-500/10',
@@ -98,7 +93,7 @@ const contributionWays = [
     icon: MessageSquare,
     title: 'Join Discussions',
     description: 'Participate in GitHub Discussions. Ask questions, share tips, and connect with other users.',
-    link: `${GITHUB_REPO}/discussions`,
+    link: `${GITHUB_REPO}/issues`,
     linkText: 'Join Discussion',
     color: 'text-violet-400',
     bg: 'bg-violet-500/10',
@@ -263,6 +258,48 @@ function FAQItem({ item, isOpen, onToggle }) {
 /* ═══════════════════════════════════════ */
 export default function CommunityPage() {
   const [openFaq, setOpenFaq] = useState(null);
+  const [ghStats, setGhStats] = useState({ stars: null, forks: null, openIssues: null, contributors: null, loading: true });
+  const { user } = UrlState();
+
+  /* Fetch live stats from GitHub public API (no auth needed, 60 req/hr) */
+  useEffect(() => {
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const [repoRes, contribRes] = await Promise.all([
+          fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO_NAME}`, { signal: controller.signal }),
+          fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO_NAME}/contributors?per_page=1&anon=true`, { signal: controller.signal }),
+        ]);
+
+        const repo = await repoRes.json();
+
+        // GitHub returns contributor count via Link header pagination
+        let contributorCount = 0;
+        const linkHeader = contribRes.headers.get('Link');
+        if (linkHeader) {
+          const match = linkHeader.match(/page=(\d+)>;\s*rel="last"/);
+          contributorCount = match ? parseInt(match[1], 10) : 1;
+        } else {
+          const contribData = await contribRes.json();
+          contributorCount = Array.isArray(contribData) ? contribData.length : 0;
+        }
+
+        setGhStats({
+          stars: repo.stargazers_count ?? 0,
+          forks: repo.forks_count ?? 0,
+          openIssues: repo.open_issues_count ?? 0,
+          contributors: contributorCount,
+          loading: false,
+        });
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.warn('GitHub API fetch failed:', err);
+          setGhStats(prev => ({ ...prev, loading: false }));
+        }
+      }
+    })();
+    return () => controller.abort();
+  }, []);
 
   return (
     <>
@@ -325,26 +362,33 @@ export default function CommunityPage() {
             </div>
           </motion.div>
 
-          {/* ═══════ COMMUNITY STATS ═══════ */}
+          {/* ═══════ COMMUNITY STATS (LIVE) ═══════ */}
           <motion.div
             className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
           >
-            {communityStats.map((stat, i) => (
+            {[
+              { label: 'GitHub Stars', icon: Star, value: ghStats.stars, color: 'text-yellow-400', border: 'border-yellow-500/20', link: GITHUB_REPO },
+              { label: 'Contributors', icon: Users, value: ghStats.contributors, color: 'text-emerald-400', border: 'border-emerald-500/20', link: `${GITHUB_REPO}/graphs/contributors` },
+              { label: 'Open Issues', icon: Bug, value: ghStats.openIssues, color: 'text-red-400', border: 'border-red-500/20', link: `${GITHUB_REPO}/issues` },
+              { label: 'Forks', icon: GitPullRequest, value: ghStats.forks, color: 'text-violet-400', border: 'border-violet-500/20', link: `${GITHUB_REPO}/fork` },
+            ].map((stat) => (
               <a
                 key={stat.label}
                 href={stat.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative bg-[hsl(230,10%,9%)] border border-[hsl(230,10%,15%)] rounded-2xl p-5 text-center hover:border-blue-500/30 transition-all hover:bg-[hsl(230,10%,11%)]"
+                className={`group relative bg-[hsl(230,10%,9%)] border border-[hsl(230,10%,15%)] rounded-2xl p-5 text-center hover:${stat.border} transition-all hover:bg-[hsl(230,10%,11%)]`}
               >
-                <div className="text-3xl mb-2">{stat.value}</div>
-                <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">{stat.label}</p>
-                <p className="text-sm text-blue-400 font-medium group-hover:underline">
-                  {stat.metric} <ArrowRight className="w-3 h-3 inline ml-0.5" />
-                </p>
+                <stat.icon className={`w-7 h-7 ${stat.color} mx-auto mb-2`} />
+                {ghStats.loading ? (
+                  <Loader2 className="w-5 h-5 text-slate-600 mx-auto animate-spin mb-1" />
+                ) : (
+                  <p className="text-2xl font-bold text-white mb-1">{stat.value ?? '—'}</p>
+                )}
+                <p className="text-xs text-slate-500 uppercase tracking-wider">{stat.label}</p>
               </a>
             ))}
           </motion.div>
@@ -416,6 +460,19 @@ export default function CommunityPage() {
                   <p className="text-xs text-slate-500">{social.description}</p>
                 </a>
               ))}
+            </div>
+          </motion.section>
+
+          {/* ═══════ DISCUSSION BOARD ═══════ */}
+          <motion.section
+            className="mb-20"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.38 }}
+            id="discussions"
+          >
+            <div className="bg-[hsl(230,10%,7%)] border border-[hsl(230,10%,13%)] rounded-2xl p-6 md:p-8">
+              <DiscussionBoard user={user} />
             </div>
           </motion.section>
 
