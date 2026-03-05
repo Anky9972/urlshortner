@@ -54,3 +54,27 @@ export async function updateUser(id, data) {
 export async function getUserDashboard(id) {
     return apiRequest(`/api/users/${id}/dashboard`);
 }
+
+/**
+ * Delete own account
+ */
+export async function deleteAccount() {
+    return apiRequest('/api/users/me', { method: 'DELETE' });
+}
+
+/**
+ * Get notification preferences
+ */
+export async function getNotificationPreferences() {
+    return apiRequest('/api/users/me/notification-preferences');
+}
+
+/**
+ * Update notification preferences
+ */
+export async function updateNotificationPreferences(prefs) {
+    return apiRequest('/api/users/me/notification-preferences', {
+        method: 'PATCH',
+        body: JSON.stringify(prefs),
+    });
+}

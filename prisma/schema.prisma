@@ -46,6 +46,9 @@ model User {
   // Verified badge (set by admin)
   isVerified          Boolean   @default(false)
 
+  // Notification preferences (JSON)
+  notificationPreferences Json?   // { emailOnClick, emailOnLinkExpiry, emailOnClickLimit, weeklyReport }
+
   urls          Url[]
   linkTrees     LinkTree[]
   rooms         Room[]

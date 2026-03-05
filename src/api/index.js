@@ -48,7 +48,10 @@ export {
     getUser,
     updateUser,
     getUserStats,
-    getUserDashboard
+    getUserDashboard,
+    deleteAccount,
+    getNotificationPreferences,
+    updateNotificationPreferences
 } from './users';
 
 // API Keys

@@ -16,6 +16,11 @@ import {
     Loader2,
     CheckCircle2,
     Smartphone,
+    MousePointerClick,
+    Clock,
+    BarChart3,
+    AlertTriangle,
+    Trash2,
 } from 'lucide-react';
 import { BarLoader } from 'react-spinners';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,7 +38,7 @@ import { UrlState } from '@/context';
 import {
     getApiKeys, createApiKey, deleteApiKey, updateApiKeyPermissions,
     getWebhooks, createWebhook, deleteWebhook, updateWebhook,
-    updateUser
+    updateUser, deleteAccount, getNotificationPreferences, updateNotificationPreferences
 } from '@/api';
 import { getToken } from '@/api/token';
 
@@ -70,6 +75,11 @@ const Settings = () => {
         emailOnClickLimit: true,
         weeklyReport: true
     });
+    const [notifLoading, setNotifLoading] = useState(false);
+    const [profileSaving, setProfileSaving] = useState(false);
+    const [profileMessage, setProfileMessage] = useState('');
+    const [deleteConfirm, setDeleteConfirm] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     // 2FA state
     const [twoFAEnabled, setTwoFAEnabled] = useState(false);
@@ -78,13 +88,34 @@ const Settings = () => {
     const [twoFALoading, setTwoFALoading] = useState(false);
     const [twoFAMessage, setTwoFAMessage] = useState('');
 
-    useEffect(() => { loadSettings(); loadTwoFAStatus(); }, []);
+    useEffect(() => { loadSettings(); loadTwoFAStatus(); loadNotificationPrefs(); }, []);
 
     const loadTwoFAStatus = async () => {
         try {
             const data = await twoFAFetch('/api/2fa/status');
             setTwoFAEnabled(data.enabled);
         } catch {}
+    };
+
+    const loadNotificationPrefs = async () => {
+        try {
+            const prefs = await getNotificationPreferences();
+            setNotifications(prefs);
+        } catch {}
+    };
+
+    const handleNotificationToggle = async (key, checked) => {
+        const updated = { ...notifications, [key]: checked };
+        setNotifications(updated);
+        setNotifLoading(true);
+        try {
+            await updateNotificationPreferences({ [key]: checked });
+        } catch {
+            // revert on failure
+            setNotifications(notifications);
+        } finally {
+            setNotifLoading(false);
+        }
     };
 
     const handleSetup2FA = async () => {
@@ -151,7 +182,32 @@ const Settings = () => {
     const handleToggleWebhook = async (id, isActive) => { await updateWebhook(id, { isActive }); setWebhooks(webhooks.map(w => w.id === id ? { ...w, isActive } : w)); };
 
     const handleSaveProfile = async () => {
-        try { await updateUser(user?.id, profile); } catch (error) { console.error('Error saving profile:', error); }
+        setProfileSaving(true);
+        setProfileMessage('');
+        try {
+            await updateUser(user?.id, profile);
+            setProfileMessage('Profile updated successfully!');
+            setTimeout(() => setProfileMessage(''), 3000);
+        } catch (error) {
+            setProfileMessage('Failed to update profile.');
+            console.error('Error saving profile:', error);
+        } finally {
+            setProfileSaving(false);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        setDeleteLoading(true);
+        try {
+            await deleteAccount();
+            // Redirect to home / sign out
+            window.location.href = '/';
+        } catch (error) {
+            console.error('Error deleting account:', error);
+            setDeleteConfirm(false);
+        } finally {
+            setDeleteLoading(false);
+        }
     };
 
     const tabItems = [
@@ -274,10 +330,15 @@ const Settings = () => {
                                                     />
                                                 </div>
                                             </div>
-                                            <Button onClick={handleSaveProfile} className="bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl h-10">
-                                                <Save className="w-4 h-4 mr-2" />
-                                                Save Changes
+                                            <Button onClick={handleSaveProfile} disabled={profileSaving} className="bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl h-10">
+                                                {profileSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                                                {profileSaving ? 'Saving...' : 'Save Changes'}
                                             </Button>
+                                            {profileMessage && (
+                                                <p className={`text-xs mt-2 px-3 py-2 rounded-lg border ${profileMessage.includes('success') ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : 'text-red-400 bg-red-400/10 border-red-400/20'}`}>
+                                                    {profileMessage}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
 
@@ -294,9 +355,36 @@ const Settings = () => {
                                                     <p className="font-medium text-white text-sm">Delete Account</p>
                                                     <p className="text-xs text-slate-500 mt-0.5">Permanently delete your account and all data</p>
                                                 </div>
-                                                <Button variant="outline" size="sm" className="border-red-500/25 text-red-400 hover:bg-red-500/10 rounded-xl text-xs">
-                                                    Delete
-                                                </Button>
+                                                {!deleteConfirm ? (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => setDeleteConfirm(true)}
+                                                        className="border-red-500/25 text-red-400 hover:bg-red-500/10 rounded-xl text-xs"
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                ) : (
+                                                    <div className="flex items-center gap-2">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => setDeleteConfirm(false)}
+                                                            className="border-slate-600 text-slate-400 hover:bg-slate-800 rounded-xl text-xs"
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            onClick={handleDeleteAccount}
+                                                            disabled={deleteLoading}
+                                                            className="bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs"
+                                                        >
+                                                            {deleteLoading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Trash2 className="w-3 h-3 mr-1" />}
+                                                            Confirm Delete
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -363,7 +451,8 @@ const Settings = () => {
                                                 </div>
                                                 <Switch
                                                     checked={notifications[item.key]}
-                                                    onCheckedChange={(checked) => setNotifications({ ...notifications, [item.key]: checked })}
+                                                    onCheckedChange={(checked) => handleNotificationToggle(item.key, checked)}
+                                                    disabled={notifLoading}
                                                 />
                                             </div>
                                         ))}
@@ -476,7 +565,6 @@ const Settings = () => {
     );
 };
 
-// Need these icons for notifications section
-import { MousePointerClick, Clock, BarChart3 } from 'lucide-react';
+// Need these icons for notifications section — already imported above
 
 export default Settings;

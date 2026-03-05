@@ -49,6 +49,55 @@ router.patch('/:id', async (req, res) => {
     }
 });
 
+// Get notification preferences
+router.get('/me/notification-preferences', async (req, res) => {
+    try {
+        const user = await prisma.user.findUnique({ where: { id: req.user.userId }, select: { notificationPreferences: true } });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        const defaults = { emailOnClick: false, emailOnLinkExpiry: true, emailOnClickLimit: true, weeklyReport: true };
+        res.json({ ...defaults, ...(user.notificationPreferences || {}) });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch notification preferences' });
+    }
+});
+
+// Update notification preferences
+router.patch('/me/notification-preferences', async (req, res) => {
+    try {
+        const { emailOnClick, emailOnLinkExpiry, emailOnClickLimit, weeklyReport } = req.body;
+        const prefs = {};
+        if (emailOnClick !== undefined) prefs.emailOnClick = !!emailOnClick;
+        if (emailOnLinkExpiry !== undefined) prefs.emailOnLinkExpiry = !!emailOnLinkExpiry;
+        if (emailOnClickLimit !== undefined) prefs.emailOnClickLimit = !!emailOnClickLimit;
+        if (weeklyReport !== undefined) prefs.weeklyReport = !!weeklyReport;
+
+        const user = await prisma.user.findUnique({ where: { id: req.user.userId }, select: { notificationPreferences: true } });
+        const current = user?.notificationPreferences || {};
+        const merged = { ...current, ...prefs };
+
+        await prisma.user.update({
+            where: { id: req.user.userId },
+            data: { notificationPreferences: merged }
+        });
+        res.json(merged);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update notification preferences' });
+    }
+});
+
+// Delete own account
+router.delete('/me', async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        // All related data is cascade-deleted via onDelete: Cascade in schema
+        await prisma.user.delete({ where: { id: userId } });
+        res.json({ message: 'Account deleted successfully' });
+    } catch (error) {
+        console.error('Account deletion error:', error);
+        res.status(500).json({ error: 'Failed to delete account' });
+    }
+});
+
 // Get user stats
 router.get('/:id/stats', async (req, res) => {
     try {

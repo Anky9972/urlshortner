@@ -94,4 +94,20 @@ router.post('/:id/verify', async (req, res) => {
     }
 });
 
+// Delete domain
+router.delete('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const domain = await prisma.customDomain.findUnique({ where: { id } });
+        if (!domain) return res.status(404).json({ error: 'Domain not found' });
+        if (domain.userId !== req.user.userId) {
+            return res.status(403).json({ error: 'Not authorized' });
+        }
+        await prisma.customDomain.delete({ where: { id } });
+        res.json({ message: 'Domain deleted' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete domain' });
+    }
+});
+
 module.exports = router;

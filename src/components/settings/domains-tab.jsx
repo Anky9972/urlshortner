@@ -14,6 +14,7 @@ const DomainsTab = () => {
     const [newDomain, setNewDomain] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isVerifying, setIsVerifying] = useState('');
+    const [isDeleting, setIsDeleting] = useState('');
 
     useEffect(() => {
         if (user) loadDomains();
@@ -76,6 +77,24 @@ const DomainsTab = () => {
         }
     };
 
+    const handleDeleteDomain = async (id) => {
+        setIsDeleting(id);
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/domains/${id}`, {
+                method: 'DELETE',
+                credentials: 'include',
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            if (res.ok) {
+                setDomains(domains.filter(d => d.id !== id));
+            }
+        } catch (error) {
+            console.error('Failed to delete domain:', error);
+        } finally {
+            setIsDeleting('');
+        }
+    };
+
     return (
         <div className="space-y-6">
             <Card className="bg-[hsl(230,12%,9%)] border-[hsl(230,10%,15%)] text-white">
@@ -134,8 +153,18 @@ const DomainsTab = () => {
                                             Verify DNS
                                         </Button>
                                     )}
-                                    <Button variant="ghost" size="icon" className="text-slate-500 hover:text-red-400 hover:bg-red-500/10">
-                                        <Trash2 className="h-4 w-4" />
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-slate-500 hover:text-red-400 hover:bg-red-500/10"
+                                        onClick={() => handleDeleteDomain(domain.id)}
+                                        disabled={isDeleting === domain.id}
+                                    >
+                                        {isDeleting === domain.id ? (
+                                            <RefreshCw className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <Trash2 className="h-4 w-4" />
+                                        )}
                                     </Button>
                                 </div>
                             </div>
