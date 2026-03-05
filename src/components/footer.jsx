@@ -1,10 +1,8 @@
 import { Link } from "react-router-dom";
-import { Github, Twitter, Mail, Phone } from "lucide-react";
-import { useState } from "react";
+import { Github, Twitter } from "lucide-react";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const [email, setEmail] = useState("");
 
   const menuLinks = [
     { path: "/", label: "Home" },
@@ -18,8 +16,7 @@ const Footer = () => {
   const companyLinks = [
     { path: "/contact", label: "About Us" },
     { path: "/contact", label: "Help Center" },
-    { path: "/contact", label: "Community" },
-    { path: "/contact", label: "Partner Program" },
+    { path: "/community", label: "Community" },
   ];
 
   const serviceLinks = [
@@ -33,7 +30,7 @@ const Footer = () => {
     <footer className="bg-[hsl(230,15%,5%)] border-t border-[hsl(230,10%,13%)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-2.5 mb-4">
@@ -103,30 +100,8 @@ const Footer = () => {
 
             {/* Contact info */}
             <div className="mt-6 space-y-2">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Call Us</p>
-              <p className="text-sm text-slate-500">+62 123 4567 890</p>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-3">Email Us</p>
-              <p className="text-sm text-slate-500">hello@trimlynk.com</p>
-            </div>
-          </div>
-
-          {/* Newsletter */}
-          <div>
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
-              Subscribe to Newsletter
-            </h3>
-            <div className="flex gap-2">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@email.com"
-                aria-label="Newsletter email address"
-                className="flex-1 min-w-0 px-3 py-2.5 rounded-xl bg-[hsl(230,10%,10%)] border border-[hsl(230,10%,18%)] text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500/50 transition-all"
-              />
-              <button className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-all hover:shadow-[0_4px_20px_-4px_hsl(220,90%,56%,0.5)] flex-shrink-0">
-                Subscribe
-              </button>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Email Us</p>
+              <p className="text-sm text-slate-500">ankygaur9972@gmail.com</p>
             </div>
           </div>
         </div>
@@ -150,8 +125,8 @@ const Footer = () => {
                   className="text-slate-600 hover:text-white transition-colors">
                   <Github className="w-4 h-4" aria-hidden="true" />
                 </a>
-                <a href="https://twitter.com/trimlynk" target="_blank" rel="noopener noreferrer"
-                  aria-label="TrimLink on Twitter"
+                <a href="https://x.com/anky_vivek" target="_blank" rel="noopener noreferrer"
+                  aria-label="TrimLink on Twitter/X"
                   className="text-slate-600 hover:text-white transition-colors">
                   <Twitter className="w-4 h-4" aria-hidden="true" />
                 </a>

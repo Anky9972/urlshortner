@@ -3,6 +3,7 @@ User-agent: *
 # === PUBLIC PAGES — allow all crawlers ===
 Allow: /$
 Allow: /contact
+Allow: /community
 Allow: /qr-code-generator
 Allow: /link-tree
 Allow: /linktree

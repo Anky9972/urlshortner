@@ -6,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import {
     Mail,
     MapPin,
-    Phone,
     Send,
     Check,
     ArrowLeft,
@@ -71,17 +70,9 @@ const ContactPage = () => {
 
     const contactInfo = [
         {
-            icon: Phone,
-            label: "Phone",
-            value: "+1 212 965 9700",
-            color: "text-violet-400",
-            bg: "bg-violet-500/10",
-            border: "border-violet-500/20",
-        },
-        {
             icon: Mail,
             label: "Email",
-            value: `support@${import.meta.env.VITE_APP_DOMAIN || "trimlynk.com"}`,
+            value: "ankygaur9972@gmail.com",
             color: "text-blue-400",
             bg: "bg-blue-500/10",
             border: "border-blue-500/20",

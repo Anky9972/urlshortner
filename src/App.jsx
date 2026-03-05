@@ -37,6 +37,7 @@ import OAuthCallback from './pages/oauth-callback'
 import TermsPage from './pages/terms'
 import PrivacyPage from './pages/privacy'
 import AdminPage from './pages/admin'
+import CommunityPage from './pages/community'
 
 
 const router = createBrowserRouter([
@@ -254,6 +255,10 @@ const router = createBrowserRouter([
       {
         path: '/privacy',
         element: <PrivacyPage />,
+      },
+      {
+        path: '/community',
+        element: <CommunityPage />,
       },
       {
         path: '/admin',

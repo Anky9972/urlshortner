@@ -14,7 +14,7 @@ export const SEOMetadata = ({
   ogImage,
   keywords,
   author = 'TrimLink',
-  twitterHandle = '@trimlynk',
+  twitterHandle = '@anky_vivek',
   noIndex = false,
   language = 'en',
 }) => {

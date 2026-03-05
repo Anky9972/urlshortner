@@ -2,7 +2,7 @@ import SEOMetadata from '../components/seo-metadata';
 import { Link } from 'react-router-dom';
 
 const LAST_UPDATED = 'March 3, 2026';
-const CONTACT_EMAIL = 'hello@trimlynk.com';
+const CONTACT_EMAIL = 'ankygaur9972@gmail.com';
 const APP_NAME = 'TrimLink';
 const DOMAIN = 'trimlynk.com';
 
