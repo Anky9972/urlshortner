@@ -72,9 +72,9 @@ export function CreateLink() {
       await schema.validate(formValues, { abortEarly: false });
 
       const canvas = ref.current.canvasRef.current;
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve));
+      const qrDataUrl = canvas.toDataURL('image/png');
 
-      await fnCreateUrl(blob);
+      await fnCreateUrl(qrDataUrl);
     } catch (e) {
       const newErrors = {};
 

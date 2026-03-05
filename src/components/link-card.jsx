@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Copy, Download, LinkIcon, Trash, Edit, ExternalLink, Check, MousePointerClick, AlertTriangle, CheckCircle, Calendar, Globe } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Copy, Download, LinkIcon, Trash, Edit, ExternalLink, Check, MousePointerClick, AlertTriangle, CheckCircle, Calendar, Globe, QrCode } from 'lucide-react';
 
 const APP_DOMAIN = import.meta.env.VITE_APP_DOMAIN || 'trimlynk.com';
 const APP_URL = import.meta.env.VITE_APP_URL || 'https://trimlynk.com';
@@ -13,10 +13,13 @@ import { BeatLoader } from 'react-spinners';
 import useFetch from '../hooks/use-fetch';
 import { deleteUrl, updateUrl } from '../api/urls';
 import PropTypes from 'prop-types';
+import { QRCode } from 'react-qrcode-logo';
 
 const LinkCard = ({ url, fetchUrls }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const qrRef = useRef(null);
+  const hasStoredQr = url?.qrCode && typeof url.qrCode === 'string' && url.qrCode.startsWith('data:');
   const [editFormValues, setEditFormValues] = useState({
     title: url?.title,
     originalUrl: url?.originalUrl,
@@ -59,12 +62,24 @@ const LinkCard = ({ url, fetchUrls }) => {
   };
 
   const downloadImage = () => {
-    const anchor = document.createElement('a');
-    anchor.href = url?.qrCode;
-    anchor.download = url?.title;
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
+    if (hasStoredQr) {
+      const anchor = document.createElement('a');
+      anchor.href = url.qrCode;
+      anchor.download = url?.title || 'qr-code';
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+    } else {
+      const canvas = qrRef.current?.querySelector('canvas');
+      if (canvas) {
+        const anchor = document.createElement('a');
+        anchor.href = canvas.toDataURL('image/png');
+        anchor.download = url?.title || 'qr-code';
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+      }
+    }
   };
 
   const shortLink = url?.customUrl || url?.shortUrl;
@@ -80,8 +95,14 @@ const LinkCard = ({ url, fetchUrls }) => {
       <div className="p-5 flex gap-5">
         {/* QR Code */}
         <div className="hidden sm:flex flex-shrink-0">
-          <div className="w-[72px] h-[72px] rounded-xl bg-white p-1.5 shadow-sm">
-            <img src={url?.qrCode} width="60" height="60" loading="lazy" className="w-full h-full object-contain rounded-md" alt="QR code" />
+          <div className="w-[72px] h-[72px] rounded-xl bg-white p-1.5 shadow-sm overflow-hidden">
+            {hasStoredQr ? (
+              <img src={url.qrCode} width="60" height="60" loading="lazy" className="w-full h-full object-contain rounded-md" alt="QR code" />
+            ) : (
+              <div ref={qrRef} className="w-full h-full flex items-center justify-center">
+                <QRCode value={`${APP_URL}/${shortLink}`} size={56} quietZone={0} ecLevel="M" />
+              </div>
+            )}
           </div>
         </div>
 

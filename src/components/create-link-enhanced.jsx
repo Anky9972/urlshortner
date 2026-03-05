@@ -126,7 +126,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
         setIsLoading(true);
         try {
             const canvas = qrRef.current?.querySelector('canvas');
-            const blob = await new Promise(resolve => canvas?.toBlob(resolve));
+            const qrDataUrl = canvas ? canvas.toDataURL('image/png') : null;
 
             const { createUrl } = await import('../api/urls');
 
@@ -152,7 +152,7 @@ const CreateLinkEnhanced = ({ onSuccess, folders = [], tags = [], pixels = [] })
                 rotatorConfig: formData.isRotator && formData.rotatorDestinations?.length > 0 ? {
                     destinations: formData.rotatorDestinations.map(d => ({ targetUrl: d.url, weight: d.weight, name: 'Variant' }))
                 } : null
-            }, blob);
+            }, qrDataUrl);
 
             if (formData.selectedTags.length > 0 && createdUrls?.[0]?.id) {
                 const { addTagToUrl } = await import('../api/folders');
