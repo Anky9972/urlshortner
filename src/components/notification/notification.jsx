@@ -9,6 +9,12 @@ import {
   AlertCircle,
   Check,
   Trash2,
+  UserPlus,
+  UserMinus,
+  Shield,
+  Crown,
+  Link2,
+  Trash,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,8 +58,16 @@ const NotificationManager = () => {
       setNotifications(prev => prev.filter(n => n.id !== notification.id));
 
       const data = notification.data || notification.content || {};
-      if (data.type === 'room_invitation' || notification.type === 'room_invite') {
-        navigateToInvitation(data.roomId);
+      const type = notification.type || data.type;
+
+      if (type === 'room_invitation' || type === 'room_invite') {
+        navigate(`/invitation/${data.roomId}`);
+      } else if (['team_added', 'team_role_changed', 'team_ownership_transfer'].includes(type) && data.teamId) {
+        navigate(`/teams/${data.teamId}`);
+      } else if (['team_removed', 'team_deleted'].includes(type)) {
+        navigate('/teams');
+      } else if (type === 'link_created' && data.shortCode) {
+        navigate('/dashboard');
       }
     } catch (error) {
       console.error('Error handling notification:', error);
@@ -82,10 +96,6 @@ const NotificationManager = () => {
     }
   };
 
-  const navigateToInvitation = (roomId) => {
-    navigate(`/invitation/${roomId}`);
-  };
-
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -102,11 +112,26 @@ const NotificationManager = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'room_invitation':
+      case 'room_invite':
         return <Users className="w-4 h-4 text-blue-400" />;
       case 'message':
         return <MessageSquare className="w-4 h-4 text-emerald-400" />;
       case 'alert':
         return <AlertCircle className="w-4 h-4 text-red-400" />;
+      case 'team_added':
+        return <UserPlus className="w-4 h-4 text-emerald-400" />;
+      case 'team_removed':
+        return <UserMinus className="w-4 h-4 text-red-400" />;
+      case 'team_role_changed':
+        return <Shield className="w-4 h-4 text-amber-400" />;
+      case 'team_ownership_transfer':
+        return <Crown className="w-4 h-4 text-yellow-400" />;
+      case 'team_deleted':
+        return <Trash className="w-4 h-4 text-red-400" />;
+      case 'link_created':
+        return <Link2 className="w-4 h-4 text-blue-400" />;
+      case 'click_milestone':
+        return <Bell className="w-4 h-4 text-purple-400" />;
       default:
         return <Bell className="w-4 h-4 text-slate-400" />;
     }
@@ -115,15 +140,25 @@ const NotificationManager = () => {
   const getNotificationBadge = (type) => {
     const badges = {
       'room_invitation': { label: 'Invitation', class: 'bg-blue-600/10 text-blue-400 border-blue-600/20' },
+      'room_invite': { label: 'Invitation', class: 'bg-blue-600/10 text-blue-400 border-blue-600/20' },
       'message': { label: 'Message', class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
       'alert': { label: 'Alert', class: 'bg-red-500/10 text-red-400 border-red-500/20' },
+      'team_added': { label: 'Team', class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+      'team_removed': { label: 'Team', class: 'bg-red-500/10 text-red-400 border-red-500/20' },
+      'team_role_changed': { label: 'Team', class: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+      'team_ownership_transfer': { label: 'Team', class: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+      'team_deleted': { label: 'Team', class: 'bg-red-500/10 text-red-400 border-red-500/20' },
+      'link_created': { label: 'Link', class: 'bg-blue-600/10 text-blue-400 border-blue-600/20' },
+      'click_milestone': { label: 'Milestone', class: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
     };
     return badges[type] || { label: 'Notification', class: 'bg-slate-500/10 text-slate-400 border-slate-500/20' };
   };
 
   const filteredNotifications = notifications.filter(notification => {
     const type = notification.type || notification.content?.type;
-    return filter === 'all' || type === filter;
+    if (filter === 'all') return true;
+    if (filter === 'team') return type?.startsWith('team_');
+    return type === filter;
   });
 
   if (isLoading) {
@@ -164,6 +199,9 @@ const NotificationManager = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setFilter('room_invitation')} className="text-slate-300 focus:bg-[hsl(230,10%,14%)]">
                     Invitations
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilter('team')} className="text-slate-300 focus:bg-[hsl(230,10%,14%)]">
+                    Teams
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setFilter('message')} className="text-slate-300 focus:bg-[hsl(230,10%,14%)]">
                     Messages

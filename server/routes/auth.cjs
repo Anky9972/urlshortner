@@ -134,7 +134,8 @@ router.post('/login', async (req, res) => {
                 email: user.email,
                 name: user.name,
                 avatarUrl: user.avatarUrl,
-                isAdmin: user.isAdmin
+                isAdmin: user.isAdmin,
+                emailVerified: user.emailVerified
             }
         });
     } catch (error) {

@@ -2,6 +2,15 @@ const { Router } = require('express');
 const prisma = require('../lib/prisma.cjs');
 const { authMiddleware } = require('../middleware/auth.cjs');
 const { logAudit } = require('../lib/auditLogger.cjs');
+const {
+    createNotification,
+    notifyMany,
+    sendTeamAddedEmail,
+    sendTeamRemovedEmail,
+    sendTeamRoleChangedEmail,
+    sendOwnershipTransferEmail,
+    sendTeamDeletedEmail,
+} = require('../lib/notifications.cjs');
 
 const router = Router();
 
@@ -231,7 +240,34 @@ router.delete('/:teamId', async (req, res) => {
             return res.status(403).json({ error: 'Only the team owner can delete the team' });
         }
 
+        // Fetch members before deleting so we can notify them
+        const members = await prisma.teamMember.findMany({
+            where: { teamId },
+            include: { user: { select: { id: true, email: true } } }
+        });
+        const ownerUser = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
+
         await prisma.team.delete({ where: { id: teamId } });
+
+        // Notify all members except the owner who deleted it
+        const memberUserIds = members.map(m => m.user.id);
+        notifyMany({
+            userIds: memberUserIds,
+            excludeUserId: userId,
+            type: 'team_deleted',
+            title: `Team "${team.name}" deleted`,
+            message: `${ownerUser.name || 'The owner'} deleted the team "${team.name}"`,
+            data: { teamName: team.name }
+        }).catch(() => {});
+
+        // Email each non-owner member
+        const otherMembers = members.filter(m => m.user.id !== userId);
+        for (const m of otherMembers) {
+            sendTeamDeletedEmail(m.user.email, {
+                teamName: team.name,
+                ownerName: ownerUser.name || 'The team owner'
+            }).catch(err => console.error('[email] team deleted:', err.message));
+        }
 
         await logAudit({
             action: 'delete_team',
@@ -284,6 +320,26 @@ router.post('/:teamId/members', async (req, res) => {
                 user: { select: { id: true, name: true, email: true, avatarUrl: true } }
             }
         });
+
+        // Get team name and requester name for notifications
+        const team = await prisma.team.findUnique({ where: { id: teamId }, select: { name: true } });
+        const requesterUser = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
+
+        // Web notification to the added user
+        createNotification({
+            userId: userToAdd.id,
+            type: 'team_added',
+            title: `Added to ${team.name}`,
+            message: `${requesterUser.name || 'Someone'} added you as ${role} to "${team.name}"`,
+            data: { teamId, role }
+        }).catch(() => {});
+
+        // Email notification (non-blocking)
+        sendTeamAddedEmail(userToAdd.email, {
+            teamName: team.name,
+            role,
+            inviterName: requesterUser.name || 'A team admin'
+        }).catch(err => console.error('[email] team added:', err.message));
 
         await logAudit({
             action: 'add_team_member',
@@ -341,6 +397,24 @@ router.patch('/:teamId/members/:memberId', async (req, res) => {
             }
         });
 
+        // Notifications for role change
+        const team = await prisma.team.findUnique({ where: { id: teamId }, select: { name: true } });
+        const changerUser = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
+
+        createNotification({
+            userId: targetMember.userId,
+            type: 'team_role_changed',
+            title: `Role updated in ${team.name}`,
+            message: `${changerUser.name || 'An admin'} changed your role to ${role} in "${team.name}"`,
+            data: { teamId, oldRole: targetMember.role, newRole: role }
+        }).catch(() => {});
+
+        sendTeamRoleChangedEmail(updated.user.email, {
+            teamName: team.name,
+            newRole: role,
+            changerName: changerUser.name || 'A team admin'
+        }).catch(err => console.error('[email] role changed:', err.message));
+
         await logAudit({
             action: 'update_team_member_role',
             entityId: targetMember.userId,
@@ -385,6 +459,26 @@ router.delete('/:teamId/members/:memberId', async (req, res) => {
         }
 
         await prisma.teamMember.delete({ where: { id: memberId } });
+
+        // Notifications for removed member
+        const team = await prisma.team.findUnique({ where: { id: teamId }, select: { name: true } });
+        const removerUser = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
+        const removedUser = await prisma.user.findUnique({ where: { id: targetMember.userId }, select: { email: true } });
+
+        createNotification({
+            userId: targetMember.userId,
+            type: 'team_removed',
+            title: `Removed from ${team.name}`,
+            message: `${removerUser.name || 'An admin'} removed you from "${team.name}"`,
+            data: { teamId }
+        }).catch(() => {});
+
+        if (removedUser) {
+            sendTeamRemovedEmail(removedUser.email, {
+                teamName: team.name,
+                removerName: removerUser.name || 'A team admin'
+            }).catch(err => console.error('[email] team removed:', err.message));
+        }
 
         await logAudit({
             action: 'remove_team_member',
@@ -464,6 +558,25 @@ router.post('/:teamId/transfer', async (req, res) => {
                 data: { role: 'admin' }
             })
         ]);
+
+        // Notifications for ownership transfer
+        const previousOwner = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
+        const newOwnerUser = await prisma.user.findUnique({ where: { id: newOwnerId }, select: { email: true } });
+
+        createNotification({
+            userId: newOwnerId,
+            type: 'team_ownership_transfer',
+            title: `You are now the owner of ${team.name}`,
+            message: `${previousOwner.name || 'The previous owner'} transferred ownership of "${team.name}" to you`,
+            data: { teamId }
+        }).catch(() => {});
+
+        if (newOwnerUser) {
+            sendOwnershipTransferEmail(newOwnerUser.email, {
+                teamName: team.name,
+                previousOwnerName: previousOwner.name || 'The previous owner'
+            }).catch(err => console.error('[email] ownership transfer:', err.message));
+        }
 
         await logAudit({
             action: 'transfer_team_ownership',

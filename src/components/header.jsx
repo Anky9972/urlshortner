@@ -33,9 +33,12 @@ const Header = () => {
       ];
 
   useEffect(() => {
-    fetchNotifications().then((data) => {
+    const load = () => fetchNotifications().then((data) => {
       if (data) setNotifications(data);
     });
+    load();
+    const interval = setInterval(load, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -44,7 +47,7 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const unreadCount = notifications.filter((n) => n.status).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
     <>

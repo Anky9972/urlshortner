@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { SEOMetadata } from '@/components/seo-metadata';
+import { UrlState } from '@/context';
 
 const API = import.meta.env.VITE_API_URL || 'https://urlshortner-onhm.onrender.com';
 
@@ -10,6 +11,7 @@ export default function VerifyEmail() {
   const token = params.get('token') || '';
   const [status, setStatus] = useState('loading'); // 'loading' | 'success' | 'error'
   const [message, setMessage] = useState('');
+  const { fetchUser } = UrlState();
 
   useEffect(() => {
     if (!token) { setStatus('error'); setMessage('Invalid verification link.'); return; }
@@ -17,7 +19,12 @@ export default function VerifyEmail() {
     fetch(`${API}/api/auth/verify-email?token=${encodeURIComponent(token)}`)
       .then((r) => r.json())
       .then((data) => {
-        if (data.message) { setStatus('success'); setMessage(data.message); }
+        if (data.message) {
+          setStatus('success');
+          setMessage(data.message);
+          // Refresh user state so the verification banner disappears
+          fetchUser();
+        }
         else { setStatus('error'); setMessage(data.error || 'Verification failed'); }
       })
       .catch(() => { setStatus('error'); setMessage('Network error — please try again'); });

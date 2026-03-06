@@ -2,6 +2,7 @@ const { Router } = require('express');
 const prisma = require('../lib/prisma.cjs');
 const crypto = require('crypto');
 const { authMiddleware } = require('../middleware/auth.cjs');
+const { createNotification } = require('../lib/notifications.cjs');
 
 const router = Router();
 
@@ -73,7 +74,21 @@ router.post('/', botDetector, async (req, res) => {
 
         // Only increment click count if it's NOT a bot (or maybe we separate counters?)
         // For now, let's count everything but allow filtering in analytics
-        await prisma.url.update({ where: { id: urlId }, data: { currentClicks: { increment: 1 } } });
+        const updatedUrl = await prisma.url.update({ where: { id: urlId }, data: { currentClicks: { increment: 1 } }, select: { currentClicks: true, userId: true, title: true, shortUrl: true } });
+
+        // Click milestone notifications (non-blocking)
+        const milestones = [10, 50, 100, 500, 1000, 5000, 10000];
+        const count = updatedUrl.currentClicks;
+        if (milestones.includes(count)) {
+            createNotification({
+                userId: updatedUrl.userId,
+                type: 'click_milestone',
+                title: `🎉 ${count} clicks on "${updatedUrl.title || updatedUrl.shortUrl}"`,
+                message: `Your link "${updatedUrl.title || updatedUrl.shortUrl}" just reached ${count} clicks!`,
+                data: { urlId, clickCount: count, shortUrl: updatedUrl.shortUrl }
+            }).catch(() => {});
+        }
+
         res.status(201).json(click);
     } catch (error) {
         console.error('Error recording click:', error);
