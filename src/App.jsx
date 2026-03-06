@@ -27,6 +27,7 @@ import InvitedRooms from './components/room/invite-rooms'
 import Settings from './pages/settings'
 import Analytics from './pages/analytics'
 import TeamsPage from './pages/teams'
+import TeamDetailPage from './pages/team-detail'
 import ForgotPassword from './pages/forgot-password'
 import ResetPassword from './pages/reset-password'
 import VerifyEmail from './pages/verify-email'
@@ -148,6 +149,16 @@ const router = createBrowserRouter([
           <ErrorBoundary>
             <RequireAuth>
               <TeamsPage />
+            </RequireAuth>
+          </ErrorBoundary>
+        )
+      },
+      {
+        path: '/teams/:teamId',
+        element: (
+          <ErrorBoundary>
+            <RequireAuth>
+              <TeamDetailPage />
             </RequireAuth>
           </ErrorBoundary>
         )
