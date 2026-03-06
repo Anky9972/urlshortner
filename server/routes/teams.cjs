@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
             where: { ownerId: userId },
             include: {
                 _count: { select: { members: true, urls: true, folders: true, linkTrees: true } },
-                owner: { select: { id: true, name: true, email: true, profile_pic: true } }
+                owner: { select: { id: true, name: true, email: true, avatarUrl: true } }
             }
         });
 
@@ -33,7 +33,7 @@ router.get('/', async (req, res) => {
                 team: {
                     include: {
                         _count: { select: { members: true, urls: true, folders: true, linkTrees: true } },
-                        owner: { select: { id: true, name: true, email: true, profile_pic: true } }
+                        owner: { select: { id: true, name: true, email: true, avatarUrl: true } }
                     }
                 }
             }
@@ -63,10 +63,10 @@ router.get('/:teamId', async (req, res) => {
         const team = await prisma.team.findUnique({
             where: { id: teamId },
             include: {
-                owner: { select: { id: true, name: true, email: true, profile_pic: true } },
+                owner: { select: { id: true, name: true, email: true, avatarUrl: true } },
                 members: {
                     include: {
-                        user: { select: { id: true, name: true, email: true, profile_pic: true } }
+                        user: { select: { id: true, name: true, email: true, avatarUrl: true } }
                     },
                     orderBy: { joinedAt: 'asc' }
                 },
@@ -98,7 +98,7 @@ router.get('/:teamId/urls', async (req, res) => {
             where: { teamId },
             include: {
                 _count: { select: { clicks: true } },
-                user: { select: { id: true, name: true, email: true, profile_pic: true } }
+                user: { select: { id: true, name: true, email: true, avatarUrl: true } }
             },
             orderBy: { createdAt: 'desc' }
         });
@@ -140,7 +140,7 @@ router.post('/', async (req, res) => {
             },
             include: {
                 _count: { select: { members: true, urls: true, folders: true, linkTrees: true } },
-                owner: { select: { id: true, name: true, email: true, profile_pic: true } }
+                owner: { select: { id: true, name: true, email: true, avatarUrl: true } }
             }
         });
 
@@ -192,10 +192,10 @@ router.patch('/:teamId', async (req, res) => {
             where: { id: teamId },
             data: updateData,
             include: {
-                owner: { select: { id: true, name: true, email: true, profile_pic: true } },
+                owner: { select: { id: true, name: true, email: true, avatarUrl: true } },
                 members: {
                     include: {
-                        user: { select: { id: true, name: true, email: true, profile_pic: true } }
+                        user: { select: { id: true, name: true, email: true, avatarUrl: true } }
                     }
                 },
                 _count: { select: { members: true, urls: true, folders: true, linkTrees: true } }
@@ -281,7 +281,7 @@ router.post('/:teamId/members', async (req, res) => {
                 role
             },
             include: {
-                user: { select: { id: true, name: true, email: true, profile_pic: true } }
+                user: { select: { id: true, name: true, email: true, avatarUrl: true } }
             }
         });
 
@@ -337,7 +337,7 @@ router.patch('/:teamId/members/:memberId', async (req, res) => {
             where: { id: memberId },
             data: { role },
             include: {
-                user: { select: { id: true, name: true, email: true, profile_pic: true } }
+                user: { select: { id: true, name: true, email: true, avatarUrl: true } }
             }
         });
 

@@ -279,7 +279,7 @@ const OverviewTab = ({ team, teamUrls }) => {
                     {recentMembers.map(m => (
                         <div key={m.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-[hsl(230,10%,12%)]">
                             <Avatar className="h-8 w-8">
-                                {m.user?.profile_pic && <AvatarImage src={m.user.profile_pic} />}
+                                {m.user?.avatarUrl && <AvatarImage src={m.user.avatarUrl} />}
                                 <AvatarFallback className="text-xs bg-[hsl(230,10%,18%)]">
                                     {(m.user?.name || m.user?.email || '?').charAt(0).toUpperCase()}
                                 </AvatarFallback>
@@ -333,7 +333,7 @@ const OverviewTab = ({ team, teamUrls }) => {
                             <span className="text-slate-500">Owner</span>
                             <div className="flex items-center gap-2 mt-1">
                                 <Avatar className="h-6 w-6">
-                                    {team.owner?.profile_pic && <AvatarImage src={team.owner.profile_pic} />}
+                                    {team.owner?.avatarUrl && <AvatarImage src={team.owner.avatarUrl} />}
                                     <AvatarFallback className="text-[10px] bg-[hsl(230,10%,18%)]">
                                         {(team.owner?.name || '?').charAt(0).toUpperCase()}
                                     </AvatarFallback>
@@ -445,7 +445,7 @@ const MemberRow = ({ member, teamId, isAdmin, isOwner, onRefresh, toast }) => {
     return (
         <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-[hsl(230,10%,12%)] group">
             <Avatar className="h-9 w-9">
-                {member.user?.profile_pic && <AvatarImage src={member.user.profile_pic} />}
+                {member.user?.avatarUrl && <AvatarImage src={member.user.avatarUrl} />}
                 <AvatarFallback className="text-sm bg-[hsl(230,10%,18%)]">
                     {(member.user?.name || member.user?.email || '?').charAt(0).toUpperCase()}
                 </AvatarFallback>
@@ -626,7 +626,7 @@ const LinksTab = ({ teamUrls, onRefresh }) => {
                                     <span className="text-xs text-slate-400 whitespace-nowrap">{url._count?.clicks || 0} clicks</span>
                                     {url.user && (
                                         <Avatar className="h-6 w-6 hidden sm:flex" title={url.user.name || url.user.email}>
-                                            {url.user.profile_pic && <AvatarImage src={url.user.profile_pic} />}
+                                            {url.user.avatarUrl && <AvatarImage src={url.user.avatarUrl} />}
                                             <AvatarFallback className="text-[10px] bg-[hsl(230,10%,18%)]">
                                                 {(url.user.name || url.user.email || '?').charAt(0).toUpperCase()}
                                             </AvatarFallback>
@@ -802,7 +802,7 @@ const SettingsTab = ({ team, isOwner, onRefresh, onDeleted, toast }) => {
                                             onClick={() => setTransferTarget(m.userId)}
                                         >
                                             <Avatar className="h-8 w-8">
-                                                {m.user?.profile_pic && <AvatarImage src={m.user.profile_pic} />}
+                                                {m.user?.avatarUrl && <AvatarImage src={m.user.avatarUrl} />}
                                                 <AvatarFallback className="text-xs bg-[hsl(230,10%,18%)]">
                                                     {(m.user?.name || '?').charAt(0).toUpperCase()}
                                                 </AvatarFallback>
